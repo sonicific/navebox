@@ -513,7 +513,10 @@ VMM_INT_DECL(VBOXSTRICTRC) EMHistoryExec(PVMCPUCC pVCpu, PCEMEXITREC pExitRec, u
                      ExecStats.enmReturnReason, pVCpu->fLocalForcedActions, pVCpu->CTX_SUFF(pVM)->fGlobalForcedActions));
             emHistoryExecSetContinueExitRecIdx(pVCpu, rcStrict, pExitRecUnconst);
 
-            if (   (   ExecStats.cExits >= 2
+            /* A successful probe may not observe any exits.  Retrying it must
+             * not promote an empty exit distance to an execution threshold. */
+            if (   ExecStats.cMaxExitDistance > 0
+                && (   ExecStats.cExits >= 2
                     || pExitRecUnconst->cProbeAttempts > 8)
                 && RT_SUCCESS(rcStrict))
             {

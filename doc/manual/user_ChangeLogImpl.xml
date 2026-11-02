@@ -94,6 +94,11 @@ Rules for adding a changelog entry to make them look more uniform:
     <itemizedlist>
 
       <listitem>
+        <para>VMM: Fixed an assertion during guest startup when repeated
+          exit-history probes completed without observing an exit</para>
+      </listitem>
+
+      <listitem>
         <para>GUI: Refreshed the Manager toolbar, machine selection and
           details cards with flatter surfaces, rounded corners and improved
           spacing, using the application theme colors</para>
