@@ -136,6 +136,8 @@ public:
     virtual int childCount() const RT_OVERRIDE;
     /** Returns the child with the passed @a iIndex. */
     virtual QAccessibleInterface *child(int iIndex) const RT_OVERRIDE;
+    /** Returns the index of the passed @a pChild. */
+    virtual int indexOfChild(const QAccessibleInterface *pChild) const RT_OVERRIDE;
 
     /** Returns the role. */
     virtual QAccessible::Role role() const RT_OVERRIDE;
@@ -150,8 +152,8 @@ private:
     /** Returns corresponding toolbar button. */
     QToolButton *button() const { return qobject_cast<QToolButton*>(widget()); }
 
-    /** Holds the map of instances of sub-element interfaces. */
-    QMap<UIMenuBarEditorSegment, UIAccessibilityInterfaceForUIMenuBarEditorButtonSegment*>  m_elements;
+    /** Holds the cache IDs of sub-element interfaces. */
+    QMap<UIMenuBarEditorSegment, QAccessible::Id>  m_elements;
 };
 
 
@@ -208,14 +210,18 @@ UIAccessibilityInterfaceForUIMenuBarEditorButton::UIAccessibilityInterfaceForUIM
     {
         for (int iIndex = 0; iIndex < (int)UIMenuBarEditorSegment_Max; ++iIndex)
             m_elements[(UIMenuBarEditorSegment)iIndex] =
-                new UIAccessibilityInterfaceForUIMenuBarEditorButtonSegment(this, (UIMenuBarEditorSegment)iIndex);
+                QAccessible::registerAccessibleInterface(
+                    new UIAccessibilityInterfaceForUIMenuBarEditorButtonSegment(this, (UIMenuBarEditorSegment)iIndex));
     }
 }
 
 UIAccessibilityInterfaceForUIMenuBarEditorButton::~UIAccessibilityInterfaceForUIMenuBarEditorButton()
 {
-    /* Cleanup button with popup menu: */
-    qDeleteAll(m_elements);
+    /* Remove virtual children from Qt's cache before their parent disappears.
+     * Native accessibility providers may still hold their IDs after the dialog closes. */
+    foreach (QAccessible::Id uId, m_elements)
+        if (QAccessible::accessibleInterface(uId))
+            QAccessible::deleteAccessibleInterface(uId);
     m_elements.clear();
 }
 
@@ -236,14 +242,33 @@ QAccessibleInterface *UIAccessibilityInterfaceForUIMenuBarEditorButton::child(in
 {
     /* Sanity check: */
     AssertPtrReturn(button(), 0);
-    AssertReturn(iIndex >= 0 && iIndex < childCount(), 0);
+    if (iIndex < 0 || iIndex >= childCount())
+        return 0;
 
     /* Return the child with the passed iIndex for a button with popup menu: */
     if (button()->popupMode() == QToolButton::MenuButtonPopup)
-        return m_elements.value((UIMenuBarEditorSegment)iIndex);
+        return QAccessible::accessibleInterface(m_elements.value((UIMenuBarEditorSegment)iIndex));
 
     /* Call to base-class: */
     return QAccessibleWidget::child(iIndex);
+}
+
+int UIAccessibilityInterfaceForUIMenuBarEditorButton::indexOfChild(const QAccessibleInterface *pChild) const
+{
+    if (!button() || !pChild)
+        return -1;
+
+    /* Segments have no QObject, so QAccessibleWidget cannot find their index.
+     * Keep sibling navigation consistent with child() for accessibility clients. */
+    if (button()->popupMode() == QToolButton::MenuButtonPopup)
+    {
+        for (int iIndex = 0; iIndex < (int)UIMenuBarEditorSegment_Max; ++iIndex)
+            if (QAccessible::accessibleInterface(m_elements.value((UIMenuBarEditorSegment)iIndex)) == pChild)
+                return iIndex;
+        return -1;
+    }
+
+    return QAccessibleWidget::indexOfChild(pChild);
 }
 
 QAccessible::Role UIAccessibilityInterfaceForUIMenuBarEditorButton::role() const

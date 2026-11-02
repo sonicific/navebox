@@ -821,7 +821,6 @@ UIAdvancedSettingsDialog::UIAdvancedSettingsDialog(QWidget *pParent,
     , m_pWarningPane(0)
     , m_fValid(true)
     , m_fSilent(true)
-    , m_pTimerDisabledLookAndFeel(0)
     , m_pLayoutMain(0)
     , m_pCheckBoxMode(0)
     , m_pEditorFilter(0)
@@ -1009,22 +1008,6 @@ bool UIAdvancedSettingsDialog::eventFilter(QObject *pObject, QEvent *pEvent)
         }
     }
 
-    /* We'd like to accumulate multiple events of the same type to
-     * process them the bundled way, once after the last one arrived. */
-    switch (pEvent->type())
-    {
-        /* Only enabled-change and resize events useful for us: */
-        case QEvent::EnabledChange:
-        case QEvent::Resize:
-        {
-            /* Start (or restart) corresponding timer: */
-            m_pTimerDisabledLookAndFeel->start();
-            break;
-        }
-        default:
-            break;
-    }
-
     /* Call to base-class: */
     return QMainWindow::eventFilter(pObject, pEvent);
 }
@@ -1082,9 +1065,6 @@ void UIAdvancedSettingsDialog::polishEvent()
     resize(minimumSizeHint());
     /* Explicit centering according to our parent: */
     gpDesktop->centerWidget(this, parentWidget(), false);
-
-    /* Make sure widgets disabled initially have look&feel updated: */
-    sltUpdateDisabledWidgetsLookAndFeel();
 }
 
 void UIAdvancedSettingsDialog::keyPressEvent(QKeyEvent *pEvent)
@@ -1495,13 +1475,6 @@ void UIAdvancedSettingsDialog::sltHandleVerticalScrollAreaWheelEvent()
         m_pSelector->selectById(iActualKey, true /* silently */);
 }
 
-void UIAdvancedSettingsDialog::sltUpdateDisabledWidgetsLookAndFeel()
-{
-    /* Make sure all child widgets have look&feel updated: */
-    foreach (QWidget *pChild, findChildren<QWidget*>())
-        adjustLookAndFeelForDisabledWidget(pChild);
-}
-
 void UIAdvancedSettingsDialog::prepare()
 {
     /* Prepare local notification-center (parent to be assigned in the end): */
@@ -1515,15 +1488,8 @@ void UIAdvancedSettingsDialog::prepare()
     /* Prepare local popup-center: */
     m_pPopupCenter = new UIPopupCenter(this);
 
-    /* Create timer to update disabled widgets look&feel: */
-    m_pTimerDisabledLookAndFeel = new QTimer(this);
-    if (m_pTimerDisabledLookAndFeel)
-    {
-        m_pTimerDisabledLookAndFeel->setSingleShot(true);
-        m_pTimerDisabledLookAndFeel->setInterval(50);
-        connect(m_pTimerDisabledLookAndFeel, &QTimer::timeout,
-                this, &UIAdvancedSettingsDialog::sltUpdateDisabledWidgetsLookAndFeel);
-    }
+    /* Let the Qt style render disabled controls.  Per-pixel widget masks make
+     * large settings pages expensive to repaint and resize on Windows. */
 
     /* Prepare central-widget: */
     setCentralWidget(new QWidget);
@@ -1696,42 +1662,6 @@ void UIAdvancedSettingsDialog::tellListenerToCloseUs()
         m_fClosed = true;
         emit sigClose();
     }
-}
-
-/* static */
-void UIAdvancedSettingsDialog::adjustLookAndFeelForDisabledWidget(QWidget *pWidget)
-{
-    /* Adjust font to be itelic for disabled widget: */
-    QFont font = pWidget->font();
-    font.setItalic(!pWidget->isEnabledTo(0));
-    pWidget->setFont(font);
-
-    /* If widget is disabled and non of his parents have mask assigned: */
-    if (!pWidget->isEnabledTo(0) && !isOneOfWidgetParentsHasMask(pWidget))
-    {
-        /* Compose striped mask using tricky QImage=>QBitmap conversion: */
-        QImage img(pWidget->width(), pWidget->height(), QImage::Format_Mono);
-        for (int j = 0; j < img.height(); ++j)
-            for (int i = 0; i < img.width(); ++i)
-                img.setPixel(i, j, (i+j) % 10 == 0 ? 1 : 0);
-        /* Adjust mask to be striped for disabled widget: */
-        pWidget->setMask(QBitmap::fromImage(img, Qt::MonoOnly));
-    }
-    else
-    {
-        /* Disable mask for good: */
-        pWidget->clearMask();
-    }
-    pWidget->update();
-}
-
-/* static */
-bool UIAdvancedSettingsDialog::isOneOfWidgetParentsHasMask(QWidget *pWidget)
-{
-    AssertPtrReturn(pWidget, false);
-    if (QWidget *pParent = pWidget->parentWidget())
-        return !pParent->mask().isNull() || isOneOfWidgetParentsHasMask(pParent);
-    return false;
 }
 
 #include "UIAdvancedSettingsDialog.moc"

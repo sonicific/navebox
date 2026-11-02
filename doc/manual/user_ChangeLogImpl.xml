@@ -110,6 +110,16 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
+        <para>GUI: Improved Settings dialog responsiveness by using native
+          disabled-control rendering instead of striped widget masks</para>
+      </listitem>
+
+      <listitem>
+        <para>GUI: Fixed Settings dialog freezes and crashes when Windows
+          accessibility clients navigate or retain menu bar editor buttons</para>
+      </listitem>
+
+      <listitem>
         <para>NAT: Fixed ICMP traceroute missing intermediate hops when using
           NAT networking</para>
       </listitem>

@@ -43,7 +43,6 @@ class QGridLayout;
 class QProgressBar;
 class QShowEvent;
 class QStackedWidget;
-class QTimer;
 class QIDialogButtonBox;
 class UIFilterEditor;
 class UIModeCheckBox;
@@ -220,9 +219,6 @@ private slots:
     /** Handles signal about vertical scroll-area wheel-event. */
     void sltHandleVerticalScrollAreaWheelEvent();
 
-    /** Handles request to update disabled widgets look&feel: */
-    void sltUpdateDisabledWidgetsLookAndFeel();
-
 private:
 
     /** @name Prepare/cleanup cascade.
@@ -244,12 +240,6 @@ private:
       * No need for QWindow destruction functionality.
       * Parent will handle destruction itself. */
     void tellListenerToCloseUs();
-
-    /** Adjusts look&feel for disabled widget.
-      * @param  pWidget   Brings the widget to adjust look&feel for. */
-    static void adjustLookAndFeelForDisabledWidget(QWidget *pWidget);
-    /** Returns whether one of @a pWidget parents in hierarchy has mask assigned. */
-    static bool isOneOfWidgetParentsHasMask(QWidget *pWidget);
 
     /** Holds configuration access level. */
     ConfigurationAccessLevel  m_enmConfigurationAccessLevel;
@@ -294,9 +284,6 @@ private:
 
     /** Stores the help tag per page. */
     QMap<int, QString>  m_pageHelpKeywords;
-
-    /** Holds the timer to update disabled widgets look&feel. */
-    QTimer *m_pTimerDisabledLookAndFeel;
 
     /** @name Widgets
      * @{ */
