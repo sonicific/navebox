@@ -99,9 +99,11 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
-        <para>GUI: Refreshed the Manager toolbar, machine selection and
-          details cards with flatter surfaces, rounded corners and improved
-          spacing, using the application theme colors</para>
+        <para>GUI: Refreshed application action and status icons with scalable
+          glass artwork and lighter visual weight, and made the Manager
+          toolbar, machine list and details cards more compact, using the
+          application theme colors. Simplified Settings navigation, page
+          surfaces and the Basic/Expert selector</para>
       </listitem>
 
       <listitem>

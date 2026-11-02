@@ -309,102 +309,36 @@ bool UIModeCheckBox::event(QEvent *pEvent)
 
 void UIModeCheckBox::paintEvent(QPaintEvent *pEvent)
 {
-    /* Prepare painter: */
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.setRenderHint(QPainter::TextAntialiasing);
-    /* Avoid painting more than necessary: */
     painter.setClipRect(pEvent->rect());
+    const QPalette pal = palette();
+    const QPalette::ColorGroup enmGroup = isEnabled() ? QPalette::Active : QPalette::Disabled;
+    const QRectF contentRect = QRectF(rect()).adjusted(1, 2, -1, -2);
+    QColor border = pal.color(enmGroup, QPalette::WindowText);
+    border.setAlpha(30);
+    painter.setPen(QPen(border, 1));
+    painter.setBrush(pal.color(enmGroup, QPalette::Base));
+    painter.drawRoundedRect(contentRect, 7, 7);
 
-    /* Acquire useful properties: */
-    const QPalette pal = qApp->palette();
-    QRect contentRect = rect();
-#ifdef VBOX_WS_MAC
-    contentRect.setLeft(contentRect.left() + 2); /// @todo justify!
-    contentRect.setWidth(contentRect.width() - 10); /// @todo justify!
-#else /* !VBOX_WS_MAC */
-    /* On non-macOS hosts we'll have to give some space to focus-frame: */
-    contentRect.setLeft(contentRect.left() + 1);
-    contentRect.setTop(contentRect.top() + 1);
-#endif /* !VBOX_WS_MAC */
-
-#ifndef VBOX_WS_MAC
-    /* On non-macOS hosts we'll have to draw focus-frame ourselves: */
+    /* Match the two visual segments to the existing mouse/keyboard hit areas. */
+    const QRectF leftRect(contentRect.left() + 2, contentRect.top() + 2,
+                          contentRect.width() / 2 - 2, contentRect.height() - 4);
+    const QRectF rightRect(contentRect.center().x(), contentRect.top() + 2,
+                           contentRect.width() / 2 - 2, contentRect.height() - 4);
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(pal.color(enmGroup, QPalette::Highlight));
+    painter.drawRoundedRect(isChecked() ? rightRect : leftRect, 5, 5);
+    painter.setPen(pal.color(enmGroup, isChecked() ? QPalette::Text : QPalette::HighlightedText));
+    painter.drawText(leftRect, Qt::AlignCenter, text1());
+    painter.setPen(pal.color(enmGroup, isChecked() ? QPalette::HighlightedText : QPalette::Text));
+    painter.drawText(rightRect, Qt::AlignCenter, text2());
     if (hasFocus())
     {
-        QStyleOptionFocusRect option;
-        option.initFrom(this);
-        option.rect = rect();
-        style()->drawPrimitive(QStyle::PE_FrameFocusRect, &option, &painter, this);
+        painter.setPen(QPen(pal.color(enmGroup, QPalette::Highlight), 1, Qt::DotLine));
+        painter.setBrush(Qt::NoBrush);
+        painter.drawRoundedRect(contentRect, 7, 7);
     }
-#endif /* !VBOX_WS_MAC */
-
-    /* Prepare left painter paths: */
-    QPainterPath painterPath1;
-    painterPath1.moveTo(contentRect.x(),                                contentRect.y());
-    painterPath1.lineTo(contentRect.width() / 2,                        contentRect.y());
-    painterPath1.lineTo(contentRect.width() / 2 - contentRect.height(), contentRect.height());
-    painterPath1.lineTo(contentRect.x(),                                contentRect.height());
-    painterPath1.closeSubpath();
-
-    /* Prepare right painter paths: */
-    QPainterPath painterPath2;
-    painterPath2.moveTo(contentRect.width() / 2,                        contentRect.y());
-    painterPath2.lineTo(contentRect.width(),                            contentRect.y());
-    painterPath2.lineTo(contentRect.width()     - contentRect.height(), contentRect.height());
-    painterPath2.lineTo(contentRect.width() / 2 - contentRect.height(), contentRect.height());
-    painterPath2.closeSubpath();
-
-    /* Prepare left painting gradient: */
-    const QColor backColor1 = pal.color(QPalette::Active, isChecked() ? QPalette::Window : QPalette::Highlight);
-    const QColor bcTone11 = backColor1.lighter(isChecked() ? 120 : 100);
-    const QColor bcTone12 = backColor1.lighter(isChecked() ? 140 : 120);
-    QLinearGradient grad1(painterPath1.boundingRect().topLeft(), painterPath1.boundingRect().bottomRight());
-    grad1.setColorAt(0, bcTone11);
-    grad1.setColorAt(1, bcTone12);
-
-    /* Prepare right painting gradient: */
-    const QColor backColor2 = pal.color(QPalette::Active, isChecked() ? QPalette::Highlight : QPalette::Window);
-    const QColor bcTone21 = backColor2.lighter(isChecked() ? 100 : 120);
-    const QColor bcTone22 = backColor2.lighter(isChecked() ? 120 : 140);
-    QLinearGradient grad2(painterPath2.boundingRect().topLeft(), painterPath2.boundingRect().bottomRight());
-    grad2.setColorAt(0, bcTone21);
-    grad2.setColorAt(1, bcTone22);
-
-    /* Paint fancy shape: */
-    painter.save();
-    painter.fillPath(painterPath1, grad1);
-    painter.strokePath(painterPath1, uiCommon().isInDarkMode() ? backColor1.lighter(120) : backColor1.darker(110));
-    painter.fillPath(painterPath2, grad2);
-    painter.strokePath(painterPath2, uiCommon().isInDarkMode() ? backColor2.lighter(120) : backColor2.darker(110));
-    painter.restore();
-
-    /* Prepare text stuff: */
-    const QFont fnt = font();
-    const QFontMetrics fm(fnt);
-    const QColor foreground1 = suitableForegroundColor(pal, backColor1);
-    const QColor foreground2 = suitableForegroundColor(pal, backColor2);
-    /* Calculate text1 position: */
-    const int iMaxSpace1 = contentRect.width() / 2 - 2 * fm.height();
-    const int iTextSize1 = fm.horizontalAdvance(m_strText1);
-    const int iIndent1 = iMaxSpace1 > iTextSize1 ? (iMaxSpace1 - iTextSize1) / 2 : 0;
-    const QPoint point1 = QPoint(contentRect.left() + 5 /* margin */ + iIndent1,
-                                 contentRect.height() / 2 + fm.ascent() / 2 - 1 /* base line */);
-    /* Calculate text2 position: */
-    const int iMaxSpace2 = contentRect.width() / 2 - 2 * fm.height();
-    const int iTextSize2 = fm.horizontalAdvance(m_strText2);
-    const int iIndent2 = iMaxSpace2 > iTextSize2 ? (iMaxSpace2 - iTextSize2) / 2 : 0;
-    const QPoint point2 = QPoint(contentRect.width() / 2 + iIndent2,
-                                 contentRect.height() / 2 + fm.ascent() / 2 - 1 /* base line */);
-
-    /* Paint text: */
-    painter.save();
-    painter.setFont(fnt);
-    painter.setPen(foreground1);
-    painter.drawText(point1, text1());
-    painter.setPen(foreground2);
-    painter.drawText(point2, text2());
-    painter.restore();
 }
 
 QSize UIModeCheckBox::minimumSizeHint() const
@@ -417,16 +351,7 @@ QSize UIModeCheckBox::minimumSizeHint() const
     iMaxLength = qMax(iMaxLength, fm.horizontalAdvance(m_strText1));
     iMaxLength = qMax(iMaxLength, fm.horizontalAdvance(m_strText2));
 
-    /* Composing result: */
-    QSize result(  5               /* left margin */
-                 + iMaxLength + 2  /* padding */
-                 + 2 * fm.height() /* spacing */
-                 + iMaxLength + 2  /* padding */
-                 + 2 * fm.height() /* right marging */,
-                   2 * fm.height() /* vertical hint */);
-    //printf("UIModeCheckBox::minimumSizeHint(%dx%d)\n",
-    //       result.width(), result.height());
-    return result;
+    return QSize(2 * (iMaxLength + 20), qMax(28, fm.height() + 12));
 }
 
 

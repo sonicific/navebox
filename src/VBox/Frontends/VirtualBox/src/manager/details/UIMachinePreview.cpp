@@ -39,6 +39,7 @@
 #include "UIConverter.h"
 #include "UIIconPool.h"
 #include "UIMachinePreview.h"
+#include "UIManagerStyle.h"
 #include "UIImageTools.h"
 #include "UITranslationEventListener.h"
 #include "UIVirtualBoxEventHandler.h"
@@ -145,12 +146,19 @@ void UIMachinePreview::paint(QPainter *pPainter, const QStyleOptionGraphicsItem*
     if (!cr.isValid())
         return;
 
+    /* Use a thin, palette-aware frame instead of the shaded monitor bitmap. */
+    const QPalette pal = QApplication::palette();
+    pPainter->save();
+    pPainter->setRenderHint(QPainter::Antialiasing);
+    pPainter->setPen(QPen(UIManagerStyle::borderColor(pal), 1));
+    pPainter->setBrush(UIManagerStyle::surfaceColor(pal));
+    pPainter->drawRoundedRect(QRectF(m_vRect).adjusted(-4, -4, 4, 4), 6, 6);
+    pPainter->fillRect(m_vRect, QColor(24, 31, 42));
+    pPainter->restore();
+
     /* If there is a preview image available: */
     if (m_pPreviewImg)
     {
-        /* Draw empty monitor frame: */
-        pPainter->drawPixmap(cr.x() + m_iMargin, cr.y() + m_iMargin, *m_emptyPixmaps.value(m_enmPreset));
-
         /* Move image to viewport center: */
         QRect imageRect(QPoint(0, 0), m_pPreviewImg->size());
         imageRect.moveCenter(m_vRect.center());
@@ -169,9 +177,6 @@ void UIMachinePreview::paint(QPainter *pPainter, const QStyleOptionGraphicsItem*
     }
     else
     {
-        /* Draw full monitor frame: */
-        pPainter->drawPixmap(cr.x() + m_iMargin, cr.y() + m_iMargin, *m_fullPixmaps.value(m_enmPreset));
-
         /* Paint preview name: */
         QFont font = pPainter->font();
         font.setBold(true);

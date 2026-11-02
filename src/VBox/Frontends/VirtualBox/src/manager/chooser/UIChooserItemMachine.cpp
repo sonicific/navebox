@@ -599,7 +599,7 @@ QVariant UIChooserItemMachine::data(int iKey) const
         /* Layout hints: */
         case MachineItemData_MarginHL:     return QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize);
         case MachineItemData_MarginHR:     return QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) / 4 * 5;
-        case MachineItemData_MarginV:      return QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) / 4 * 3;
+        case MachineItemData_MarginV:      return QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) / 2;
         case MachineItemData_MajorSpacing: return QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) / 2;
         case MachineItemData_MinorSpacing: return QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) / 4;
         case MachineItemData_TextSpacing:  return 0;
@@ -626,6 +626,15 @@ void UIChooserItemMachine::updatePixmap()
     AssertPtrReturnVoid(cache());
     QSize pixmapSize;
     QPixmap pixmap = cache()->osPixmap(&pixmapSize);
+    /* Keep guest OS artwork recognizable without dominating the machine row. */
+    const int iIconMetric = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) * 3 / 2;
+    if (pixmapSize.width() > iIconMetric || pixmapSize.height() > iIconMetric)
+    {
+        const qreal dRatio = pixmap.devicePixelRatio();
+        pixmapSize.scale(iIconMetric, iIconMetric, Qt::KeepAspectRatio);
+        pixmap = pixmap.scaled(pixmapSize * dRatio, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        pixmap.setDevicePixelRatio(dRatio);
+    }
     /* Update linked values: */
     if (m_pixmapSize != pixmapSize)
     {
@@ -667,7 +676,7 @@ void UIChooserItemMachine::updateStatePixmap()
 void UIChooserItemMachine::updateToolPixmap()
 {
     /* Determine icon metric: */
-    const int iIconMetric = QApplication::style()->pixelMetric(QStyle::PM_LargeIconSize) * .75;
+    const int iIconMetric = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize);
     /* Create new tool-pixmap and tool-pixmap size: */
     const QIcon toolIcon = UIIconPool::iconSet(":/tools_menu_24px.png");
     AssertReturnVoid(!toolIcon.isNull());
@@ -872,7 +881,7 @@ void UIChooserItemMachine::paintBackground(QPainter *pPainter, const QRect &rect
     pPainter->setRenderHint(QPainter::Antialiasing);
     pPainter->setPen(Qt::NoPen);
     pPainter->setBrush(UIManagerStyle::machineBackgroundColor(pal, model()->selectedItems().contains(this), animatedValue()));
-    pPainter->drawRoundedRect(QRectF(rectangle).adjusted(4, 3, -4, -3), 6, 6);
+    pPainter->drawRoundedRect(QRectF(rectangle).adjusted(4, 3, -4, -3), 8, 8);
 
     /* Paint drag token UP? */
     if (dragTokenPlace() != UIChooserItemDragToken_Off)
@@ -944,7 +953,7 @@ void UIChooserItemMachine::paintFrame(QPainter *pPainter, const QRect &rectangle
     pPainter->setRenderHint(QPainter::Antialiasing);
 
     /* Keep the outline inside the selection surface. */
-    pPainter->drawRoundedRect(QRectF(rectangle).adjusted(4.5, 3.5, -4.5, -3.5), 6, 6);
+    pPainter->drawRoundedRect(QRectF(rectangle).adjusted(4.5, 3.5, -4.5, -3.5), 8, 8);
 
     /* Restore painter: */
     pPainter->restore();

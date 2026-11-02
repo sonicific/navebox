@@ -333,7 +333,7 @@ void UIVirtualBoxWidget::sltUpdateToolbar()
 void UIVirtualBoxWidget::sltUpdateToolbarStyle()
 {
     if (m_pToolBar)
-        m_pToolBar->setStyleSheet(UIManagerStyle::toolBarStyleSheet());
+        m_pToolBar->setStyleSheet(UIManagerStyle::toolBarStyleSheet(m_pToolBar->palette()));
 }
 
 void UIVirtualBoxWidget::prepare()
@@ -369,7 +369,7 @@ void UIVirtualBoxWidget::prepareWidgets()
         if (m_pToolBar)
         {
             /* Configure toolbar: */
-            const int iIconMetric = QApplication::style()->pixelMetric(QStyle::PM_LargeIconSize);
+            const int iIconMetric = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) * 3 / 2;
             m_pToolBar->setIconSize(QSize(iIconMetric, iIconMetric));
             m_pToolBar->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
             m_pToolBar->setContextMenuPolicy(Qt::CustomContextMenu);

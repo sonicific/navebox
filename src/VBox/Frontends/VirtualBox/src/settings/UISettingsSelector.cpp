@@ -29,14 +29,11 @@
 #include <QApplication>
 #include <QLayout>
 #include <QPainter>
-#include <QPainterPath>
 
 /* GUI includes: */
 #include "QIListWidget.h"
-#include "UICommon.h"
 #include "UIDesktopWidgetWatchdog.h"
 #include "UIIconPool.h"
-#include "UIImageTools.h"
 #include "UISettingsPage.h"
 #include "UISettingsSelector.h"
 
@@ -204,7 +201,7 @@ public:
             AssertPtrReturn(pItem, QSize());
             const QSize itemSizeHint = pItem->sizeHint();
             const int iHeightHint = itemSizeHint.height();
-            iMaximumColumnWidth = qMax(iMaximumColumnWidth, itemSizeHint.width() + iHeightHint /* to get the fancy shape */);
+            iMaximumColumnWidth = qMax(iMaximumColumnWidth, itemSizeHint.width());
             iCumulativeColumnHeight += iHeightHint;
         }
 
@@ -423,43 +420,21 @@ void UISettingsSelectorListWidget::sltHandleItemPainted(QListWidgetItem *pItem, 
     }
 #endif /* !VBOX_WS_MAC */
 
-    /* Draw background: */
-    QColor backColor;
-    if (m_pListWidget->currentItem() == pItem)
+    /* Keep navigation compact and align it with the Manager's rounded surfaces. */
+    const bool fSelected = m_pListWidget->currentItem() == pItem;
+    if (fSelected)
     {
-        /* Prepare painter path: */
-        QPainterPath painterPath;
-        painterPath.lineTo(itemRectangle.width() - itemRectangle.height(), 0);
-        painterPath.lineTo(itemRectangle.width(),                          itemRectangle.height());
-        painterPath.lineTo(0,                                              itemRectangle.height());
-        painterPath.closeSubpath();
-        painterPath.translate(itemRectangle.topLeft());
-
-        /* Prepare painting gradient: */
-        backColor = pal.color(QPalette::Active, QPalette::Highlight);
-        const QColor bcTone1 = backColor.lighter(100);
-        const QColor bcTone2 = backColor.lighter(120);
-        QLinearGradient grad(itemRectangle.topLeft(), itemRectangle.bottomRight());
-        grad.setColorAt(0, bcTone1);
-        grad.setColorAt(1, bcTone2);
-
-        /* Paint fancy shape: */
         pPainter->save();
-        pPainter->setClipPath(painterPath);
         pPainter->setRenderHint(QPainter::Antialiasing);
-        pPainter->fillPath(painterPath, grad);
-        pPainter->strokePath(painterPath, uiCommon().isInDarkMode() ? backColor.lighter(120) : backColor.darker(110));
+        pPainter->setPen(Qt::NoPen);
+        pPainter->setBrush(pal.color(QPalette::Active, QPalette::Highlight));
+        pPainter->drawRoundedRect(QRectF(itemRectangle), 7, 7);
         pPainter->restore();
-    }
-    else
-    {
-        /* Just init painting color: */
-        backColor = pal.color(QPalette::Active, QPalette::Window);
     }
 
     /* Some common variables: */
-    const int iMargin = QApplication::style()->pixelMetric(QStyle::PM_LayoutLeftMargin) / 1.5;
-    const int iIconSize = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) * 1.5;
+    const int iMargin = QApplication::style()->pixelMetric(QStyle::PM_LayoutLeftMargin) / 2;
+    const int iIconSize = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) * 5 / 4;
 
     /* Draw icon: */
     const QRect itemPixmapRect(iMargin, iMargin, iIconSize, iIconSize);
@@ -476,7 +451,7 @@ void UISettingsSelectorListWidget::sltHandleItemPainted(QListWidgetItem *pItem, 
     const int iSpacing = qMax(QApplication::style()->pixelMetric(QStyle::PM_LayoutVerticalSpacing), 5) * 2;
     const QFont listFont = m_pListWidget->font();
     const QFontMetrics fm(listFont);
-    const QColor foreground = suitableForegroundColor(pal, backColor);
+    const QColor foreground = pal.color(QPalette::Active, fSelected ? QPalette::HighlightedText : QPalette::Text);
     const QSize itemsSizeHint = pItem->sizeHint();
     int iNamePointX = iMargin + iIconSize + iSpacing;
     int iNamePointY = itemsSizeHint.height() / 2 + fm.ascent() / 2 - 1 /* base line */;
@@ -529,9 +504,9 @@ QSize UISettingsSelectorListWidget::itemSizeHint(QListWidgetItem *pItem) const
 
     /* Calculate size-hint for passed pItem: */
     const QFontMetrics fm(m_pListWidget->font());
-    const int iMargin = QApplication::style()->pixelMetric(QStyle::PM_LayoutLeftMargin) / 1.5;
+    const int iMargin = QApplication::style()->pixelMetric(QStyle::PM_LayoutLeftMargin) / 2;
     const int iSpacing = qMax(QApplication::style()->pixelMetric(QStyle::PM_LayoutVerticalSpacing), 5) * 2;
-    const int iIconSize = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) * 1.5;
+    const int iIconSize = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) * 5 / 4;
     const QString strName = pItem->text();
     const int iMinimumContentWidth = iIconSize /* icon width */
                                    + iSpacing

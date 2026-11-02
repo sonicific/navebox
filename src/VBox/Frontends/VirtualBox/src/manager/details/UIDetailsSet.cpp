@@ -54,8 +54,6 @@ UIDetailsSet::UIDetailsSet(UIDetailsItem *pParent)
     , m_fHasDetails(false)
     , m_configurationAccessLevel(ConfigurationAccessLevel_Null)
     , m_pBuildStep(0)
-    , m_iBackgroundDarknessStart(115)
-    , m_iBackgroundDarknessFinal(150)
 {
     /* Add set to the parent group: */
     parentItem()->addItem(this);
@@ -754,13 +752,8 @@ void UIDetailsSet::paintBackground(QPainter *pPainter, const QStyleOptionGraphic
     /* Acquire background color: */
     const QColor backgroundColor = QApplication::palette().color(QPalette::Active, QPalette::Window);
 
-    /* Paint default background: */
-    QColor bcTone1 = backgroundColor.darker(m_iBackgroundDarknessStart);
-    QColor bcTone2 = backgroundColor.darker(m_iBackgroundDarknessFinal);
-    QLinearGradient gradientDefault(optionRect.topLeft(), optionRect.bottomRight());
-    gradientDefault.setColorAt(0, bcTone1);
-    gradientDefault.setColorAt(1, bcTone2);
-    pPainter->fillRect(optionRect, gradientDefault);
+    /* Leave the space between cards quiet, including in dark themes. */
+    pPainter->fillRect(optionRect, backgroundColor);
 
     /* Restore painter: */
     pPainter->restore();

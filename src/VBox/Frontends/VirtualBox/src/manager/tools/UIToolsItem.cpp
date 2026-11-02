@@ -711,7 +711,7 @@ QVariant UIToolsItem::data(int iKey) const
         {
             /* Init font: */
             QFont fnt = font();
-            fnt.setWeight(QFont::Bold);
+            fnt.setWeight(QFont::Medium);
 
             /* Make font a bit smaller: */
             fnt.setPointSize(fnt.pointSize() - 1);
@@ -765,127 +765,38 @@ void UIToolsItem::updateNameSize()
 
 void UIToolsItem::paintBackground(QPainter *pPainter, const QRect &rectangle) const
 {
-    /* Save painter: */
     pPainter->save();
-
-    /* Prepare variables: */
     const QPalette pal = QApplication::palette();
-
-    /* Selection background: */
-    if (model()->currentItem() == this)
+    const bool fSelected = model()->currentItem() == this;
+    if (fSelected || isHovered())
     {
-        /* Acquire background color: */
-        const QColor selectionColor = uiCommon().isInDarkMode()
-                                    ? pal.color(QPalette::Active, QPalette::Button).lighter(150)
-                                    : pal.color(QPalette::Active, QPalette::Button).darker(150);
-        QColor selectionColor1 = selectionColor;
-        QColor selectionColor2 = selectionColor;
-        selectionColor1.setAlpha(100);
-        selectionColor2.setAlpha(110);
-
-        /* Acquire token color: */
-        const QColor highlightColor = isEnabled()
-                                    ? pal.color(QPalette::Active, QPalette::Highlight)
-                                    : pal.color(QPalette::Disabled, QPalette::Highlight);
-#ifdef VBOX_WS_MAC
-        const QColor highlightColor1 = uiCommon().isInDarkMode()
-                                     ? highlightColor.lighter(160)
-                                     : highlightColor.darker(160);
-        const QColor highlightColor2 = uiCommon().isInDarkMode()
-                                     ? highlightColor.lighter(140)
-                                     : highlightColor.darker(140);
-#else
-        const QColor highlightColor1 = uiCommon().isInDarkMode()
-                                     ? highlightColor.darker(120)
-                                     : highlightColor.lighter(120);
-        const QColor highlightColor2 = uiCommon().isInDarkMode()
-                                     ? highlightColor.darker(100)
-                                     : highlightColor.lighter(100);
-#endif
-
-        /* Draw gradient background: */
-        QLinearGradient bgGrad(rectangle.topLeft(), rectangle.topRight());
-        bgGrad.setColorAt(0, selectionColor1);
-        bgGrad.setColorAt(1, selectionColor2);
-        pPainter->fillRect(rectangle, bgGrad);
-
-        /* Depending on item class: */
-        switch (itemClass())
+        /* A quiet accent wash replaces the old grey gradient and spotlight. */
+        QColor accent = pal.color(isEnabled() ? QPalette::Active : QPalette::Disabled, QPalette::Highlight);
+        QColor surface = accent;
+        surface.setAlpha(fSelected ? 26 : 12);
+        pPainter->setRenderHint(QPainter::Antialiasing);
+        pPainter->setPen(Qt::NoPen);
+        pPainter->setBrush(surface);
+        pPainter->drawRoundedRect(QRectF(rectangle).adjusted(3, 3, -3, -3), 7, 7);
+        if (fSelected)
         {
-            case UIToolClass_Global:
-            {
-                /* Draw gradient token: */
-                QRect tokenRect(rectangle.topLeft(), QSize(3, rectangle.height()));
-                QLinearGradient tkGrad(tokenRect.topLeft(), tokenRect.bottomLeft());
-                tkGrad.setColorAt(0, highlightColor1);
-                tkGrad.setColorAt(1, highlightColor2);
-                pPainter->fillRect(tokenRect, tkGrad);
-                break;
-            }
-            case UIToolClass_Machine:
-            {
-                /* Draw gradient token: */
-                QRect tokenRect(rectangle.bottomLeft() - QPoint(0, 2), QSize(rectangle.width(), 2));
-                QLinearGradient hlGrad(tokenRect.bottomLeft(), tokenRect.bottomRight());
-                hlGrad.setColorAt(0, highlightColor1);
-                hlGrad.setColorAt(1, highlightColor2);
-                pPainter->fillRect(tokenRect, hlGrad);
-                break;
-            }
-            default:
-                break;
+            pPainter->setBrush(accent);
+            if (itemClass() == UIToolClass_Machine)
+                pPainter->drawRoundedRect(QRectF(rectangle.left() + 8, rectangle.bottom() - 2,
+                                                qMax(0, rectangle.width() - 16), 2), 1, 1);
+            else
+                pPainter->drawRoundedRect(QRectF(rectangle.left() + 1, rectangle.top() + 9,
+                                                3, qMax(0, rectangle.height() - 18)), 1.5, 1.5);
         }
-
 #ifndef VBOX_WS_MAC
-        /* On non-macOS hosts we'll have to draw focus-frame ourselves: */
-        if (model()->view()->hasFocus())
+        if (fSelected && model()->view()->hasFocus())
         {
-            QStyleOptionFocusRect focusOption;
-            focusOption.rect = rectangle;
-            focusOption.backgroundColor = pal.color(QPalette::Window);
-            QApplication::style()->drawPrimitive(QStyle::PE_FrameFocusRect, &focusOption, pPainter);
+            pPainter->setPen(QPen(accent, 1, Qt::DotLine));
+            pPainter->setBrush(Qt::NoBrush);
+            pPainter->drawRoundedRect(QRectF(rectangle).adjusted(3.5, 3.5, -3.5, -3.5), 7, 7);
         }
-#endif /* !VBOX_WS_MAC */
-    }
-
-    /* Hovering background for widget: */
-    else if (isHovered())
-    {
-        /* Prepare variables: */
-        const int iMargin = data(ToolsItemData_Margin).toInt();
-        const int iPadding = data(ToolsItemData_Padding).toInt();
-
-        /* Configure painter: */
-        pPainter->setRenderHint(QPainter::Antialiasing, true);
-        /* Acquire background color: */
-        const QColor backgroundColor = model() && model()->view()
-                                     ? model()->view()->palette().color(QPalette::Active, QPalette::Base)
-                                     : pal.color(QPalette::Active, QPalette::Window);
-
-        /* Prepare button sub-rect: */
-        QRect subRect;
-        subRect.setHeight(m_pixmap.height() / m_pixmap.devicePixelRatio() + iPadding * 2);
-        subRect.setWidth(subRect.height());
-#ifdef VBOX_WS_MAC
-        /* Take into account additional margin for non-Machine items (Global & Aux): */
-        if (itemClass() == UIToolClass_Machine)
-            subRect.moveTopLeft(rectangle.topLeft() + QPoint(1.5 * iMargin - iPadding, iMargin - iPadding));
-        else
-            subRect.moveTopLeft(rectangle.topLeft() + QPoint(2 * iMargin - iPadding, iMargin - iPadding));
-#else
-        subRect.moveTopLeft(rectangle.topLeft() + QPoint(1.5 * iMargin - iPadding, iMargin - iPadding));
 #endif
-
-        /* Prepare mouse cursor position: */
-        const QPoint  cursorPosInView = model()->view()->mapFromGlobal(QCursor::pos());
-        const QPointF cursorPosInScene = model()->view()->mapToScene(cursorPosInView);
-        const QPointF cursorPosInItem = mapFromScene(cursorPosInScene);
-
-        /* Paint button finally: */
-        paintRoundedButton(pPainter, subRect, cursorPosInItem, backgroundColor, iPadding);
     }
-
-    /* Restore painter: */
     pPainter->restore();
 }
 

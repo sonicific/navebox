@@ -1378,6 +1378,7 @@ UICommon_SOURCES = \
 	src/globals/UIGlobalSession.cpp \
 	src/globals/UIGuestOSType.cpp \
 	src/globals/UIIconPool.cpp \
+	src/globals/UIIconPoolTheme.cpp \
 	src/globals/UIImageTools.cpp \
 	src/globals/UILocalMachineStuff.cpp \
 	src/globals/UIMachineAttributeSetter.cpp \

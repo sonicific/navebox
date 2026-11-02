@@ -55,22 +55,37 @@ QColor UIManagerStyle::machineBackgroundColor(const QPalette &palette, bool fSel
 QColor UIManagerStyle::borderColor(const QPalette &palette)
 {
     QColor color = palette.color(QPalette::Active, QPalette::WindowText);
-    color.setAlpha(40);
+    color.setAlpha(26);
     return color;
 }
 
 /* static */
-QString UIManagerStyle::toolBarStyleSheet()
+QColor UIManagerStyle::surfaceColor(const QPalette &palette)
+{
+    const QColor base = palette.color(QPalette::Active, QPalette::Base);
+    const QColor window = palette.color(QPalette::Active, QPalette::Window);
+    return QColor((base.red() * 3 + window.red()) / 4,
+                  (base.green() * 3 + window.green()) / 4,
+                  (base.blue() * 3 + window.blue()) / 4);
+}
+
+/* static */
+QString UIManagerStyle::toolBarStyleSheet(const QPalette &palette)
 {
     /* Scope all rules to the main toolbar, keeping embedded tools and dialogs native. */
+    const QString strSurface = surfaceColor(palette).name();
+    const QString strWindow = palette.color(QPalette::Active, QPalette::Window).name();
+    const QString strBorder = borderColor(palette).name(QColor::HexArgb);
     return QStringLiteral(
         "QToolBar#managerToolBar {"
-        " background: palette(window); border: none;"
-        " border-bottom: 1px solid palette(mid); padding: 8px; spacing: 6px; }"
+        " background: qlineargradient(x1:0,y1:0,x2:0,y2:1,"
+        " stop:0 %1,stop:1 %2); border: none;"
+        " border-bottom: 1px solid %3; padding: 4px 8px; spacing: 4px; }"
         "QToolBar#managerToolBar QToolButton {"
         " color: palette(button-text); background: transparent;"
-        " border: 1px solid transparent; border-radius: 6px; padding: 6px 10px; }"
-        "QToolBar#managerToolBar QToolButton:hover { background: palette(midlight); }"
+        " border: 1px solid transparent; border-radius: 7px; padding: 4px 8px; }"
+        "QToolBar#managerToolBar QToolButton:hover {"
+        " background: palette(button); border-color: %3; }"
         "QToolBar#managerToolBar QToolButton:pressed,"
         "QToolBar#managerToolBar QToolButton:checked {"
         " background: palette(highlight); color: palette(highlighted-text); }"
@@ -78,5 +93,5 @@ QString UIManagerStyle::toolBarStyleSheet()
         "QToolBar#managerToolBar QToolButton:disabled { color: palette(mid); }"
         "QToolBar#managerToolBar QToolButton#qt_toolbar_ext_button { padding: 0px; }"
         "QToolBar#managerToolBar::separator {"
-        " background: palette(mid); width: 1px; margin: 8px 4px; }");
+        " background: %3; width: 1px; margin: 6px 4px; }").arg(strSurface, strWindow, strBorder);
 }

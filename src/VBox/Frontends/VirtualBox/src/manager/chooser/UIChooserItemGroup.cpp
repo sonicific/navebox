@@ -60,8 +60,6 @@
 UIChooserItemGroup::UIChooserItemGroup(QGraphicsScene *pScene, UIChooserNodeGroup *pNode)
     : UIChooserItem(0, pNode)
     , m_pScene(pScene)
-    , m_iRootBackgroundDarknessStart(0)
-    , m_iRootBackgroundDarknessFinal(0)
     , m_iItemBackgroundDarknessStart(0)
     , m_iItemBackgroundDarknessFinal(0)
     , m_iHighlightLightness(0)
@@ -82,8 +80,6 @@ UIChooserItemGroup::UIChooserItemGroup(QGraphicsScene *pScene, UIChooserNodeGrou
 UIChooserItemGroup::UIChooserItemGroup(UIChooserItem *pParent, UIChooserNodeGroup *pNode)
     : UIChooserItem(pParent, pNode)
     , m_pScene(0)
-    , m_iRootBackgroundDarknessStart(0)
-    , m_iRootBackgroundDarknessFinal(0)
     , m_iItemBackgroundDarknessStart(0)
     , m_iItemBackgroundDarknessFinal(0)
     , m_iHighlightLightness(0)
@@ -982,8 +978,6 @@ void UIChooserItemGroup::sltGroupToggleFinish(bool fToggled)
 void UIChooserItemGroup::prepare()
 {
     /* Color tones: */
-    m_iRootBackgroundDarknessStart = 115;
-    m_iRootBackgroundDarknessFinal = 150;
     m_iItemBackgroundDarknessStart = 100;
     m_iItemBackgroundDarknessFinal = 105;
 #if defined(VBOX_WS_MAC)
@@ -1530,11 +1524,8 @@ void UIChooserItemGroup::paintBackground(QPainter *pPainter, const QRect &rect)
         /* Acquire background color: */
         const QColor backgroundColor = QApplication::palette().color(QPalette::Active, QPalette::Window);
 
-        /* Paint default background: */
-        QLinearGradient gradientDefault(rect.topRight(), rect.bottomLeft());
-        gradientDefault.setColorAt(0, backgroundColor.darker(m_iRootBackgroundDarknessStart));
-        gradientDefault.setColorAt(1, backgroundColor.darker(m_iRootBackgroundDarknessFinal));
-        pPainter->fillRect(rect, gradientDefault);
+        /* Keep the navigation background level with its machine rows. */
+        pPainter->fillRect(rect, backgroundColor);
     }
     else
     {

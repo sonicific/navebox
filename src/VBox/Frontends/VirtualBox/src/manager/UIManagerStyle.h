@@ -48,8 +48,11 @@ public:
     /** Returns a subtle border color derived from @a palette. */
     static QColor borderColor(const QPalette &palette);
 
+    /** Returns the raised surface color for cards and navigation. */
+    static QColor surfaceColor(const QPalette &palette);
+
     /** Returns the style sheet for the Manager's main toolbar. */
-    static QString toolBarStyleSheet();
+    static QString toolBarStyleSheet(const QPalette &palette);
 };
 
 #endif /* !FEQT_INCLUDED_SRC_manager_UIManagerStyle_h */

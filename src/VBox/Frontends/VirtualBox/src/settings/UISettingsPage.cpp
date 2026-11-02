@@ -29,14 +29,12 @@
 #include <QApplication>
 #include <QLabel>
 #include <QPainter>
-#include <QPainterPath>
 #include <QPaintEvent>
 #include <QStyle>
 #include <QVariant>
 #include <QVBoxLayout>
 
 /* GUI includes: */
-#include "UICommon.h"
 #include "UIConverter.h"
 #include "UISettingsPage.h"
 #include "UISettingsPageValidator.h"
@@ -202,39 +200,15 @@ void UISettingsPageFrame::paintEvent(QPaintEvent *pPaintEvent)
     /* Avoid painting more than necessary: */
     painter.setClipRect(pPaintEvent->rect());
 
-    /* Prepare colors: */
-    const bool fActive = window() && window()->isActiveWindow();
-    QColor col1;
-    QColor col2;
-    if (uiCommon().isInDarkMode())
-    {
-        col1 = qApp->palette().color(fActive ? QPalette::Active : QPalette::Inactive, QPalette::Window).lighter(130);
-        col2 = qApp->palette().color(fActive ? QPalette::Active : QPalette::Inactive, QPalette::Window).lighter(150);
-    }
-    else
-    {
-        col1 = qApp->palette().color(fActive ? QPalette::Active : QPalette::Inactive, QPalette::Window).darker(105);
-        col2 = qApp->palette().color(fActive ? QPalette::Active : QPalette::Inactive, QPalette::Window).darker(120);
-    }
-
-    /* Prepare painter path: */
-    const QRect widgetRect = rect();
-    QPainterPath path;
-    int iRadius = 6;
-    QSizeF arcSize(2 * iRadius, 2 * iRadius);
-    path.moveTo(widgetRect.x() + iRadius, widgetRect.y());
-    path.arcTo(QRectF(path.currentPosition(), arcSize).translated(-iRadius, 0), 90, 90);
-    path.lineTo(path.currentPosition().x(), widgetRect.height() - iRadius);
-    path.arcTo(QRectF(path.currentPosition(), arcSize).translated(0, -iRadius), 180, 90);
-    path.lineTo(widgetRect.width() - iRadius, path.currentPosition().y());
-    path.arcTo(QRectF(path.currentPosition(), arcSize).translated(-iRadius, -2 * iRadius), 270, 90);
-    path.lineTo(path.currentPosition().x(), widgetRect.y() + iRadius);
-    path.arcTo(QRectF(path.currentPosition(), arcSize).translated(-2 * iRadius, -iRadius), 0, 90);
-    path.closeSubpath();
-
-    /* Painting stuff: */
-    painter.fillPath(path, col1);
-    painter.strokePath(path, col2);
+    /* Quiet card surfaces replace the recessed grey panels. */
+    const QPalette pal = palette();
+    const QPalette::ColorGroup enmGroup = window() && window()->isActiveWindow()
+                                       ? QPalette::Active : QPalette::Inactive;
+    QColor border = pal.color(enmGroup, QPalette::WindowText);
+    border.setAlpha(26);
+    painter.setPen(QPen(border, 1));
+    painter.setBrush(pal.color(enmGroup, QPalette::Base));
+    painter.drawRoundedRect(QRectF(rect()).adjusted(0.5, 0.5, -0.5, -0.5), 8, 8);
 }
 
 void UISettingsPageFrame::prepare()

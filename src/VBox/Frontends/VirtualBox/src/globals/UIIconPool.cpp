@@ -35,6 +35,7 @@
 
 /* GUI includes: */
 #include "UIIconPool.h"
+#include "UIIconPoolTheme.h"
 #include "UIExtraDataManager.h"
 #include "UIGlobalSession.h"
 #include "UIGuestOSType.h"
@@ -266,7 +267,10 @@ void UIIconPool::addName(QIcon &icon, const QString &strName,
                          QIcon::Mode mode /* = QIcon::Normal */, QIcon::State state /* = QIcon::Off */)
 {
     /* Prepare pixmap on the basis of passed value: */
-    QPixmap pixmap(strName);
+    QPixmap pixmap = UIIconPoolTheme::pixmap(strName);
+    const bool fThemed = !pixmap.isNull();
+    if (!fThemed)
+        pixmap = QPixmap(strName);
     /* Add pixmap: */
     icon.addPixmap(pixmap, mode, state);
 
@@ -277,11 +281,13 @@ void UIIconPool::addName(QIcon &icon, const QString &strName,
     const QStringList aPixmapNames = QStringList() << (strPrefix + "_x2." + strSuffix)
                                                    << (strPrefix + "_x3." + strSuffix)
                                                    << (strPrefix + "_x4." + strSuffix);
+    int iScale = 2;
     foreach (const QString &strPixmapName, aPixmapNames)
     {
-        QPixmap pixmapHiDPI(strPixmapName);
+        QPixmap pixmapHiDPI = fThemed ? UIIconPoolTheme::pixmap(strName, iScale) : QPixmap(strPixmapName);
         if (!pixmapHiDPI.isNull())
             icon.addPixmap(pixmapHiDPI, mode, state);
+        ++iScale;
     }
 }
 

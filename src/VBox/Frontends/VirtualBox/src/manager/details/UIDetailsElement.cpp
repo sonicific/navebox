@@ -379,8 +379,8 @@ QVariant UIDetailsElement::data(int iKey) const
     switch (iKey)
     {
         /* Hints: */
-        case ElementData_Margin: return QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) / 2;
-        case ElementData_Spacing: return QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) / 2;
+        case ElementData_Margin: return QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) * 3 / 8;
+        case ElementData_Spacing: return QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) * 3 / 8;
         /* Default: */
         default: break;
     }
@@ -1478,14 +1478,17 @@ void UIDetailsElement::paintBackground(QPainter *pPainter, const QStyleOptionGra
                          ? QRect(optionRect.topLeft(), QSize(optionRect.width(), iHeadHeight + m_iAdditionalHeight))
                          : optionRect;
 
-    /* Draw a flat card, keeping its outline within the item's bounds. */
+    /* Draw a softly lit card, keeping its outline within the item's bounds. */
     const QPalette pal = QApplication::palette();
     const QRectF cardRect = QRectF(fullRect).adjusted(0.5, 0.5, -0.5, -0.5);
     QPainterPath cardPath;
-    cardPath.addRoundedRect(cardRect, 6, 6);
+    cardPath.addRoundedRect(cardRect, 8, 8);
     pPainter->setRenderHint(QPainter::Antialiasing);
     pPainter->setPen(QPen(UIManagerStyle::borderColor(pal), 1));
-    pPainter->setBrush(pal.color(QPalette::Active, QPalette::Base));
+    QLinearGradient surface(cardRect.topLeft(), cardRect.bottomLeft());
+    surface.setColorAt(0, UIManagerStyle::surfaceColor(pal));
+    surface.setColorAt(1, pal.color(QPalette::Active, QPalette::Base));
+    pPainter->setBrush(surface);
     pPainter->drawPath(cardPath);
     pPainter->setClipPath(cardPath, Qt::IntersectClip);
 
