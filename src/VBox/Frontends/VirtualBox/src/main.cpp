@@ -35,6 +35,7 @@
 #endif
 
 /* GUI includes: */
+#include "UIBranding.h"
 #include "UICommon.h"
 #include "UILoggingDefs.h"
 #include "UIModalWindowManager.h"
@@ -265,9 +266,9 @@ static void QtMessageOutput(QtMsgType enmType, const QMessageLogContext &context
 static void ShowHelp()
 {
 #ifndef VBOX_RUNTIME_UI
-    static const char s_szTitle[] = VBOX_PRODUCT " Manager";
+    static const char s_szTitle[] = VBOX_GUI_PRODUCT_NAME " Manager";
 #else
-    static const char s_szTitle[] = VBOX_PRODUCT " Runner";
+    static const char s_szTitle[] = VBOX_GUI_PRODUCT_NAME " Runner";
 #endif
 
     static const char s_szUsage[] =
@@ -505,7 +506,21 @@ extern "C" DECLEXPORT(int) TrustedMain(int argc, char **argv, char ** /*envp*/)
 #endif /* VBOX_WS_NIX */
 
         /* Create application: */
+#ifdef VBOX_WS_WIN
+        /* Give Explorer and the taskbar the product's own identity before any UI is shown. */
+        /* Resolve this entry point because the shared SDK configuration targets older Windows headers. */
+        typedef HRESULT (WINAPI *PFNSETAPPMODELID)(PCWSTR);
+        HMODULE hShell32 = GetModuleHandleW(L"shell32.dll");
+        PFNSETAPPMODELID pfnSetAppModelId = hShell32
+                                        ? reinterpret_cast<PFNSETAPPMODELID>(GetProcAddress(hShell32,
+                                              "SetCurrentProcessExplicitAppUserModelID")) : 0;
+        if (pfnSetAppModelId)
+            pfnSetAppModelId(VBOX_GUI_APP_USER_MODEL_ID);
+#endif
         QApplication a(argc, argv);
+        a.setApplicationName(QStringLiteral("VirtualBox"));
+        a.setApplicationDisplayName(UIBranding::name());
+        a.setWindowIcon(UIBranding::icon());
 
 #ifdef VBOX_WS_MAC
         /* Disable menu icons on MacOS X host: */
@@ -759,7 +774,7 @@ int main(int argc, char **argv, char **envp)
 # endif
 
         /* Prepare the error-message: */
-        QString strTitle = QApplication::tr("VirtualBox - Runtime Error");
+        QString strTitle = QApplication::tr("Navebox - Runtime Error");
         QString strText = "<html>";
         switch (rc)
         {
@@ -915,7 +930,7 @@ extern "C" DECLEXPORT(void) TrustedError(const char *pszWhere, SUPINITOP enmWhat
     strText += "</html>";
 
     /* Create and show the error message-box: */
-    QMessageBox::critical(0, QApplication::tr("VirtualBox - Error In %1").arg(pszWhere), strText);
+    QMessageBox::critical(0, QApplication::tr("Navebox - Error In %1").arg(pszWhere), strText);
 
     qFatal("%s", strText.toUtf8().constData());
 }

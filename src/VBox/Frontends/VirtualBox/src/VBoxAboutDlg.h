@@ -33,7 +33,6 @@
 
 /* Qt includes: */
 #include <QDialog>
-#include <QPixmap>
 
 /* GUI includes: */
 #include "UILibraryDefs.h"
@@ -59,9 +58,6 @@ protected:
     /** Handles show @a pEvent. */
     virtual void showEvent(QShowEvent *pEvent) RT_OVERRIDE;
 
-    /** Handles paint @a pEvent. */
-    virtual void paintEvent(QPaintEvent *pEvent) RT_OVERRIDE;
-
 private slots:
 
     /** Handles translation event. */
@@ -73,8 +69,8 @@ private:
     void prepare();
     /** Prepares main-layout. */
     void prepareMainLayout();
-    /** Prepares label. */
-    void prepareLabel();
+    /** Prepares the brand story and contact/credits pages. */
+    void preparePages();
     /** Prepares close-button. */
     void prepareCloseButton();
 
@@ -84,19 +80,12 @@ private:
     /** Holds whether window is polished. */
     bool  m_fPolished;
 
-    /** Holds the About-VirtualBox text. */
-    QString  m_strAboutText;
     /** Holds the VirtualBox version number. */
     QString  m_strVersion;
 
-    /** Holds the About-VirtualBox image. */
-    QPixmap  m_pixmap;
-    /** Holds the About-VirtualBox dialog size. */
-    QSize    m_size;
-
     /** Holds About-VirtualBox main-layout instance. */
     QVBoxLayout *m_pMainLayout;
-    /** Holds About-VirtualBox text-label instance. */
+    /** Holds the version and upstream attribution label. */
     QLabel      *m_pLabel;
 };
 

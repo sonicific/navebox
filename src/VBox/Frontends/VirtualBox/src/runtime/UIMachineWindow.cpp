@@ -33,6 +33,7 @@
 #include <QTimer>
 
 /* GUI includes: */
+#include "UIBranding.h"
 #include "UIActionPoolRuntime.h"
 #include "UICommon.h"
 #include "UIConverter.h"
@@ -306,7 +307,7 @@ void UIMachineWindow::updateAppearanceOf(int iElement)
 void UIMachineWindow::sltRetranslateUI()
 {
     /* Compose window-title prefix: */
-    m_strWindowTitlePrefix = VBOX_PRODUCT;
+    m_strWindowTitlePrefix = UIBranding::name();
 #ifdef VBOX_BLEEDING_EDGE
     m_strWindowTitlePrefix += UIMachineWindow::tr(" EXPERIMENTAL build %1r%2 - %3")
                               .arg(RTBldCfgVersion())

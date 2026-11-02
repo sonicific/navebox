@@ -34,6 +34,9 @@ include $(KBUILD_PATH)/subheader.kmk
 #
 VBOX_VIRTUALBOX_SRC := $(PATH_SUB_CURRENT)
 VBOX_VIRTUALBOX_OUT_DIR := $(PATH_TARGET)/VirtualBox/misc
+VBOX_NAVEBOX_BRAND_DIR := $(PATH_SUB_CURRENT)/images/Navebox
+VBOX_WINDOWS_ICON_FILE := $(VBOX_NAVEBOX_BRAND_DIR)/navebox.ico
+VBOX_MACOSX_ICON_FILE := $(VBOX_NAVEBOX_BRAND_DIR)/navebox.icns
 USES += qt6
 
 
@@ -1224,7 +1227,8 @@ endif
 VirtualBox_SOURCES.win += \
 	src/platform/win/UIDesktopServices_win.cpp
 
-$(call VBOX_SET_VER_INFO_EXE,VirtualBox,VirtualBox Manager,$(VBOX_WINDOWS_ICON_FILE),VirtualBoxGUI)
+$(call VBOX_SET_VER_INFO_EXE,VirtualBox,Navebox,$(VBOX_WINDOWS_ICON_FILE),Navebox.exe)
+VirtualBox_RCFLAGS.win += /dIN_PRODUCT_NAME="\"Navebox\""
 
 
 #
@@ -1306,8 +1310,9 @@ endif
 ifdef VBOX_WITH_HARDENING
  $(call VBOX_SET_VER_INFO_DLL,VirtualBoxVM,VirtualBox Virtual Machine (dll),$(VBOX_WINDOWS_ICON_FILE))
 else
- $(call VBOX_SET_VER_INFO_EXE,VirtualBoxVM,VirtualBox Virtual Machine,$(VBOX_WINDOWS_ICON_FILE))
+ $(call VBOX_SET_VER_INFO_EXE,VirtualBoxVM,Navebox Virtual Machine,$(VBOX_WINDOWS_ICON_FILE))
 endif
+VirtualBoxVM_RCFLAGS.win += /dIN_PRODUCT_NAME="\"Navebox\""
 
 
 #
@@ -1369,6 +1374,7 @@ UICommon_SOURCES = \
 	src/globals/UIAnimationFramework.cpp \
 	src/globals/UICloudNetworkingStuff.cpp \
 	src/globals/UICommon.cpp \
+	src/globals/UIAppearance.cpp \
 	src/globals/UIFileSystemModel.cpp \
 	src/globals/UIDefs.cpp \
 	src/globals/UIDesktopWidgetWatchdog.cpp \
@@ -1753,10 +1759,12 @@ VirtualBox_BLDDIRS       += $(VBOX_VIRTUALBOX_OUT_DIR)
 VirtualBox_CLEAN         += $(VBOX_VIRTUALBOX_OUT_DIR)/VirtualBoxBrand.qrc
 $(VBOX_VIRTUALBOX_OUT_DIR)/VirtualBoxBrand.qrc: \
 		$(VBOX_VIRTUALBOX_SRC)/VirtualBoxBrand.qrc \
+		$(MAKEFILE_CURRENT) \
 		$(PATH_ROOT)/Config.kmk \
 		| $$(dir $$@)
 	$(call MSG_GENERATE,VirtualBox,$<,$@)
 	$(QUIET)$(SED) \
+		-e 's;@VBOX_NAVEBOX_BRAND_DIR@;$(VBOX_NAVEBOX_BRAND_DIR);g' \
 		-e 's;@VBOX_ABOUT_PNG@;$(VBOX_BRAND_GUI_ABOUT_PNG);g' \
 		-e 's;@VBOX_ABOUT_X2_PNG@;$(VBOX_BRAND_GUI_ABOUT_X2_PNG);g' \
 		-e 's;@VBOX_ABOUT_X3_PNG@;$(VBOX_BRAND_GUI_ABOUT_X3_PNG);g' \
@@ -1847,11 +1855,22 @@ ifeq ($(KBUILD_TARGET),win)
  #
  INSTALLS.win += VirtualBoxManifest
  VirtualBoxManifest_INST = $(INST_VIRTUALBOX)
- VirtualBoxManifest_DEFPATH = $(PATH_ROOT)/src/VBox/Artwork/$(if-expr defined(VBOX_OSE),OSE,NonOSE)/
+ VirtualBoxManifest_DEFPATH = $(VBOX_NAVEBOX_BRAND_DIR)/
  VirtualBoxManifest_SOURCES := \
- 	virtualbox-70px.png=>VirtualBox_70px.png \
- 	virtualbox-150px.png=>VirtualBox_150px.png \
- 	$(PATH_SUB_CURRENT)/src/platform/win/VirtualBox.VisualElementsManifest.xml
+ 	navebox-70.png=>VirtualBox_70px.png \
+ 	navebox-150.png=>VirtualBox_150px.png \
+ 	$(PATH_SUB_CURRENT)/src/platform/win/VirtualBox.VisualElementsManifest.xml \
+ 	$(PATH_SUB_CURRENT)/src/platform/win/VirtualBox.VisualElementsManifest.xml=>Navebox.VisualElementsManifest.xml
+
+ #
+ # Branded entry point, alongside the internal compatibility executable.
+ #
+ TEMPLATE_VBoxNaveboxLauncher = Navebox launcher installation
+ TEMPLATE_VBoxNaveboxLauncher_INST = $(INST_VIRTUALBOX)
+ TEMPLATE_VBoxNaveboxLauncher_MODE = 755
+ INSTALLS.win += NaveboxLauncher
+ NaveboxLauncher_TEMPLATE = VBoxNaveboxLauncher
+ NaveboxLauncher_SOURCES = $(VirtualBox_1_TARGET)=>Navebox.exe
 
 endif
 

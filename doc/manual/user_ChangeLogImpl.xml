@@ -99,6 +99,12 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
+        <para>GUI: Introduced Navebox branding, desktop icons and product
+          information with a separate About action next to Help, and replaced
+          heavy native input and group-box frames with lighter borders</para>
+      </listitem>
+
+      <listitem>
         <para>GUI: Refreshed application action and status icons with scalable
           glass artwork and lighter visual weight, and made the Manager
           toolbar, machine list and details cards more compact, using the

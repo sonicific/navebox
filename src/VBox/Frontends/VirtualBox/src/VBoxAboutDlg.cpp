@@ -26,36 +26,59 @@
  */
 
 /* Qt includes: */
+#include <QApplication>
+#include <QFrame>
+#include <QGridLayout>
 #include <QGuiApplication>
 #include <QLabel>
-#include <QPainter>
+#include <QScrollArea>
+#include <QTabWidget>
 #include <QVBoxLayout>
 
 /* GUI includes: */
 #include "QIDialogButtonBox.h"
+#include "UIBranding.h"
 #include "UIDesktopWidgetWatchdog.h"
-#include "UIIconPool.h"
 #include "UITranslationEventListener.h"
-#include "UIVersion.h"
 #include "VBoxAboutDlg.h"
 
 /* Other VBox includes: */
-#include <iprt/path.h> /* RTPathExecDir */
-#include <VBox/version.h> /* VBOX_VENDOR */
+#include <VBox/version.h>
 
+/** @page pg_ui_navebox_about Navebox Product Information
+ *
+ * Present the product identity and the four NAVE pillars separately from
+ * contact details, build information and upstream attribution.  Content can
+ * scroll on small screens; font metrics and layouts handle display scaling.
+ */
+
+/** Adds a word-wrapped label with the requested type hierarchy. */
+static QLabel *uiAboutLabel(const QString &strText, QWidget *pParent, int iPointDelta = 0, bool fBold = false)
+{
+    QLabel *pLabel = new QLabel(strText, pParent);
+    pLabel->setWordWrap(true);
+    pLabel->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::LinksAccessibleByMouse | Qt::LinksAccessibleByKeyboard);
+    QFont labelFont = pLabel->font();
+    labelFont.setPointSize(qMax(8, labelFont.pointSize() + iPointDelta));
+    labelFont.setBold(fBold);
+    pLabel->setFont(labelFont);
+    return pLabel;
+}
+
+/** Returns a link color with enough visual weight on a dark About surface. */
+static QString uiAboutLinkColor(const QPalette &palette)
+{
+    QColor link = palette.color(QPalette::Link);
+    if (palette.color(QPalette::Window).lightness() < 128 && link.lightness() < 160)
+        link = link.lighter(180);
+    return link.name();
+}
 
 VBoxAboutDlg::VBoxAboutDlg(QWidget *pParent /* = 0 */, const QString &strVersion /* = QString() */)
 #ifdef VBOX_WS_MAC
-    // No need for About dialog parent on macOS.
-    // First of all, non of other native apps (Safari, App Store, iTunes) centers About dialog according the app itself, they do
-    // it according to screen instead, we should do it as well.  Besides that since About dialog is not modal, it will be in
-    // conflict with modal dialogs if there will be a parent passed, because the dialog will not have own event-loop in that case.
     : QDialog(0)
     , m_pPseudoParent(pParent)
 #else
-    // On other hosts we will keep the current behavior for now.
-    // First of all it's quite difficult to find native (Metro UI) Windows app which have About dialog at all.  But non-native
-    // cross-platform apps (Qt Creator, VLC) centers About dialog according the app exactly.
     : QDialog(pParent)
     , m_pPseudoParent(0)
 #endif
@@ -69,162 +92,145 @@ VBoxAboutDlg::VBoxAboutDlg(QWidget *pParent /* = 0 */, const QString &strVersion
 
 void VBoxAboutDlg::showEvent(QShowEvent *pEvent)
 {
-    /* Call to base-class: */
     QDialog::showEvent(pEvent);
-
-    /* Polish once: */
     if (!m_fPolished)
     {
         m_fPolished = true;
-        setFixedSize(m_size);
-
-        QRect geo = geometry();
-#ifdef VBOX_WS_MAC
-        /* Center according to parent screen: */
-        geo.moveCenter(gpDesktop->screenGeometry(m_pPseudoParent).center());
-#else
-        /* Center according to parent widget: */
-        if (parentWidget())
-            geo.moveCenter(parentWidget()->geometry().center());
-        /* Center according to parent screen: */
-        else
-            geo.moveCenter(gpDesktop->screenGeometry(m_pPseudoParent).center());
-#endif
-        setGeometry(geo);
+        QWidget *pParent = m_pPseudoParent ? m_pPseudoParent : parentWidget();
+        const QRect available = gpDesktop->availableGeometry(pParent);
+        resize(qMin(680, available.width() - 48), qMin(550, available.height() - 72));
+        gpDesktop->centerWidget(this, pParent);
     }
-}
-
-void VBoxAboutDlg::paintEvent(QPaintEvent *)
-{
-    /* Draw About-VirtualBox background image: */
-    QPainter painter(this);
-    painter.drawPixmap(0, 0, m_pixmap);
 }
 
 void VBoxAboutDlg::sltRetranslateUI()
 {
-    setWindowTitle(tr("VirtualBox - About"));
-
+    setWindowTitle(tr("About"));
     if (m_pLabel)
-    {
-        const QString strAboutText = tr("VirtualBox Graphical User Interface");
-#ifdef VBOX_BLEEDING_EDGE
-        const QString strVersionText = "EXPERIMENTAL build %1 - " + QString(VBOX_BLEEDING_EDGE);
-#else
-        const QString strVersionText = tr("Version %1");
-#endif
-#ifdef VBOX_OSE
-        m_strAboutText = strAboutText + " " + strVersionText.arg(m_strVersion) + "\n"
-                       + QString("%1 2004-" VBOX_C_YEAR " " VBOX_VENDOR).arg(QChar(0xa9));
-#else
-        m_strAboutText = strAboutText + "\n" + strVersionText.arg(m_strVersion);
-#endif
-        QString strPlatformName = QGuiApplication::platformName();
-        if (strPlatformName.isEmpty())
-            m_strAboutText = m_strAboutText + QString(" (Qt%1)").arg(qVersion());
-        else
-            m_strAboutText = m_strAboutText + QString(" (Qt%1 on %2)").arg(qVersion()).arg(strPlatformName);
-        m_strAboutText = m_strAboutText + "\n" + QString("Copyright %1 %2 %3.")
-                                                         .arg(QChar(0xa9)).arg(VBOX_C_YEAR).arg(VBOX_VENDOR);
-        m_pLabel->setText(m_strAboutText);
-    }
+        m_pLabel->setText(tr("Version %1 | Qt %2 (%3)").arg(m_strVersion, QString::fromLatin1(qVersion()),
+                                                         QGuiApplication::platformName())
+                         + QStringLiteral("<br/><br/>")
+                         + tr("Built on the VirtualBox open-source platform.")
+                         + QStringLiteral("<br/>")
+                         + QStringLiteral("Copyright &copy; 2004-" VBOX_C_YEAR " " VBOX_VENDOR ".")
+                         + QStringLiteral("<br/>")
+                         + tr("Distributed under the <a style=\"color:%1\" href=\"https://www.gnu.org/licenses/gpl-3.0.html\">"
+                              "GNU General Public License version 3</a>.").arg(uiAboutLinkColor(palette())));
 }
 
 void VBoxAboutDlg::prepare()
 {
-    /* If we have some parent - delete dialog on close: */
     if (m_pPseudoParent || parentWidget())
         setAttribute(Qt::WA_DeleteOnClose);
-    /* Do not count that window as important for application,
-     * it will NOT be taken into account when other top-level windows will be closed: */
     setAttribute(Qt::WA_QuitOnClose, false);
-
-    /* Make sure the dialog is deleted on pseudo-parent destruction: */
+    setWindowModality(Qt::WindowModal);
+    setWindowIcon(UIBranding::icon());
     if (m_pPseudoParent)
         connect(m_pPseudoParent, &QObject::destroyed, this, &VBoxAboutDlg::close);
-
-    /* Choose default image: */
-    QString strPath(":/about.png");
-
-    /* Branding: Use a custom about splash picture if set: */
-    const QString strSplash = UIVersionInfo::brandingGetKey("UI/AboutSplash");
-    if (UIVersionInfo::brandingIsActive() && !strSplash.isEmpty())
-    {
-        char szExecPath[1024];
-        RTPathExecDir(szExecPath, 1024);
-        QString strTmpPath = QString("%1/%2").arg(szExecPath).arg(strSplash);
-        if (QFile::exists(strTmpPath))
-            strPath = strTmpPath;
-    }
-
-    /* Load image: */
-    const QIcon icon = UIIconPool::iconSet(strPath);
-    m_size = QSize(640, 480);
-    QWidget *pParent = m_pPseudoParent ? m_pPseudoParent : parentWidget();
-    const qreal fDevicePixelRatio = gpDesktop->devicePixelRatio(pParent);
-    m_pixmap = icon.pixmap(m_size, fDevicePixelRatio);
-
-    /* Prepare main-layout: */
     prepareMainLayout();
-
-    /* Translate: */
     sltRetranslateUI();
     if (UITranslationEventListener::instance())
         connect(&translationEventListener(), &UITranslationEventListener::sigRetranslateUI,
-            this, &VBoxAboutDlg::sltRetranslateUI);
+                this, &VBoxAboutDlg::sltRetranslateUI);
 }
 
 void VBoxAboutDlg::prepareMainLayout()
 {
-    /* Create main-layout: */
     m_pMainLayout = new QVBoxLayout(this);
-    if (m_pMainLayout)
-    {
-        /* Prepare stuff: */
-        prepareLabel();
-        prepareCloseButton();
-    }
+    m_pMainLayout->setContentsMargins(20, 20, 20, 16);
+    m_pMainLayout->setSpacing(16);
+    QFrame *pHero = new QFrame(this);
+    pHero->setObjectName("naveboxAboutHero");
+    pHero->setStyleSheet(QStringLiteral(
+        "QFrame#naveboxAboutHero { background: qlineargradient(x1:0,y1:0,x2:1,y2:1,"
+        " stop:0 #203b58,stop:1 #0b192a); border-radius: 12px; }"
+        "QFrame#naveboxAboutHero QLabel { color: #edf3fa; background: transparent; }"
+        "QLabel#naveboxSlogan { color: #bdcddd; }"));
+    QHBoxLayout *pHeroLayout = new QHBoxLayout(pHero);
+    pHeroLayout->setContentsMargins(18, 16, 18, 16);
+    pHeroLayout->setSpacing(16);
+    QLabel *pLogo = new QLabel(pHero);
+    const qreal dRatio = gpDesktop->devicePixelRatio(this);
+    pLogo->setPixmap(UIBranding::icon().pixmap(QSize(64, 64), dRatio));
+    pHeroLayout->addWidget(pLogo);
+    QVBoxLayout *pIdentity = new QVBoxLayout;
+    pIdentity->setSpacing(4);
+    pIdentity->addWidget(uiAboutLabel(UIBranding::name(), pHero, 17, true));
+    QLabel *pSlogan = uiAboutLabel(UIBranding::slogan(), pHero, 1);
+    pSlogan->setObjectName("naveboxSlogan");
+    pIdentity->addWidget(pSlogan);
+    pHeroLayout->addLayout(pIdentity, 1);
+    m_pMainLayout->addWidget(pHero);
+    preparePages();
+    prepareCloseButton();
 }
 
-void VBoxAboutDlg::prepareLabel()
+void VBoxAboutDlg::preparePages()
 {
-    /* Create label for version text: */
-    m_pLabel = new QLabel(this);
-    if (m_pLabel)
+    QTabWidget *pTabs = new QTabWidget(this);
+    QWidget *pOverview = new QWidget(pTabs);
+    QVBoxLayout *pOverviewLayout = new QVBoxLayout(pOverview);
+    pOverviewLayout->setContentsMargins(14, 12, 14, 12);
+    pOverviewLayout->setSpacing(12);
+    pOverviewLayout->addWidget(uiAboutLabel(tr("NAVE - The Virtualization Architecture"), pOverview, 2, true));
+    pOverviewLayout->addWidget(uiAboutLabel(tr("FOUR PILLARS. ONE VIRTUAL WORLD."), pOverview));
+    QGridLayout *pPillars = new QGridLayout;
+    pPillars->setSpacing(14);
+    const QStringList titles = QStringList() << tr("Network of Worlds") << tr("Architecture")
+                                            << tr("Virtualization") << tr("Efficiency");
+    const QStringList descriptions = QStringList()
+        << tr("Connect independent virtual machines in one workspace.")
+        << tr("A flexible, modular foundation for virtual environments.")
+        << tr("Create, run and manage multiple systems on one computer.")
+        << tr("Stay in control of compute, memory and storage resources.");
+    const QString strLetters = QStringLiteral("NAVE");
+    for (int i = 0; i < 4; ++i)
     {
-        /* Prepare label for version text: */
-        QPalette palette;
-        /* Branding: Set a different text color (because splash also could be white),
-         * otherwise use white as default color: */
-        const QString strColor = UIVersionInfo::brandingGetKey("UI/AboutTextColor");
-        if (!strColor.isEmpty())
-            palette.setColor(QPalette::WindowText, QColor(strColor).name());
-        else
-            palette.setColor(QPalette::WindowText, Qt::white);
-        m_pLabel->setPalette(palette);
-        m_pLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
-        m_pLabel->setFont(font());
-
-        /* Add label to the main-layout: */
-        if (m_pMainLayout)
-        {
-            m_pMainLayout->addWidget(m_pLabel);
-            m_pMainLayout->setAlignment(m_pLabel, Qt::AlignRight | Qt::AlignBottom);
-        }
+        QFrame *pCard = new QFrame(pOverview);
+        QVBoxLayout *pCardLayout = new QVBoxLayout(pCard);
+        pCardLayout->setContentsMargins(0, 0, 8, 0);
+        pCardLayout->setSpacing(5);
+        pCardLayout->addWidget(uiAboutLabel(strLetters.mid(i, 1), pCard, 10, true));
+        pCardLayout->addWidget(uiAboutLabel(titles.at(i), pCard, 0, true));
+        pCardLayout->addWidget(uiAboutLabel(descriptions.at(i), pCard));
+        pCardLayout->addStretch();
+        pPillars->addWidget(pCard, i / 2, i % 2);
     }
+    pPillars->setColumnStretch(0, 1);
+    pPillars->setColumnStretch(1, 1);
+    pOverviewLayout->addLayout(pPillars);
+    QScrollArea *pStoryScroll = new QScrollArea(pTabs);
+    pStoryScroll->setFrameShape(QFrame::NoFrame);
+    pStoryScroll->setWidgetResizable(true);
+    pStoryScroll->setWidget(pOverview);
+    pTabs->addTab(pStoryScroll, tr("Overview"));
+
+    QWidget *pContact = new QWidget(pTabs);
+    QVBoxLayout *pContactLayout = new QVBoxLayout(pContact);
+    pContactLayout->setContentsMargins(18, 18, 18, 18);
+    pContactLayout->setSpacing(12);
+    pContactLayout->addWidget(uiAboutLabel(tr("Contact"), pContact, 4, true));
+    pContactLayout->addWidget(uiAboutLabel(UIBranding::author(), pContact, 1, true));
+    QLabel *pEmail = uiAboutLabel(QStringLiteral("<a style=\"color:%2\" href=\"mailto:%1\">%1</a>")
+                                .arg(UIBranding::email(), uiAboutLinkColor(palette())), pContact);
+    pEmail->setOpenExternalLinks(true);
+    pContactLayout->addWidget(pEmail);
+    pContactLayout->addSpacing(8);
+    m_pLabel = uiAboutLabel(QString(), pContact);
+    m_pLabel->setOpenExternalLinks(true);
+    pContactLayout->addWidget(m_pLabel);
+    pContactLayout->addStretch();
+    QScrollArea *pContactScroll = new QScrollArea(pTabs);
+    pContactScroll->setFrameShape(QFrame::NoFrame);
+    pContactScroll->setWidgetResizable(true);
+    pContactScroll->setWidget(pContact);
+    pTabs->addTab(pContactScroll, tr("Contact && Credits"));
+    m_pMainLayout->addWidget(pTabs, 1);
 }
 
 void VBoxAboutDlg::prepareCloseButton()
 {
-    /* Create button-box: */
     QIDialogButtonBox *pButtonBox = new QIDialogButtonBox(QDialogButtonBox::Close, Qt::Horizontal, this);
-    if (pButtonBox)
-    {
-        /* Prepare close-button: */
-        connect(pButtonBox, &QDialogButtonBox::rejected, this, &VBoxAboutDlg::close);
-
-        /* Add button-box to the main-layout: */
-        if (m_pMainLayout)
-            m_pMainLayout->addWidget(pButtonBox);
-    }
+    connect(pButtonBox, &QDialogButtonBox::rejected, this, &VBoxAboutDlg::close);
+    m_pMainLayout->addWidget(pButtonBox);
 }

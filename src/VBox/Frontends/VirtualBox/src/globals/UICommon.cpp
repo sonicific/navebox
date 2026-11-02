@@ -46,6 +46,7 @@
 
 /* GUI includes: */
 #include "UICommon.h"
+#include "UIAppearance.h"
 #include "UIConverter.h"
 #include "UIDesktopWidgetWatchdog.h"
 #include "UIGlobalSession.h"
@@ -659,6 +660,8 @@ void UICommon::loadColorTheme(bool fAnyway /* = false */)
     }
 
 #endif /* Linux, BSD, Solaris */
+
+    qApp->setStyleSheet(UIAppearance::styleSheet(qApp->palette()));
 
     /* Notifiy listeners ater all: */
     emit sigThemeChange();

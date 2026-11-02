@@ -32,6 +32,7 @@
 #include <QToolTip>
 
 /* GUI includes: */
+#include "UIBranding.h"
 #include "UIActionPool.h"
 #include "UIActionPoolManager.h"
 #include "UIActionPoolRuntime.h"
@@ -456,7 +457,7 @@ protected:
     virtual void retranslateUi() RT_OVERRIDE
     {
 #ifdef VBOX_WS_MAC
-        setName(QApplication::translate("UIActionPool", "&VirtualBox"));
+        setName(QStringLiteral("&") + UIBranding::name());
 #else
         setName(QApplication::translate("UIActionPool", "&File"));
 #endif
@@ -1092,7 +1093,7 @@ protected:
     /** Handles translation event. */
     virtual void retranslateUi() RT_OVERRIDE
     {
-        setName(QApplication::translate("UIActionPool", "&About VirtualBox..."));
+        setName(QApplication::translate("UIActionPool", "&About"));
         setStatusTip(QApplication::translate("UIActionPool", "Display a window with product information"));
     }
 };
@@ -3851,14 +3852,15 @@ void UIActionPool::updateMenuHelp()
 
 #ifndef VBOX_WS_MAC
     /* Separator? */
-    if (fSeparator)
+    if (fSeparator && type() != UIType_ManagerUI)
     {
         pMenu->addSeparator();
         fSeparator = false;
     }
 
-    /* 'About' action: */
-    fSeparator = addAction(pMenu, action(UIActionIndex_Simple_About)) || fSeparator;
+    /* Runtime popup menus retain access when no menu bar is available. */
+    if (type() != UIType_ManagerUI)
+        fSeparator = addAction(pMenu, action(UIActionIndex_Simple_About)) || fSeparator;
 #endif
 
     /* Remove if fSeparator is used: */

@@ -42,6 +42,7 @@
 #include "UIIconPool.h"
 #include "UITranslationEventListener.h"
 #include "UIHomePane.h"
+#include "UIBranding.h"
 
 /* Other VBox includes: */
 #include "iprt/assert.h"
@@ -85,10 +86,10 @@ void UIHomePane::sltRetranslateUI()
 {
     /* Translate greetings text: */
     if (m_pLabelGreetings)
-        m_pLabelGreetings->setText(tr("<h3>Get started with VirtualBox</h3>"
-                                      "<p><a href=#configure#>Configure VirtualBox Manager to work with your computer</a></p>"
+        m_pLabelGreetings->setText(tr("<h3>Navebox</h3><p>Command Your Virtual World</p>"
+                                      "<p><a href=#configure#>Configure Navebox to work with your computer</a></p>"
                                       "<p><a href=#create#>Create a new virtual machine (VM)</a></p>"
-                                      "<p><a href=#open#>Open a saved VirtualBox VM</a></p>"
+                                      "<p><a href=#open#>Open a saved virtual machine</a></p>"
                                       "<p><a href=#import#>Import a VM from open virtualization or cloud formats</a></p>"
                                       "<p>Refer to the "
                                       "<a href=https://docs.oracle.com/en/virtualization/virtualbox/index.html>"
@@ -101,11 +102,11 @@ void UIHomePane::sltRetranslateUI()
     /* Translate experience mode stuff: */
     if (m_pLabelMode)
         m_pLabelMode->setText(tr("<h3>Please choose Experience Mode!</h3>"
-                                 "By default, the VirtualBox GUI is hiding some options, tools and wizards. "
+                                 "By default, Navebox is hiding some options, tools and wizards. "
                                  "<p>The <b>Basic Mode</b> is intended for those users who are not interested in advanced "
                                  "functionality and prefer a simpler, cleaner interface.</p>"
                                  "<p>The <b>Expert Mode</b> is intended for experienced users who wish to utilize all "
-                                 "VirtualBox functionality.</p>"
+                                 "Navebox functionality.</p>"
                                  "<p>You can choose whether you are a beginner or experienced user by selecting required "
                                  "option at the right. This choice can always be changed in Global Preferences or Machine "
                                  "Settings windows.</p>"));
@@ -155,7 +156,7 @@ void UIHomePane::sltHandleButtonClicked(QAbstractButton *pButton)
 void UIHomePane::prepare()
 {
     /* Prepare default welcome icon: */
-    m_icon = UIIconPool::iconSet(":/tools_banner_global_200px.png");
+    m_icon = UIBranding::icon();
 
     /* Prepare main layout: */
     QGridLayout *pMainLayout = new QGridLayout(this);

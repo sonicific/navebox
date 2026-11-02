@@ -47,6 +47,7 @@
 #endif
 
 /* GUI includes: */
+#include "UIBranding.h"
 #include "QIDialogButtonBox.h"
 #include "QIFileDialog.h"
 #include "QILineEdit.h"
@@ -650,8 +651,7 @@ bool UIVirtualBoxManager::eventFilter(QObject *pObject, QEvent *pEvent)
 void UIVirtualBoxManager::sltRetranslateUI()
 {
     /* Set window title: */
-    QString strTitle(VBOX_PRODUCT);
-    strTitle += " " + tr("Manager", "Note: main window title which is prepended by the product name.");
+    QString strTitle = UIBranding::name();
 #ifdef VBOX_BLEEDING_EDGE
     strTitle += QString(" EXPERIMENTAL build ")
              +  QString(RTBldCfgVersion())
@@ -2480,16 +2480,7 @@ void UIVirtualBoxManager::prepareCloudMachineManager()
 
 void UIVirtualBoxManager::prepareIcon()
 {
-    /* Prepare application icon.
-     * On Win host it's built-in to the executable.
-     * On Mac OS X the icon referenced in info.plist is used.
-     * On X11 we will provide as much icons as we can. */
-#if !defined(VBOX_WS_WIN) && !defined(VBOX_WS_MAC)
-    QIcon icon(":/VirtualBox.svg");
-    icon.addFile(":/VirtualBox_48px.png");
-    icon.addFile(":/VirtualBox_64px.png");
-    setWindowIcon(icon);
-#endif /* !VBOX_WS_WIN && !VBOX_WS_MAC */
+    setWindowIcon(UIBranding::icon());
 }
 
 void UIVirtualBoxManager::prepareMenuBar()
@@ -2532,6 +2523,16 @@ void UIVirtualBoxManager::prepareMenuBar()
 #endif
         menuBar()->addMenu(pMenu);
     }
+#ifndef VBOX_WS_MAC
+    /* Keep product information directly accessible next to Help. */
+    if (actionPool()->isAllowedInMenuHelp(UIExtraDataMetaDefs::MenuHelpActionType_About))
+    {
+        UIAction *pAbout = actionPool()->action(UIActionIndex_Simple_About);
+        /* A menu-bar action with an icon is rendered without its text on Windows. */
+        pAbout->setIcon(QIcon());
+        menuBar()->addAction(pAbout);
+    }
+#endif
 
     /* Setup menu-bar policy: */
     menuBar()->setContextMenuPolicy(Qt::CustomContextMenu);

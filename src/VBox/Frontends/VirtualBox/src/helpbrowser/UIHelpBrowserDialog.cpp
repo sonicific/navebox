@@ -32,6 +32,7 @@
 #include <QStatusBar>
 
 /* GUI includes: */
+#include "UIBranding.h"
 #include "UICommon.h"
 #include "UIDesktopWidgetWatchdog.h"
 #include "UIExtraDataManager.h"
@@ -87,7 +88,7 @@ void UIHelpBrowserDialog::showHelpForKeyword(const QString &strKeyword)
 
 void UIHelpBrowserDialog::sltRetranslateUI()
 {
-    setWindowTitle(UIHelpBrowserWidget::tr("%1 User Guide", "[Product Name] User Guide").arg(VBOX_PRODUCT));
+    setWindowTitle(UIHelpBrowserWidget::tr("%1 User Guide", "[Product Name] User Guide").arg(UIBranding::name()));
 }
 
 bool UIHelpBrowserDialog::event(QEvent *pEvent)

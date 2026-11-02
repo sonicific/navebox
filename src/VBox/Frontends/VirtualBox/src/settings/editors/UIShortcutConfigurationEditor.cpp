@@ -831,7 +831,7 @@ QString UIShortcutConfigurationEditor::tabNameRuntime() const
 
 void UIShortcutConfigurationEditor::sltRetranslateUI()
 {
-    m_pTabWidget->setTabText(TableIndex_Manager, tr("&VirtualBox Manager"));
+    m_pTabWidget->setTabText(TableIndex_Manager, tr("&Navebox"));
     m_pTabWidget->setTabText(TableIndex_Runtime, tr("Virtual &Machine"));
     const QString strTableTip = tr("Configurable shortcuts");
     m_pTableManager->setWhatsThis(strTableTip);
