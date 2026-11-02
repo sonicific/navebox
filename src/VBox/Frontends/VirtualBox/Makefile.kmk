@@ -1114,6 +1114,7 @@ VirtualBox_SOURCES = \
 	src/manager/UIGlobalToolsWidget.cpp \
 	src/manager/UIHomePane.cpp \
 	src/manager/UIMachineToolsWidget.cpp \
+	src/manager/UIManagerStyle.cpp \
 	src/manager/UIProgressTaskReadCloudMachineList.cpp \
 	src/manager/UITaskCloudGetSettingsForm.cpp \
 	src/manager/UIToolPane.cpp \

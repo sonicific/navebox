@@ -29,6 +29,9 @@
       </li>
     </ul>
     <p>When you start <ph conkeyref="vbox-conkeyref-phrases/product-name"/>, the <ph conkeyref="vbox-conkeyref-phrases/vbox-mgr"/> interface is shown. See <xref href="configuring-virtualbox.dita"/>. </p>
+    <p>The main toolbar, machine selection, and rounded details cards use
+      the application color theme. Selected machines use the theme's highlight
+      and matching text colors in both light and dark modes.</p>
   </body>
   
 </topic>

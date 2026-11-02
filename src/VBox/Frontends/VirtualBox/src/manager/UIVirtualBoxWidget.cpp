@@ -41,6 +41,7 @@
 #include "UIGlobalToolsWidget.h"
 #include "UIIconPool.h"
 #include "UIMachineToolsWidget.h"
+#include "UIManagerStyle.h"
 #include "UINotificationCenter.h"
 #include "UIToolPane.h"
 #include "UIVirtualBoxEventHandler.h"
@@ -329,6 +330,12 @@ void UIVirtualBoxWidget::sltUpdateToolbar()
     updateToolbar();
 }
 
+void UIVirtualBoxWidget::sltUpdateToolbarStyle()
+{
+    if (m_pToolBar)
+        m_pToolBar->setStyleSheet(UIManagerStyle::toolBarStyleSheet());
+}
+
 void UIVirtualBoxWidget::prepare()
 {
     /* Prepare everything: */
@@ -367,6 +374,8 @@ void UIVirtualBoxWidget::prepareWidgets()
             m_pToolBar->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
             m_pToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
             m_pToolBar->setUseTextLabels(true);
+            m_pToolBar->setObjectName("managerToolBar");
+            sltUpdateToolbarStyle();
 
             /* Check whether we should show Dev Preview tag: */
             bool fShowDevPreviewTag = false;
@@ -411,6 +420,8 @@ void UIVirtualBoxWidget::prepareConnections()
     /* UICommon connections: */
     connect(&uiCommon(), &UICommon::sigAskToCommitData,
             this, &UIVirtualBoxWidget::sltHandleCommitData);
+    connect(&uiCommon(), &UICommon::sigThemeChange,
+            this, &UIVirtualBoxWidget::sltUpdateToolbarStyle);
 
     /* Global COM event handlers: */
     connect(gVBoxEvents, &UIVirtualBoxEventHandler::sigMachineStateChange,

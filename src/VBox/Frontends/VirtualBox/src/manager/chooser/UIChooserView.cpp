@@ -89,10 +89,10 @@ public:
     /** Returns the number of children. */
     virtual int childCount() const RT_OVERRIDE
     {
-        /* Sanity check: */
-        AssertPtrReturn(view(), 0);
-        AssertPtrReturn(view()->model(), 0);
-        AssertPtrReturn(view()->model()->root(), 0);
+        /* Accessibility queries can arrive before the root is prepared or after
+         * it has been removed during cleanup.  The view has no children then. */
+        if (!view() || !view()->model() || !view()->model()->root())
+            return 0;
 
         /* Return the number of model's root children: */
         return view()->model()->root()->items().size();
@@ -101,8 +101,11 @@ public:
     /** Returns the child with the passed @a iIndex. */
     virtual QAccessibleInterface *child(int iIndex) const RT_OVERRIDE
     {
+        /* An accessibility client's index can become stale during cleanup. */
+        if (iIndex < 0 || iIndex >= childCount())
+            return 0;
+
         /* Sanity check: */
-        AssertReturn(iIndex >= 0 && iIndex < childCount(), 0);
         AssertPtrReturn(view(), 0);
         AssertPtrReturn(view()->model(), 0);
         AssertPtrReturn(view()->model()->root(), 0);

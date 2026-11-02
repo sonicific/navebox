@@ -40,7 +40,7 @@
 #include "UIChooserNodeGroup.h"
 #include "UIChooserNodeMachine.h"
 #include "UIIconPool.h"
-#include "UIImageTools.h"
+#include "UIManagerStyle.h"
 #include "UITranslationEventListener.h"
 #include "UIVirtualBoxManager.h"
 #include "UIVirtualMachineItemCloud.h"
@@ -49,12 +49,6 @@
 
 UIChooserItemMachine::UIChooserItemMachine(UIChooserItem *pParent, UIChooserNodeMachine *pNode)
     : UIChooserItem(pParent, pNode)
-    , m_iDefaultLightnessStart(0)
-    , m_iDefaultLightnessFinal(0)
-    , m_iHoverLightnessStart(0)
-    , m_iHoverLightnessFinal(0)
-    , m_iHighlightLightnessStart(0)
-    , m_iHighlightLightnessFinal(0)
     , m_iFirstRowMaximumWidth(0)
     , m_iMinimumNameWidth(0)
     , m_iMaximumNameWidth(0)
@@ -535,30 +529,6 @@ void UIChooserItemMachine::sltHandleWindowRemapped()
 
 void UIChooserItemMachine::prepare()
 {
-    /* Color tones: */
-#if defined(VBOX_WS_MAC)
-    m_iDefaultLightnessStart = 120;
-    m_iDefaultLightnessFinal = 110;
-    m_iHoverLightnessStart = 125;
-    m_iHoverLightnessFinal = 115;
-    m_iHighlightLightnessStart = 115;
-    m_iHighlightLightnessFinal = 105;
-#elif defined(VBOX_WS_WIN)
-    m_iDefaultLightnessStart = 120;
-    m_iDefaultLightnessFinal = 110;
-    m_iHoverLightnessStart = 220;
-    m_iHoverLightnessFinal = 210;
-    m_iHighlightLightnessStart = 190;
-    m_iHighlightLightnessFinal = 180;
-#else /* !VBOX_WS_MAC && !VBOX_WS_WIN */
-    m_iDefaultLightnessStart = 110;
-    m_iDefaultLightnessFinal = 100;
-    m_iHoverLightnessStart = 125;
-    m_iHoverLightnessFinal = 115;
-    m_iHighlightLightnessStart = 110;
-    m_iHighlightLightnessFinal = 100;
-#endif /* !VBOX_WS_MAC && !VBOX_WS_WIN */
-
     /* Fonts: */
     m_nameFont = font();
     m_nameFont.setWeight(QFont::Bold);
@@ -897,88 +867,12 @@ void UIChooserItemMachine::paintBackground(QPainter *pPainter, const QRect &rect
     /* Prepare color: */
     const QPalette pal = QApplication::palette();
 
-    /* Selected-item background: */
-    if (model()->selectedItems().contains(this))
-    {
-        /* Prepare color: */
-        QColor backgroundColor = pal.color(QPalette::Active, QPalette::Highlight);
-        /* Draw gradient: */
-        QLinearGradient bgGrad(rectangle.topLeft(), rectangle.bottomLeft());
-        bgGrad.setColorAt(0, backgroundColor.lighter(m_iHighlightLightnessStart));
-        bgGrad.setColorAt(1, backgroundColor.lighter(m_iHighlightLightnessFinal));
-        pPainter->fillRect(rectangle, bgGrad);
-
-        if (isHovered())
-        {
-            /* Prepare color: */
-            QColor animationColor1 = QColor(Qt::white);
-            QColor animationColor2 = QColor(Qt::white);
-#ifdef VBOX_WS_MAC
-            animationColor1.setAlpha(90);
-#else
-            animationColor1.setAlpha(30);
-#endif
-            animationColor2.setAlpha(0);
-            /* Draw hovered-item animated gradient: */
-            QRect animatedRect = rectangle;
-            animatedRect.setWidth(animatedRect.height());
-            const int iLength = 2 * animatedRect.width() + rectangle.width();
-            const int iShift = - animatedRect.width() + iLength * animatedValue() / 100;
-            animatedRect.moveLeft(iShift);
-            QLinearGradient bgAnimatedGrad(animatedRect.topLeft(), animatedRect.bottomRight());
-            bgAnimatedGrad.setColorAt(0,   animationColor2);
-            bgAnimatedGrad.setColorAt(0.1, animationColor2);
-            bgAnimatedGrad.setColorAt(0.5, animationColor1);
-            bgAnimatedGrad.setColorAt(0.9, animationColor2);
-            bgAnimatedGrad.setColorAt(1,   animationColor2);
-            pPainter->fillRect(rectangle, bgAnimatedGrad);
-        }
-    }
-    /* Hovered-item background: */
-    else if (isHovered())
-    {
-        /* Prepare color: */
-        QColor backgroundColor = pal.color(QPalette::Active, QPalette::Highlight);
-        /* Draw gradient: */
-        QLinearGradient bgGrad(rectangle.topLeft(), rectangle.bottomLeft());
-        bgGrad.setColorAt(0, backgroundColor.lighter(m_iHoverLightnessStart));
-        bgGrad.setColorAt(1, backgroundColor.lighter(m_iHoverLightnessFinal));
-        pPainter->fillRect(rectangle, bgGrad);
-
-        /* Prepare color: */
-        QColor animationColor1 = QColor(Qt::white);
-        QColor animationColor2 = QColor(Qt::white);
-#ifdef VBOX_WS_MAC
-        animationColor1.setAlpha(120);
-#else
-        animationColor1.setAlpha(50);
-#endif
-        animationColor2.setAlpha(0);
-        /* Draw hovered-item animated gradient: */
-        QRect animatedRect = rectangle;
-        animatedRect.setWidth(animatedRect.height());
-        const int iLength = 2 * animatedRect.width() + rectangle.width();
-        const int iShift = - animatedRect.width() + iLength * animatedValue() / 100;
-        animatedRect.moveLeft(iShift);
-        QLinearGradient bgAnimatedGrad(animatedRect.topLeft(), animatedRect.bottomRight());
-        bgAnimatedGrad.setColorAt(0,   animationColor2);
-        bgAnimatedGrad.setColorAt(0.1, animationColor2);
-        bgAnimatedGrad.setColorAt(0.5, animationColor1);
-        bgAnimatedGrad.setColorAt(0.9, animationColor2);
-        bgAnimatedGrad.setColorAt(1,   animationColor2);
-        pPainter->fillRect(rectangle, bgAnimatedGrad);
-    }
-    /* Default background: */
-    else
-    {
-        /* Prepare color: */
-        QColor backgroundColor = pal.color(QPalette::Active, QPalette::Window);
-        /* Draw gradient: */
-        QLinearGradient bgGrad(rectangle.topLeft(), rectangle.bottomLeft());
-        bgGrad.setColorAt(0, backgroundColor.lighter(m_iDefaultLightnessStart));
-        bgGrad.setColorAt(1, backgroundColor.lighter(m_iDefaultLightnessFinal));
-        pPainter->fillRect(rectangle, bgGrad);
-    }
+    /* Inset the selection surface without changing the item's hit area. */
+    pPainter->fillRect(rectangle, pal.color(QPalette::Active, QPalette::Window));
+    pPainter->setRenderHint(QPainter::Antialiasing);
+    pPainter->setPen(Qt::NoPen);
+    pPainter->setBrush(UIManagerStyle::machineBackgroundColor(pal, model()->selectedItems().contains(this), animatedValue()));
+    pPainter->drawRoundedRect(QRectF(rectangle).adjusted(4, 3, -4, -3), 6, 6);
 
     /* Paint drag token UP? */
     if (dragTokenPlace() != UIChooserItemDragToken_Off)
@@ -1038,26 +932,19 @@ void UIChooserItemMachine::paintFrame(QPainter *pPainter, const QRect &rectangle
 
     /* Prepare color: */
     const QPalette pal = QApplication::palette();
-    QColor strokeColor;
-
-    /* Selected-item frame: */
-    if (model()->selectedItems().contains(this))
-        strokeColor = pal.color(QPalette::Active, QPalette::Highlight).lighter(m_iHighlightLightnessStart - 40);
-    /* Hovered-item frame: */
-    else if (isHovered())
-        strokeColor = pal.color(QPalette::Active, QPalette::Highlight).lighter(m_iHoverLightnessStart - 40);
+    const QColor strokeColor = model()->selectedItems().contains(this)
+                             ? pal.color(QPalette::Active, QPalette::Highlight).darker(115)
+                             : UIManagerStyle::borderColor(pal);
 
     /* Create/assign pen: */
     QPen pen(strokeColor);
-    pen.setWidth(0);
+    pen.setWidthF(1);
     pPainter->setPen(pen);
+    pPainter->setBrush(Qt::NoBrush);
+    pPainter->setRenderHint(QPainter::Antialiasing);
 
-    /* Draw borders: */
-    if (dragTokenPlace() != UIChooserItemDragToken_Up)
-        pPainter->drawLine(rectangle.topLeft(),    rectangle.topRight()    + QPoint(1, 0));
-    if (dragTokenPlace() != UIChooserItemDragToken_Down)
-        pPainter->drawLine(rectangle.bottomLeft(), rectangle.bottomRight() + QPoint(1, 0));
-    pPainter->drawLine(rectangle.topLeft(),    rectangle.bottomLeft());
+    /* Keep the outline inside the selection surface. */
+    pPainter->drawRoundedRect(QRectF(rectangle).adjusted(4.5, 3.5, -4.5, -3.5), 6, 6);
 
     /* Restore painter: */
     pPainter->restore();
@@ -1072,22 +959,10 @@ void UIChooserItemMachine::paintMachineInfo(QPainter *pPainter, const QRect &rec
     const int iMinorSpacing = data(MachineItemData_MinorSpacing).toInt();
     const int iMachineItemTextSpacing = data(MachineItemData_TextSpacing).toInt();
 
-    /* Selected or hovered item foreground: */
-    if (model()->selectedItems().contains(this) || isHovered())
-    {
-        /* Prepare palette: */
-        const QPalette pal = QApplication::palette();
-
-        /* Get background color: */
-        const QColor highlight = pal.color(QPalette::Active, QPalette::Highlight);
-        const QColor background = model()->selectedItems().contains(this)
-                                ? highlight.lighter(m_iHighlightLightnessStart)
-                                : highlight.lighter(m_iHoverLightnessStart);
-
-        /* Gather foreground color for background one: */
-        const QColor foreground = suitableForegroundColor(pal, background);
-        pPainter->setPen(foreground);
-    }
+    /* Use the theme's matching text role for the unmodified selection color. */
+    const QPalette pal = QApplication::palette();
+    pPainter->setPen(pal.color(QPalette::Active, model()->selectedItems().contains(this)
+                                              ? QPalette::HighlightedText : QPalette::Text));
 
     /* Calculate indents: */
     int iLeftColumnIndent = iMarginHL;

@@ -94,6 +94,17 @@ Rules for adding a changelog entry to make them look more uniform:
     <itemizedlist>
 
       <listitem>
+        <para>GUI: Refreshed the Manager toolbar, machine selection and
+          details cards with flatter surfaces, rounded corners and improved
+          spacing, using the application theme colors</para>
+      </listitem>
+
+      <listitem>
+        <para>GUI: Handled accessibility queries while the Manager machine
+          list is being initialized or closed</para>
+      </listitem>
+
+      <listitem>
         <para>NAT: Fixed ICMP traceroute missing intermediate hops when using
           NAT networking</para>
       </listitem>

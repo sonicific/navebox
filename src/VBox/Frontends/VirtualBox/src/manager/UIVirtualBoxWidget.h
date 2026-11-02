@@ -250,6 +250,8 @@ private slots:
       * @{ */
         /** Updates tool-bar. */
         void sltUpdateToolbar();
+        /** Updates the main toolbar's appearance after a theme change. */
+        void sltUpdateToolbarStyle();
     /** @} */
 
 private:

@@ -31,6 +31,7 @@
 #include <QClipboard>
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsView>
+#include <QPainterPath>
 #include <QPropertyAnimation>
 #include <QSignalTransition>
 #include <QStateMachine>
@@ -58,6 +59,7 @@
 #include "UIGraphicsTextPane.h"
 #include "UIIconPool.h"
 #include "UIMachineAttributeSetter.h"
+#include "UIManagerStyle.h"
 #include "UIMediumTools.h"
 #include "UINameAndSystemEditor.h"
 #include "UINetworkAttachmentEditor.h"
@@ -100,8 +102,6 @@ UIDetailsElement::UIDetailsElement(UIDetailsSet *pParent, DetailsElementType enm
     : UIDetailsItem(pParent)
     , m_pSet(pParent)
     , m_enmType(enmType)
-    , m_iDefaultDarknessStart(100)
-    , m_iDefaultDarknessFinal(105)
     , m_fHovered(false)
     , m_fNameHovered(false)
     , m_pHoveringMachine(0)
@@ -379,7 +379,7 @@ QVariant UIDetailsElement::data(int iKey) const
     switch (iKey)
     {
         /* Hints: */
-        case ElementData_Margin: return QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) / 4;
+        case ElementData_Margin: return QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) / 2;
         case ElementData_Spacing: return QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) / 2;
         /* Default: */
         default: break;
@@ -1478,31 +1478,29 @@ void UIDetailsElement::paintBackground(QPainter *pPainter, const QStyleOptionGra
                          ? QRect(optionRect.topLeft(), QSize(optionRect.width(), iHeadHeight + m_iAdditionalHeight))
                          : optionRect;
 
-    /* Acquire background color: */
-    QColor backgroundColor = QApplication::palette().color(QPalette::Active, QPalette::Window);
-
-    /* Paint default background: */
-    QLinearGradient gradientDefault(fullRect.topLeft(), fullRect.bottomRight());
-    gradientDefault.setColorAt(0, backgroundColor.darker(m_iDefaultDarknessStart));
-    gradientDefault.setColorAt(1, backgroundColor.darker(m_iDefaultDarknessFinal));
-    pPainter->fillRect(fullRect, gradientDefault);
+    /* Draw a flat card, keeping its outline within the item's bounds. */
+    const QPalette pal = QApplication::palette();
+    const QRectF cardRect = QRectF(fullRect).adjusted(0.5, 0.5, -0.5, -0.5);
+    QPainterPath cardPath;
+    cardPath.addRoundedRect(cardRect, 6, 6);
+    pPainter->setRenderHint(QPainter::Antialiasing);
+    pPainter->setPen(QPen(UIManagerStyle::borderColor(pal), 1));
+    pPainter->setBrush(pal.color(QPalette::Active, QPalette::Base));
+    pPainter->drawPath(cardPath);
+    pPainter->setClipPath(cardPath, Qt::IntersectClip);
 
     /* If element is hovered: */
     if (animatedValue())
     {
-        /* Acquire header color: */
-        QColor headColor = backgroundColor.lighter(130);
-
-        /* Paint hovered background: */
-        QColor hcTone1 = headColor;
-        QColor hcTone2 = headColor;
-        hcTone1.setAlpha(255 * animatedValue() / 100);
-        hcTone2.setAlpha(0);
-        QLinearGradient gradientHovered(headRect.topLeft(), headRect.bottomLeft());
-        gradientHovered.setColorAt(0, hcTone1);
-        gradientHovered.setColorAt(1, hcTone2);
-        pPainter->fillRect(headRect, gradientHovered);
+        /* Fade the palette accent into the header without a moving gradient. */
+        QColor headColor = pal.color(QPalette::Active, QPalette::Highlight);
+        headColor.setAlpha(20 * qBound(0, animatedValue(), 100) / 100);
+        pPainter->fillRect(headRect, headColor);
     }
+
+    /* Separate an expanded header from its contents. */
+    if (fullRect.height() > iHeadHeight)
+        pPainter->drawLine(headRect.bottomLeft(), headRect.bottomRight());
 
     /* Restore painter: */
     pPainter->restore();
