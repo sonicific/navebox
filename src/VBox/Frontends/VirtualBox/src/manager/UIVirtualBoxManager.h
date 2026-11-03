@@ -48,6 +48,7 @@ class QMenu;
 class QIManagerDialog;
 class UIAction;
 class UIActionPool;
+class UIPhoneManager;
 class UINativeWizard;
 struct UIUnattendedInstallData;
 class UIVirtualBoxWidget;
@@ -218,6 +219,8 @@ private slots:
 
         /** Handles call to open new machine wizard. */
         void sltOpenNewMachineWizard();
+        /** Opens the Android phone manager independently of the selected VM. */
+        void sltOpenPhoneManager();
         /** Handles call to open new cloud machine wizard. */
         void sltOpenNewCloudMachineWizard();
         /** Handles call to open add machine dialog. */
@@ -526,6 +529,9 @@ private:
 
     /** Holds the central-widget instance. */
     UIVirtualBoxWidget *m_pWidget;
+
+    /** Holds the persistent Android phone dialog; closing it only hides it. */
+    UIPhoneManager *m_pPhoneManager;
 
     /** Holds the geometry save timer ID. */
     int  m_iGeometrySaveTimerId;

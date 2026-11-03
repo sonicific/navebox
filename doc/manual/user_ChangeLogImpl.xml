@@ -80,6 +80,12 @@ Rules for adding a changelog entry to make them look more uniform:
     <itemizedlist>
 
       <listitem>
+        <para>Navebox GUI: Added an Android Phones manager for creating private
+          Android SDK virtual devices, checking acceleration, starting and
+          stopping phones, monitoring boot completion, and installing APKs.</para>
+      </listitem>
+
+      <listitem>
         <para>Building the OSE Edition: Implemented a new configure.py script which
           unifies the ./configure (non-Windows) and configure.vbs (Windows) scripts
           Please adjust your building process accordingly, as the compatibility wrapper

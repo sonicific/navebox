@@ -35,6 +35,9 @@ been built and tested.
 - 🧭 Navebox desktop identity, logo, icons and taskbar grouping.
 - 🖥️ Create, configure, start, pause and manage virtual machines through the
   familiar VirtualBox manager.
+- 📱 Create and manage Android virtual phones through **File > Android
+  Phones**, using a separately installed Android SDK. See the
+  [phone setup and validation guide](doc/navebox-phones.md).
 - 💾 Support for VirtualBox VM files and internal service/API compatibility.
 - 🎨 Light, dark and high-DPI-aware interface behavior.
 - 🌍 Existing VirtualBox translation and accessibility infrastructure.

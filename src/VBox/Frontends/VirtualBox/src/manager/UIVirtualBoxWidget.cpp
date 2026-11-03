@@ -516,6 +516,7 @@ void UIVirtualBoxWidget::updateToolbar()
         case UIToolType_Home:
         {
             m_pToolBar->addAction(actionPool()->action(UIActionIndexMN_M_Home_S_New));
+            m_pToolBar->addAction(actionPool()->action(UIActionIndexMN_M_File_S_AndroidPhones));
             m_pToolBar->addAction(actionPool()->action(UIActionIndexMN_M_Home_S_Add));
             m_pToolBar->addSeparator();
             m_pToolBar->addAction(actionPool()->action(UIActionIndex_M_Application_S_Preferences));

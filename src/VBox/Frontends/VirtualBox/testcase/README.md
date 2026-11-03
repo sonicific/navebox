@@ -39,3 +39,20 @@ screen-edge clamping. Run them with native Windows as well as scaled offscreen
 platforms. They are regression tests, not substitutes for native Windows
 UIAutomation, screen-reader, installer or hypervisor testing.
 See `doc/navebox-release.md` at the repository root for the release matrix.
+
+Build and run `tstNaveboxPhone` alongside `tstNaveboxGui` to exercise the
+Android phone SDK adapter and manager. It copies its own executable into a
+temporary mock SDK, runs actual asynchronous subprocesses, and verifies SDK
+validation, literal Unicode/metacharacter arguments, phone creation and boot
+state, scoped ADB commands, identity changes, failure handling and catalog
+containment. It never connects to an actual ADB server or touches user AVDs.
+On Windows, stage the test executable and the matching frontend/Qt runtime
+DLLs together in a separate test runtime directory if the host loader does
+not search `PATH` for private DLLs. The mock tools copy these local DLLs into
+their temporary SDK tool directories.
+Set `VBOX_GUI_TEST_SNAPSHOT_DIR` to export SDK setup and both phone-manager tabs.
+Set `VBOX_GUI_TEST_STYLE=Windows` and `VBOX_GUI_TEST_NO_APP_STYLE=1` to check
+phone-manager geometry without the shared application stylesheet. The default
+is Fusion with the shared stylesheet. These options affect only this test.
+See
+`doc/navebox-phones.md` for the separate real-Android qualification gate.

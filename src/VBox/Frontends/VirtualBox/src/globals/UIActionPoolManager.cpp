@@ -153,6 +153,31 @@ protected:
 };
 
 
+/** Opens Navebox's Android phone catalog. */
+class UIActionSimpleManagerAndroidPhones : public UIActionSimple
+{
+    Q_OBJECT;
+
+public:
+    /** Constructs the phone manager action. */
+    UIActionSimpleManagerAndroidPhones(UIActionPool *pParent)
+        : UIActionSimple(pParent, ":/machine_32px.png", ":/machine_16px.png")
+    {}
+
+protected:
+    /** Returns the stable shortcut settings identifier. */
+    virtual QString shortcutExtraDataID() const RT_OVERRIDE { return QString("AndroidPhones"); }
+    /** Handles live translation changes. */
+    virtual void retranslateUi() RT_OVERRIDE
+    {
+        setIconText(QApplication::translate("UIActionPool", "Phones"));
+        setName(QApplication::translate("UIActionPool", "&Android Phones..."));
+        setStatusTip(QApplication::translate("UIActionPool", "Create and manage Android virtual phones"));
+        setToolTip(simplifyText(text()));
+    }
+};
+
+
 /** Menu action extension, used as 'Global Tools' menu class. */
 class UIActionMenuManagerToolsGlobal : public UIActionMenu
 {
@@ -3790,6 +3815,7 @@ void UIActionPoolManager::preparePool()
     m_pool[UIActionIndexMN_M_File] = new UIActionMenuManagerFile(this);
     m_pool[UIActionIndexMN_M_File_S_ImportAppliance] = new UIActionSimpleManagerFileShowImportApplianceWizard(this);
     m_pool[UIActionIndexMN_M_File_S_ExportAppliance] = new UIActionSimpleManagerFileShowExportApplianceWizard(this);
+    m_pool[UIActionIndexMN_M_File_S_AndroidPhones] = new UIActionSimpleManagerAndroidPhones(this);
     m_pool[UIActionIndexMN_M_File_M_Tools] = new UIActionMenuManagerToolsGlobal(this);
     m_pool[UIActionIndexMN_M_File_M_Tools_T_HomeScreen] = new UIActionToggleManagerToolsGlobalShowHomeScreen(this);
     m_pool[UIActionIndexMN_M_File_M_Tools_T_MachineManager] = new UIActionToggleManagerToolsGlobalShowMachineManager(this);
@@ -4254,6 +4280,8 @@ void UIActionPoolManager::updateMenuFile()
     pMenu->clear();
 
     /* The Application / 'File' menu contents is very different depending on host type. */
+    pMenu->addAction(action(UIActionIndexMN_M_File_S_AndroidPhones));
+    pMenu->addSeparator();
 
 #ifdef VBOX_WS_MAC
 
@@ -4360,6 +4388,7 @@ void UIActionPoolManager::updateMenuHome()
     /* Populate 'Home' menu: */
     pMenu->addAction(action(UIActionIndexMN_M_Home_S_New));
     pMenu->addAction(action(UIActionIndexMN_M_Home_S_Add));
+    pMenu->addAction(action(UIActionIndexMN_M_File_S_AndroidPhones));
 
     /* Mark menu as valid: */
     m_invalidations.remove(UIActionIndexMN_M_Home);

@@ -340,6 +340,7 @@ VBOX_GUI_INC_DIRS += \
 	./src/manager/chooser \
 	./src/manager/details \
 	./src/manager/tools \
+	./src/phone \
 	./src/activity \
 	./src/activity/overview \
 	./src/activity/vmactivity
@@ -563,6 +564,8 @@ endif
 # Headers containing definitions of classes that use the Q_OBJECT macro.
 #
 VirtualBox_QT_MOCHDRS = \
+	src/phone/UIPhoneBackend.h \
+	src/phone/UIPhoneManager.h \
 	src/cloud/UICloudMachineManager.h \
 	src/cloud/consolemanager/UICloudConsoleDetailsWidget.h \
 	src/cloud/consolemanager/UICloudConsoleManager.h \
@@ -1103,6 +1106,8 @@ VBOX_GH_SOURCES := \
 #
 VirtualBox_SOURCES = \
 	src/main.cpp \
+	src/phone/UIPhoneBackend.cpp \
+	src/phone/UIPhoneManager.cpp \
 	src/cloud/UICloudMachineManager.cpp \
 	src/cloud/consolemanager/UICloudConsoleDetailsWidget.cpp \
 	src/cloud/consolemanager/UICloudConsoleManager.cpp \
@@ -2011,6 +2016,36 @@ ifdef VBOX_WITH_TESTCASES
   tstNaveboxGui_LDFLAGS.win = /SUBSYSTEM:console
  else
   tstNaveboxGui_LIBS += $(PATH_STAGE_DLL)/UICommon$(VBOX_SUFF_DLL)
+ endif
+
+#
+# Android phone SDK adapter and dialog tests use an isolated executable mock SDK.
+#
+PROGRAMS += tstNaveboxPhone
+tstNaveboxPhone_TEMPLATE = VBoxQtGuiExe
+tstNaveboxPhone_INST = $(INST_TESTCASE)
+tstNaveboxPhone_INCS = $(VBOX_GUI_INC_DIRS) $(UICommon_0_OUTDIR)/include
+tstNaveboxPhone_DEFS.win = VBOX_WS_WIN
+tstNaveboxPhone_DEFS.darwin = VBOX_WS_MAC
+tstNaveboxPhone_DEFS.linux = VBOX_WS_NIX
+tstNaveboxPhone_DEFS.freebsd = VBOX_WS_NIX
+tstNaveboxPhone_DEFS.solaris = VBOX_WS_NIX
+tstNaveboxPhone_QT_MOCHDRS = \
+	src/phone/UIPhoneBackend.h \
+	src/phone/UIPhoneManager.h
+tstNaveboxPhone_SOURCES = \
+	testcase/tstNaveboxPhone.cpp \
+	src/globals/UIAppearance.cpp \
+	src/phone/UIPhoneBackend.cpp \
+	src/phone/UIPhoneManager.cpp
+tstNaveboxPhone_QT_MODULES = Core Gui Widgets
+tstNaveboxPhone_CXXFLAGS.win = /permissive-
+tstNaveboxPhone_LIBS = $(LIB_RUNTIME)
+ ifeq ($(KBUILD_TARGET),win)
+tstNaveboxPhone_LIBS += $(PATH_STAGE_LIB)/UICommon$(VBOX_SUFF_LIB)
+tstNaveboxPhone_LDFLAGS.win = /SUBSYSTEM:console
+ else
+tstNaveboxPhone_LIBS += $(PATH_STAGE_DLL)/UICommon$(VBOX_SUFF_DLL)
  endif
 
  # Testcase for the darwin keyboard routines.
