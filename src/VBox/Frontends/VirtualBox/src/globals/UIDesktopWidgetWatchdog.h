@@ -149,8 +149,8 @@ public:
     static QRect getNormalized(const QRect &rectangle,
                                const QRegion &boundRegion,
                                bool fCanResize = true);
-    /** Aligns the center of @a pWidget with the center
-      * of @a pRelative, performing resize if allowed. */
+    /** Aligns the center of @a pWidget with the visible area of @a pRelative,
+      * or the available screen if NULL, performing resize if allowed. */
     void centerWidget(QWidget *pWidget,
                       QWidget *pRelative,
                       bool fCanResize = true) const;

@@ -1,25 +1,48 @@
 <!-- $Id$
-  Navebox desktop identity.
+  Navebox folded-ribbon desktop identity.
   Copyright (C) 2026 Oracle and/or its affiliates.
   SPDX-License-Identifier: GPL-3.0-only
 -->
 <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
   <title>Navebox</title>
   <defs>
-    <linearGradient id="navy" x1="0" y1="0" x2="1" y2="1">
-      <stop stop-color="#203b58"/><stop offset=".5" stop-color="#10243a"/><stop offset="1" stop-color="#081321"/>
+    <linearGradient id="plate" x1="0" y1="0" x2=".8" y2="1">
+      <stop stop-color="#ffffff"/><stop offset=".5" stop-color="#edf4ff"/>
+      <stop offset="1" stop-color="#cbdfff"/>
     </linearGradient>
-    <linearGradient id="silver" x1="0" y1="0" x2=".8" y2="1">
-      <stop stop-color="#fff"/><stop offset=".5" stop-color="#dce6ef"/><stop offset="1" stop-color="#91a5bc"/>
+    <radialGradient id="light" cx=".32" cy=".2" r=".9">
+      <stop stop-color="#ffffff" stop-opacity=".95"/><stop offset="1" stop-color="#e2edff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="left" x1=".2" y1="1" x2=".8" y2="0">
+      <stop stop-color="#00d8ef"/><stop offset=".35" stop-color="#0088ff"/>
+      <stop offset="1" stop-color="#003cae"/>
     </linearGradient>
-    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
-      <stop stop-color="#eaf6ff" stop-opacity=".65"/><stop offset="1" stop-color="#8ca9cb" stop-opacity=".05"/>
+    <linearGradient id="right" x1=".15" y1="0" x2=".9" y2="1">
+      <stop stop-color="#00e7ef"/><stop offset=".38" stop-color="#00a5ff"/>
+      <stop offset="1" stop-color="#0046c6"/>
+    </linearGradient>
+    <linearGradient id="ribbon" x1="0" y1=".05" x2=".85" y2="1">
+      <stop stop-color="#008cff"/><stop offset=".2" stop-color="#62b8ff"/>
+      <stop offset=".38" stop-color="#f8fbff"/><stop offset=".7" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#d4e5ff"/>
+    </linearGradient>
+    <linearGradient id="shadow" x1="0" y1="0" x2=".2" y2="1">
+      <stop stop-color="#173d7c" stop-opacity=".22"/><stop offset="1" stop-color="#173d7c" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="fold" x1="0" y1="1" x2="1" y2="0">
+      <stop stop-color="#0057cb" stop-opacity=".28"/><stop offset="1" stop-color="#ffffff" stop-opacity=".1"/>
     </linearGradient>
   </defs>
-  <rect x="12" y="12" width="232" height="232" rx="54" fill="url(#navy)"/>
-  <rect x="13" y="13" width="230" height="230" rx="53" fill="none" stroke="#8aa2bd" stroke-opacity=".35"/>
-  <path d="M62 191V65h30l72 80V65h30v126h-30l-72-80v80z" fill="url(#silver)"/>
-  <path d="M92 65l72 80v46l-72-80z" fill="url(#glass)"/>
-  <path d="M62 65h30l72 80" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="2"/>
-  <path d="M164 191h30" fill="none" stroke="#7b9fca" stroke-width="3"/>
+  <rect x="16" y="17" width="224" height="224" rx="59" fill="#61baff" fill-opacity=".6"/>
+  <rect x="16" y="14" width="224" height="224" rx="59" fill="url(#plate)" stroke="#b8d5f7" stroke-width="1.2"/>
+  <rect x="18" y="16" width="220" height="220" rx="57" fill="url(#light)" stroke="#ffffff" stroke-opacity=".9"/>
+  <path d="M68 116c10-7 18-2 27 7l76 76c12 12 27 11 36-1-3 24-29 31-49 11l-69-66z" fill="url(#shadow)"/>
+  <path d="M47 121v66c0 11 5 14 13 9l24-17c7-5 9-9 9-18v-48c-15-23-34-22-46 8z" fill="url(#left)" stroke="#00c9f5" stroke-width=".8"/>
+  <path d="M145 119V96c0-13 4-21 15-28l31-21c8-5 15 0 15 11v91c0 18-11 28-24 20z" fill="url(#right)" stroke="#04c7ef" stroke-width=".8"/>
+  <path d="M180 165c14 9 26-3 26-20v21c0 15-10 22-23 12l-38-35v-24z" fill="#003fae" fill-opacity=".3"/>
+  <path d="M47 121V99c0-31 29-54 52-31l78 78c10 10 20 21 29 13v13c0 30-24 38-44 18L79 107c-14-14-32-5-32 14z" fill="url(#ribbon)"/>
+  <path d="M48 117c2-18 20-24 33-11l82 83c18 18 41 13 43-12" fill="none" stroke="#ffffff" stroke-opacity=".82" stroke-width="1.1"/>
+  <path d="M48 99c0-30 28-51 50-30l80 79" fill="none" stroke="#ffffff" stroke-opacity=".72" stroke-width=".8"/>
+  <path d="M93 119l69 71c15 16 33 13 41 1-11 10-26 8-39-6z" fill="url(#fold)"/>
+  <path d="M147 95c0-11 5-19 15-25l30-21" fill="none" stroke="#5dfbff" stroke-opacity=".8" stroke-width=".9"/>
 </svg>

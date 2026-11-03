@@ -32,6 +32,10 @@ the image-format plugins available through the normal deployment layout or
 
 The checks cover runtime-state icon semantics, external icon fallback, live
 translation and palette updates, build-info copying, dialog/accessibility
-lifetime and control geometry. They are regression tests, not substitutes for
-native Windows UIAutomation, screen-reader, installer or hypervisor testing.
+lifetime, control geometry, owned/ownerless modal centering and startup-error
+presentation/cleanup. Centering checks compare the actual decorated window
+frame with its owner's visible frame area or the available screen, allowing
+screen-edge clamping. Run them with native Windows as well as scaled offscreen
+platforms. They are regression tests, not substitutes for native Windows
+UIAutomation, screen-reader, installer or hypervisor testing.
 See `doc/navebox-release.md` at the repository root for the release matrix.

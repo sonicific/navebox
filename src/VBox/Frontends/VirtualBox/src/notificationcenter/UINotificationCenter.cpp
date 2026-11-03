@@ -33,6 +33,7 @@
 #include <QPaintEvent>
 #include <QPropertyAnimation>
 #include <QScrollArea>
+#include <QShowEvent>
 #include <QSignalTransition>
 #include <QState>
 #include <QStateMachine>
@@ -43,16 +44,52 @@
 
 /* GUI includes: */
 #include "QIToolButton.h"
+#include "UIBranding.h"
+#include "UIDesktopWidgetWatchdog.h"
 #include "UIExtraDataManager.h"
 #include "UIIconPool.h"
 #include "UINotificationCenter.h"
 #include "UINotificationObjectItem.h"
 #include "UINotificationModel.h"
 #include "UITranslationEventListener.h"
-#include "VBoxAboutDlg.h"
 
 /* Other VBox includes: */
 #include "iprt/assert.h"
+
+
+/** Neutral owner for notifications shown before the Manager or VM window exists. */
+class UIStartupNotificationWindow : public QWidget
+{
+public:
+    /** Creates a startup-error surface without product-information content. */
+    UIStartupNotificationWindow()
+        : QWidget(0, Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint)
+        , m_fCentered(false)
+    {
+        setObjectName("startupNotificationWindow");
+        setWindowTitle(UIBranding::name());
+        setWindowIcon(UIBranding::icon());
+        resize(560, 280);
+    }
+
+protected:
+    /** Centers the first presentation, keeping subsequent user positioning intact. */
+    virtual void showEvent(QShowEvent *pEvent) RT_OVERRIDE
+    {
+        QWidget::showEvent(pEvent);
+        if (!m_fCentered)
+        {
+            m_fCentered = true;
+            /* Bound the initial size before centering, including on high-DPI small screens. */
+            resize(size().boundedTo(gpDesktop->availableGeometry(this).size() - QSize(48, 72)));
+            gpDesktop->centerWidget(this, 0);
+        }
+    }
+
+private:
+    /** Whether initial positioning has been applied. */
+    bool m_fCentered;
+};
 
 
 /** QScrollArea extension to make notification scroll-area more versatile. */
@@ -144,7 +181,7 @@ UINotificationCenter *UINotificationCenter::s_pInstance = 0;
 void UINotificationCenter::createTemporary()
 {
     AssertReturnVoid(!s_pFallbackParent);
-    s_pFallbackParent = new VBoxAboutDlg;
+    s_pFallbackParent = new UIStartupNotificationWindow;
 
     AssertReturnVoid(!s_pInstance);
     s_pInstance = new UINotificationCenter(s_pFallbackParent);
@@ -1345,7 +1382,8 @@ void UINotificationCenter::adjustGeometry()
     else
     {
         /* Move and resize notification-center finally: */
-        move(iParentWidth / 2 - iActualWidth / 2, - iActualHeight + (double)animatedValue() / 100 * iActualHeight);
+        const int iTop = pParent == s_pFallbackParent ? qMax(0, (iParentHeight - iActualHeight) / 2) : 0;
+        move(iParentWidth / 2 - iActualWidth / 2, iTop - iActualHeight + (double)animatedValue() / 100 * iActualHeight);
         resize(iActualWidth, iActualHeight);
     }
 }

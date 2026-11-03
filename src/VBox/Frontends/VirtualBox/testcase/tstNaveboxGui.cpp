@@ -43,14 +43,20 @@
 #include <QStyleOptionSpinBox>
 #include <QTabWidget>
 #include <QTemporaryDir>
+#include <QTimer>
 #include <QTranslator>
+#include <QVBoxLayout>
 
 /* GUI includes: */
 #include "UIAppearance.h"
+#include "QIDialog.h"
+#include "QIMainDialog.h"
 #include "UIBranding.h"
 #include "UIConverter.h"
 #include "UIDesktopWidgetWatchdog.h"
 #include "UIIconPool.h"
+#include "UINotificationCenter.h"
+#include "UINotificationMessage.h"
 #include "UITranslationEventListener.h"
 #include "VBoxAboutDlg.h"
 
@@ -291,6 +297,111 @@ static void tstControls()
     }
 }
 
+/** Checks frame centering whenever the requested position fits the available screen. */
+static void tstCheckCentered(QWidget &widget, QWidget *pParent)
+{
+    const QRect available = gpDesktop->availableGeometry(pParent);
+    const QRect visibleParent = pParent ? pParent->frameGeometry().intersected(available) : QRect();
+    const QPoint target = visibleParent.isEmpty() ? available.center() : visibleParent.center();
+    QRect expected = widget.frameGeometry();
+    expected.moveCenter(target);
+    if (available.contains(expected))
+    {
+        const QPoint delta = widget.frameGeometry().center() - target;
+        RTTestIPrintf(RTTESTLVL_INFO, "Center offset: %d,%d\n", delta.x(), delta.y());
+        RTTESTI_CHECK(qAbs(delta.x()) <= 2 && qAbs(delta.y()) <= 2);
+    }
+    else
+        RTTESTI_CHECK(available.adjusted(-2, -2, 2, 2).contains(widget.frameGeometry()));
+}
+
+/** Checks shared modal bases with and without an owner. */
+static void tstDialogCentering()
+{
+    RTTestISub("Modal frame centering");
+    QWidget parent;
+    const QRect available = gpDesktop->availableGeometry();
+    RTTestIPrintf(RTTESTLVL_INFO, "Available screen: %d,%d %dx%d\n",
+                  available.x(), available.y(), available.width(), available.height());
+    parent.setGeometry(available.adjusted(30, 30, -70, -70));
+    parent.show();
+    QApplication::processEvents();
+    for (bool fParent : {false, true})
+    {
+        QIDialog dialog(fParent ? &parent : 0);
+        QVBoxLayout *pLayout = new QVBoxLayout(&dialog);
+        pLayout->addWidget(new QLabel(QStringLiteral("Centered dialog"), &dialog));
+        dialog.show();
+        QApplication::processEvents();
+        tstCheckCentered(dialog, fParent ? &parent : 0);
+        dialog.hide();
+
+        QIMainDialog mainDialog(fParent ? &parent : 0);
+        mainDialog.setCentralWidget(new QLabel(QStringLiteral("Centered main dialog")));
+        mainDialog.resize(240, 120);
+        mainDialog.show();
+        QApplication::processEvents();
+        tstCheckCentered(mainDialog, fParent ? &parent : 0);
+        mainDialog.hide();
+
+        VBoxAboutDlg about(fParent ? &parent : 0);
+        about.setAttribute(Qt::WA_DeleteOnClose, false);
+        about.show();
+        QApplication::processEvents();
+        tstCheckCentered(about, fParent ? &parent : 0);
+    }
+    /* A restored owner can be taller than the current monitor after a display change. */
+    parent.setGeometry(available.adjusted(0, 0, 0, 400));
+    QApplication::processEvents();
+    {
+        VBoxAboutDlg about(&parent);
+        about.setAttribute(Qt::WA_DeleteOnClose, false);
+        about.show();
+        QApplication::processEvents();
+        tstCheckCentered(about, &parent);
+    }
+    parent.showMaximized();
+    QApplication::processEvents();
+    VBoxAboutDlg about(&parent);
+    about.setAttribute(Qt::WA_DeleteOnClose, false);
+    about.show();
+    QApplication::processEvents();
+    tstCheckCentered(about, &parent);
+}
+
+/** Checks that startup failures use a neutral centered surface and unblock on close. */
+static void tstStartupNotification()
+{
+    RTTestISub("Startup error presentation");
+    UINotificationCenter::createTemporary();
+    UINotificationCenter *pCenter = UINotificationCenter::instance();
+    QWidget *pHost = pCenter->parentWidget();
+    RTTESTI_CHECK(pHost);
+    if (!pHost)
+    {
+        UINotificationCenter::destroy();
+        return;
+    }
+    RTTESTI_CHECK(!qobject_cast<VBoxAboutDlg*>(pHost));
+    RTTESTI_CHECK(pHost->findChildren<QTabWidget*>().isEmpty());
+    QPointer<UINotificationMessage> message = new UINotificationMessage(
+        QStringLiteral("Startup check"), QStringLiteral("Backend activation failed"), QString(), QString());
+    QTimer::singleShot(600, [&]()
+    {
+        RTTESTI_CHECK(pHost->isVisible());
+        tstCheckCentered(*pHost, 0);
+        const QPoint delta = pCenter->geometry().center() - pHost->rect().center();
+        RTTESTI_CHECK(qAbs(delta.x()) <= 2 && qAbs(delta.y()) <= 2);
+        if (message)
+            message->close();
+    });
+    pCenter->showBlocking(message);
+    RTTESTI_CHECK(message.isNull());
+    QPointer<QWidget> hostGuard = pHost;
+    UINotificationCenter::destroy();
+    RTTESTI_CHECK(hostGuard.isNull());
+}
+
 /** Optionally exports real-dialog renders for visual review. */
 static void tstAboutSnapshots()
 {
@@ -365,6 +476,8 @@ int main(int argc, char **argv)
     tstAbout();
     tstAboutLifetime();
     tstControls();
+    tstDialogCentering();
+    tstStartupNotification();
     tstAboutSnapshots();
 
     UITranslationEventListener::destroy();

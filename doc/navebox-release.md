@@ -62,7 +62,10 @@ registers a VM or reads a user's VM configuration. It checks mouse-state
 distinctions through the installed icon loader at multiple sizes/scales,
 custom-icon fallback, live About translations, tab preservation, palette
 changes, build-info copying, repeated destruction/accessibility-cache cleanup
-and styled spinbox geometry. Native-platform runs skip the clipboard check.
+and styled spinbox geometry. It also checks owned/ownerless dialog frame
+centering for normal, maximized and oversized owners, and the neutral
+startup-error window, including close/lifetime
+behavior. Native-platform runs skip the clipboard check.
 Offscreen success must be supplemented by native accessibility and DPI tests.
 
 Compile updated translation catalogs with Qt `lrelease`. New messages without
@@ -99,6 +102,18 @@ On disposable clean hosts, verify:
 
 XML parsing and shortcut assertions do not replace WiX compilation, MSI
 validation, Authenticode verification or clean-host installation tests.
+
+For developer builds moved to another directory, Windows COM and VBoxSDS
+registrations can still point to the old path. `REGDB_E_CLASSNOTREG` at startup
+requires checking the effective 64-bit VirtualBoxClient `InprocServer32`, the
+VirtualBox `LocalServer32` and the VBoxSDS service executable. Compare them with
+the matching build directory before attempting repair. Close all managers and
+VM processes, back up the affected registrations and repair with administrator
+rights. A MIDL-proxy build registers its classes via the matching
+`VBoxProxyStub.dll`; registering `VBoxC.dll` alone is insufficient. Do not run a
+different installation's repair utility or overwrite the 32-bit registration
+when repairing only a 64-bit developer build. The application does not change
+these system registrations on startup.
 
 ## Native GUI and performance acceptance
 

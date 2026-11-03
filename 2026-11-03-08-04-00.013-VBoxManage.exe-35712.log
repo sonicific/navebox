@@ -1,0 +1,5 @@
+Log created: 2026-11-03T08:04:00.133901500Z
+Process ID:  35712 (0x8b80)
+Parent PID:  12124 (0x2f5c)
+Executable:  D:\Projects\navebox\out\win.amd64\debug\bin\VBoxManage.exe
+Commandline: D:\Projects\navebox\out\win.amd64\debug\bin\VBoxManage.exe list vms

@@ -104,9 +104,9 @@ static QColor uiIconColor(UIIconGlyph enmGlyph)
             return QColor(193, 134, 38);
         case UIICONGLYPH_SETTINGS: case UIICONGLYPH_TOOLS: case UIICONGLYPH_SNAPSHOT:
         case UIICONGLYPH_CHIP: case UIICONGLYPH_MEMORY:
-            return QColor(126, 103, 191);
+            return QColor(34, 112, 218);
         default:
-            return QColor(55, 132, 185);
+            return QColor(0, 142, 235);
     }
 }
 

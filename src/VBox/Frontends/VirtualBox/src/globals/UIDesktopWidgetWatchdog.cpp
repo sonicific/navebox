@@ -635,8 +635,8 @@ void UIDesktopWidgetWatchdog::centerWidget(QWidget *pWidget,
      * size limit (in which case the top left corner will be simply aligned with the top
      * left corner of the available desktop area). pWidget must be a top-level widget.
      * pRelative may be any widget, but if it's not top-level itself, its top-level
-     * widget will be used for calculations. pRelative can also be NULL, in which case
-     * pWidget will be centered relative to the available desktop area. */
+     * widget's visible area will be used for calculations. pRelative can also be NULL,
+     * in which case pWidget will be centered relative to the available desktop area. */
 
     AssertReturnVoid(pWidget);
     AssertReturnVoid(pWidget->isWindow());
@@ -654,6 +654,11 @@ void UIDesktopWidgetWatchdog::centerWidget(QWidget *pWidget,
         d.rx() -= pRelative->geometry().x() - pRelative->x();
         d.ry() -= pRelative->geometry().y() - pRelative->y();
         parentGeo.moveTopLeft(d);
+        /* Restored owners can exceed the current screen after changing monitors.
+         * Center on the visible owner area instead of clamping the dialog to an edge. */
+        parentGeo = parentGeo.intersected(deskGeo);
+        if (parentGeo.isEmpty())
+            parentGeo = deskGeo;
     }
     else
     {

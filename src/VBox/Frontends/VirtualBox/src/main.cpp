@@ -72,6 +72,7 @@
 #endif
 #ifdef VBOX_WS_WIN
 # include <VBox/com/microatl.h>
+# include <iprt/ldr.h>
 #endif
 #if defined(VBOX_WITH_HARDENING) || defined(VBOX_WS_WIN)
 # include <iprt/string.h>
@@ -510,10 +511,8 @@ extern "C" DECLEXPORT(int) TrustedMain(int argc, char **argv, char ** /*envp*/)
         /* Give Explorer and the taskbar the product's own identity before any UI is shown. */
         /* Resolve this entry point because the shared SDK configuration targets older Windows headers. */
         typedef HRESULT (WINAPI *PFNSETAPPMODELID)(PCWSTR);
-        HMODULE hShell32 = GetModuleHandleW(L"shell32.dll");
-        PFNSETAPPMODELID pfnSetAppModelId = hShell32
-                                        ? reinterpret_cast<PFNSETAPPMODELID>(GetProcAddress(hShell32,
-                                              "SetCurrentProcessExplicitAppUserModelID")) : 0;
+        PFNSETAPPMODELID pfnSetAppModelId = reinterpret_cast<PFNSETAPPMODELID>(
+            RTLdrGetSystemSymbol("shell32.dll", "SetCurrentProcessExplicitAppUserModelID"));
         if (pfnSetAppModelId)
             pfnSetAppModelId(VBOX_GUI_APP_USER_MODEL_ID);
 #endif

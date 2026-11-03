@@ -1,6 +1,9 @@
 # Navebox identity
 
-The editable artwork is `navebox.svg`. The PNG, ICO and ICNS files are exports
+The editable artwork is `navebox.svg`: a cyan/cobalt folded N with a white
+ribbon on a pale rounded plate. Semantic action/status icons use the same blue
+family while retaining green, amber and red for their existing meanings.
+The PNG, ICO and ICNS files are exports
 of that SVG; do not retouch individual resolutions. The ICO contains 16, 20,
 24, 32, 40, 48, 64, 128 and 256 pixel images. The ICNS contains 128 through
 1024 pixel images. There is no bitmap shadow outside the rounded silhouette.
@@ -27,5 +30,6 @@ bevels are removed. Their geometry is defined in the renderer source.
 
 Windows startup requests the `Navebox.Desktop` taskbar identity through
 [SetCurrentProcessExplicitAppUserModelID](https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nf-shobjidl_core-setcurrentprocessexplicitappusermodelid),
-resolved from the already-loaded Shell32 module so the shared SDK target
-configuration can remain unchanged.
+resolved through IPRT's system-library loader before creating any windows.
+This also works when the launching process has not loaded Shell32, so a child
+process does not inherit the launcher's taskbar group.

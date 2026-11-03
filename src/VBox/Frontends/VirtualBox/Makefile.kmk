@@ -1995,7 +1995,7 @@ ifdef VBOX_WITH_TESTCASES
  PROGRAMS += tstNaveboxGui
  tstNaveboxGui_TEMPLATE = VBoxQtGuiExe
  tstNaveboxGui_INST = $(INST_TESTCASE)
- tstNaveboxGui_INCS = $(VBOX_GUI_INC_DIRS)
+ tstNaveboxGui_INCS = $(VBOX_GUI_INC_DIRS) $(UICommon_0_OUTDIR)/include
  tstNaveboxGui_DEFS.win = VBOX_WS_WIN
  tstNaveboxGui_DEFS.darwin = VBOX_WS_MAC
  tstNaveboxGui_DEFS.linux = VBOX_WS_NIX
