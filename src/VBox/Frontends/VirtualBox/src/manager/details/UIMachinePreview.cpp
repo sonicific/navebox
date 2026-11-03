@@ -37,7 +37,6 @@
 /* GUI includes: */
 #include "UIExtraDataManager.h"
 #include "UIConverter.h"
-#include "UIIconPool.h"
 #include "UIMachinePreview.h"
 #include "UIManagerStyle.h"
 #include "UIImageTools.h"
@@ -203,7 +202,7 @@ QSizeF UIMachinePreview::sizeHint(Qt::SizeHint enmWhich, const QSizeF &constrain
 {
     if (enmWhich == Qt::MinimumSize)
     {
-        AssertReturn(m_emptyPixmaps.contains(m_enmPreset),
+        AssertReturn(m_sizes.contains(m_enmPreset),
                      QIGraphicsWidget::sizeHint(enmWhich, constraint));
         QSize size = m_sizes.value(m_enmPreset);
         if (m_iMargin != 0)
@@ -385,34 +384,14 @@ void UIMachinePreview::prepare()
     /* Create session instance: */
     m_comSession.createInstance(CLSID_Session);
 
-    /* Cache aspect-ratio preset settings: */
-    const QIcon empty16x10 = UIIconPool::iconSet(":/preview_empty_16to10_242x167px.png");
-    const QIcon empty16x9 = UIIconPool::iconSet(":/preview_empty_16to9_242x155px.png");
-    const QIcon empty4x3 = UIIconPool::iconSet(":/preview_empty_4to3_242x192px.png");
-    const QIcon full16x10 = UIIconPool::iconSet(":/preview_full_16to10_242x167px.png");
-    const QIcon full16x9 = UIIconPool::iconSet(":/preview_full_16to9_242x155px.png");
-    const QIcon full4x3 = UIIconPool::iconSet(":/preview_full_4to3_242x192px.png");
-
-    // WORKAROUND:
-    // Since we don't have x3 and x4 HiDPI icons yet,
-    // and we hadn't enabled automatic up-scaling for now,
-    // we have to make sure m_dRatio is within possible bounds.
-    const QList<QSize> sizes = empty16x10.availableSizes();
-    if (sizes.size() >= 2)
-        m_dRatio = qMin(m_dRatio, (double)sizes.last().width() / sizes.first().width());
-
+    /* The frame is painted as vectors.  Preset geometry needs no monitor bitmaps
+     * and is no longer limited by the resolutions of the old artwork. */
     m_sizes.insert(AspectRatioPreset_16x10, QSize(242 * m_dRatio, 167 * m_dRatio));
     m_sizes.insert(AspectRatioPreset_16x9, QSize(242 * m_dRatio, 155 * m_dRatio));
     m_sizes.insert(AspectRatioPreset_4x3, QSize(242 * m_dRatio, 192 * m_dRatio));
     m_ratios.insert(AspectRatioPreset_16x10, (double)16/10);
     m_ratios.insert(AspectRatioPreset_16x9, (double)16/9);
     m_ratios.insert(AspectRatioPreset_4x3, (double)4/3);
-    m_emptyPixmaps.insert(AspectRatioPreset_16x10, new QPixmap(empty16x10.pixmap(m_sizes.value(AspectRatioPreset_16x10))));
-    m_emptyPixmaps.insert(AspectRatioPreset_16x9, new QPixmap(empty16x9.pixmap(m_sizes.value(AspectRatioPreset_16x9))));
-    m_emptyPixmaps.insert(AspectRatioPreset_4x3, new QPixmap(empty4x3.pixmap(m_sizes.value(AspectRatioPreset_4x3))));
-    m_fullPixmaps.insert(AspectRatioPreset_16x10, new QPixmap(full16x10.pixmap(m_sizes.value(AspectRatioPreset_16x10))));
-    m_fullPixmaps.insert(AspectRatioPreset_16x9, new QPixmap(full16x9.pixmap(m_sizes.value(AspectRatioPreset_16x9))));
-    m_fullPixmaps.insert(AspectRatioPreset_4x3, new QPixmap(full4x3.pixmap(m_sizes.value(AspectRatioPreset_4x3))));
 
     /* Setup contents (depends on presets above!): */
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -451,18 +430,6 @@ void UIMachinePreview::cleanup()
     /* Close any open session: */
     if (m_comSession.GetState() == KSessionState_Locked)
         m_comSession.UnlockMachine();
-
-    /* Destroy background images: */
-    foreach (const AspectRatioPreset &enmPreset, m_emptyPixmaps.keys())
-    {
-        delete m_emptyPixmaps.value(enmPreset);
-        m_emptyPixmaps.remove(enmPreset);
-    }
-    foreach (const AspectRatioPreset &enmPreset, m_fullPixmaps.keys())
-    {
-        delete m_fullPixmaps.value(enmPreset);
-        m_fullPixmaps.remove(enmPreset);
-    }
 
     /* Destroy preview image: */
     if (m_pPreviewImg)

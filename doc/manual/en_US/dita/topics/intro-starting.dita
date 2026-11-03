@@ -32,6 +32,9 @@
     <p>The main toolbar, machine selection, and rounded details cards use
       the application color theme. Selected machines use the theme's highlight
       and matching text colors in both light and dark modes.</p>
+    <p>The About dialog includes a Copy Build Information button for support
+      requests. It copies product and platform versions, build type, and source
+      revision, without including VM configuration or host file paths.</p>
   </body>
   
 </topic>

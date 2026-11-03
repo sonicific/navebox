@@ -105,6 +105,18 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
+        <para>GUI: Restored distinct mouse capture and integration status icons,
+          updated all About text when changing languages and link colors when
+          changing themes, and added copying of build information for support</para>
+      </listitem>
+
+      <listitem>
+        <para>GUI: Removed unused preview frame bitmaps and their display-scale
+          limitation, and included the Navebox launcher and matching shortcuts
+          in Windows installer packages</para>
+      </listitem>
+
+      <listitem>
         <para>GUI: Refreshed application action and status icons with scalable
           glass artwork and lighter visual weight, and made the Manager
           toolbar, machine list and details cards more compact, using the

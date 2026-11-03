@@ -1988,9 +1988,32 @@ endif # darwin
 
 
 #
-# Testcase for the darwin keyboard routines.
+# GUI regression tests.  These use the installed UICommon resources without
+# creating a COM session, registering a VM or loading user settings.
 #
 ifdef VBOX_WITH_TESTCASES
+ PROGRAMS += tstNaveboxGui
+ tstNaveboxGui_TEMPLATE = VBoxQtGuiExe
+ tstNaveboxGui_INST = $(INST_TESTCASE)
+ tstNaveboxGui_INCS = $(VBOX_GUI_INC_DIRS)
+ tstNaveboxGui_DEFS.win = VBOX_WS_WIN
+ tstNaveboxGui_DEFS.darwin = VBOX_WS_MAC
+ tstNaveboxGui_DEFS.linux = VBOX_WS_NIX
+ tstNaveboxGui_DEFS.freebsd = VBOX_WS_NIX
+ tstNaveboxGui_DEFS.solaris = VBOX_WS_NIX
+ tstNaveboxGui_SOURCES = testcase/tstNaveboxGui.cpp
+ tstNaveboxGui_SOURCES += src/globals/UIAppearance.cpp
+ tstNaveboxGui_QT_MODULES = Core Gui Widgets
+ tstNaveboxGui_CXXFLAGS.win = /permissive-
+ tstNaveboxGui_LIBS = $(LIB_RUNTIME)
+ ifeq ($(KBUILD_TARGET),win)
+  tstNaveboxGui_LIBS += $(PATH_STAGE_LIB)/UICommon$(VBOX_SUFF_LIB)
+  tstNaveboxGui_LDFLAGS.win = /SUBSYSTEM:console
+ else
+  tstNaveboxGui_LIBS += $(PATH_STAGE_DLL)/UICommon$(VBOX_SUFF_DLL)
+ endif
+
+ # Testcase for the darwin keyboard routines.
  PROGRAMS.darwin += tstDarwinKeyboard
  tstDarwinKeyboard_TEMPLATE = VBoxR3TstExe
  tstDarwinKeyboard_DEFS.x86 = USE_HID_FOR_MODIFIERS

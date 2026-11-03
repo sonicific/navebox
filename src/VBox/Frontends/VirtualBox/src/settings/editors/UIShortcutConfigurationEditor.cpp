@@ -37,6 +37,7 @@
 #include "QITableView.h"
 #include "QITabWidget.h"
 #include "UIActionPool.h"
+#include "UIBranding.h"
 #include "UICommon.h"
 #include "UIExtraDataManager.h"
 #include "UIHostComboEditor.h"
@@ -831,7 +832,7 @@ QString UIShortcutConfigurationEditor::tabNameRuntime() const
 
 void UIShortcutConfigurationEditor::sltRetranslateUI()
 {
-    m_pTabWidget->setTabText(TableIndex_Manager, tr("&Navebox"));
+    m_pTabWidget->setTabText(TableIndex_Manager, QStringLiteral("&") + UIBranding::name());
     m_pTabWidget->setTabText(TableIndex_Runtime, tr("Virtual &Machine"));
     const QString strTableTip = tr("Configurable shortcuts");
     m_pTableManager->setWhatsThis(strTableTip);

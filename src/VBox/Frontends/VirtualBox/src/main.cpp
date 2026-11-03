@@ -774,7 +774,7 @@ int main(int argc, char **argv, char **envp)
 # endif
 
         /* Prepare the error-message: */
-        QString strTitle = QApplication::tr("Navebox - Runtime Error");
+        QString strTitle = QApplication::tr("%1 - Runtime Error").arg(UIBranding::name());
         QString strText = "<html>";
         switch (rc)
         {
@@ -930,7 +930,7 @@ extern "C" DECLEXPORT(void) TrustedError(const char *pszWhere, SUPINITOP enmWhat
     strText += "</html>";
 
     /* Create and show the error message-box: */
-    QMessageBox::critical(0, QApplication::tr("Navebox - Error In %1").arg(pszWhere), strText);
+    QMessageBox::critical(0, QApplication::tr("%1 - Error In %2").arg(UIBranding::name(), QString::fromUtf8(pszWhere)), strText);
 
     qFatal("%s", strText.toUtf8().constData());
 }

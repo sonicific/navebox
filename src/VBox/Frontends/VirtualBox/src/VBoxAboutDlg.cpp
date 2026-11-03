@@ -27,10 +27,13 @@
 
 /* Qt includes: */
 #include <QApplication>
+#include <QClipboard>
+#include <QEvent>
 #include <QFrame>
 #include <QGridLayout>
 #include <QGuiApplication>
 #include <QLabel>
+#include <QPushButton>
 #include <QScrollArea>
 #include <QTabWidget>
 #include <QVBoxLayout>
@@ -44,6 +47,7 @@
 
 /* Other VBox includes: */
 #include <VBox/version.h>
+#include <iprt/buildconfig.h>
 
 /** @page pg_ui_navebox_about Navebox Product Information
  *
@@ -83,9 +87,18 @@ VBoxAboutDlg::VBoxAboutDlg(QWidget *pParent /* = 0 */, const QString &strVersion
     , m_pPseudoParent(0)
 #endif
     , m_fPolished(false)
-    , m_strVersion(strVersion)
+    , m_strVersion(strVersion.isEmpty() ? QString::fromLatin1(RTBldCfgVersion()) : strVersion)
     , m_pMainLayout(0)
     , m_pLabel(0)
+    , m_pTabs(0)
+    , m_pOverviewHeading(0)
+    , m_pOverviewIntroduction(0)
+    , m_apPillarTitles{0, 0, 0, 0}
+    , m_apPillarDescriptions{0, 0, 0, 0}
+    , m_pContactHeading(0)
+    , m_pEmail(0)
+    , m_pBuildInformation(0)
+    , m_pCopyBuildInformation(0)
 {
     prepare();
 }
@@ -103,12 +116,66 @@ void VBoxAboutDlg::showEvent(QShowEvent *pEvent)
     }
 }
 
+void VBoxAboutDlg::changeEvent(QEvent *pEvent)
+{
+    QDialog::changeEvent(pEvent);
+    if (   pEvent->type() == QEvent::LanguageChange
+        || pEvent->type() == QEvent::PaletteChange
+        || pEvent->type() == QEvent::ApplicationPaletteChange)
+        sltRetranslateUI();
+}
+
 void VBoxAboutDlg::sltRetranslateUI()
 {
     setWindowTitle(tr("About"));
+    if (m_pTabs)
+    {
+        m_pTabs->setTabText(0, tr("Overview"));
+        m_pTabs->setTabText(1, tr("Contact && Credits"));
+    }
+    if (m_pOverviewHeading)
+        m_pOverviewHeading->setText(tr("NAVE - The Virtualization Architecture"));
+    if (m_pOverviewIntroduction)
+        m_pOverviewIntroduction->setText(tr("FOUR PILLARS. ONE VIRTUAL WORLD."));
+    const QStringList titles = QStringList() << tr("Network of Worlds") << tr("Architecture")
+                                            << tr("Virtualization") << tr("Efficiency");
+    const QStringList descriptions = QStringList()
+        << tr("Connect independent virtual machines in one workspace.")
+        << tr("A flexible, modular foundation for virtual environments.")
+        << tr("Create, run and manage multiple systems on one computer.")
+        << tr("Stay in control of compute, memory and storage resources.");
+    for (int i = 0; i < 4; ++i)
+    {
+        if (m_apPillarTitles[i])
+            m_apPillarTitles[i]->setText(titles.at(i));
+        if (m_apPillarDescriptions[i])
+            m_apPillarDescriptions[i]->setText(descriptions.at(i));
+    }
+    if (m_pContactHeading)
+        m_pContactHeading->setText(tr("Contact"));
+    if (m_pEmail)
+        m_pEmail->setText(QStringLiteral("<a style=\"color:%2\" href=\"mailto:%1\">%1</a>")
+                         .arg(UIBranding::email().toHtmlEscaped(), uiAboutLinkColor(palette())));
+    if (m_pCopyBuildInformation)
+        m_pCopyBuildInformation->setText(tr("Copy Build Information"));
+    if (m_pBuildInformation)
+    {
+        QString strBuildStatus;
+#ifdef VBOX_BLEEDING_EDGE
+        strBuildStatus = tr("EXPERIMENTAL build %1").arg(QStringLiteral(VBOX_BLEEDING_EDGE));
+#elif VBOX_VERSION_BUILD % 2
+        strBuildStatus = tr("Development build");
+#endif
+        const QString strBuildDetails = tr("Build type: %1; source revision: %2")
+                                        .arg(QString::fromLatin1(RTBldCfgType()))
+                                        .arg(RTBldCfgRevision());
+        m_pBuildInformation->setText(strBuildStatus.isEmpty() ? strBuildDetails
+                                                            : strBuildStatus + QLatin1Char('\n') + strBuildDetails);
+    }
     if (m_pLabel)
-        m_pLabel->setText(tr("Version %1 | Qt %2 (%3)").arg(m_strVersion, QString::fromLatin1(qVersion()),
-                                                         QGuiApplication::platformName())
+        m_pLabel->setText(tr("Version %1 | Qt %2 (%3)").arg(m_strVersion.toHtmlEscaped(),
+                                                         QString::fromLatin1(qVersion()),
+                                                         QGuiApplication::platformName().toHtmlEscaped())
                          + QStringLiteral("<br/><br/>")
                          + tr("Built on the VirtualBox open-source platform.")
                          + QStringLiteral("<br/>")
@@ -116,6 +183,21 @@ void VBoxAboutDlg::sltRetranslateUI()
                          + QStringLiteral("<br/>")
                          + tr("Distributed under the <a style=\"color:%1\" href=\"https://www.gnu.org/licenses/gpl-3.0.html\">"
                               "GNU General Public License version 3</a>.").arg(uiAboutLinkColor(palette())));
+}
+
+QString VBoxAboutDlg::buildInformation() const
+{
+    /* Keep support keys stable across languages.  Do not include machine paths or VM data. */
+    return QStringLiteral("%1 %2\nVirtualBox %3r%4\nBuild: %5 (%6)\nQt: %7 (%8)")
+           .arg(UIBranding::name(), m_strVersion, QString::fromLatin1(RTBldCfgVersion()))
+           .arg(RTBldCfgRevision())
+           .arg(QString::fromLatin1(RTBldCfgType()), QString::fromLatin1(RTBldCfgTargetDotArch()),
+                QString::fromLatin1(qVersion()), QGuiApplication::platformName());
+}
+
+void VBoxAboutDlg::sltCopyBuildInformation()
+{
+    QApplication::clipboard()->setText(buildInformation());
 }
 
 void VBoxAboutDlg::prepare()
@@ -167,22 +249,18 @@ void VBoxAboutDlg::prepareMainLayout()
 
 void VBoxAboutDlg::preparePages()
 {
-    QTabWidget *pTabs = new QTabWidget(this);
-    QWidget *pOverview = new QWidget(pTabs);
+    m_pTabs = new QTabWidget(this);
+    m_pTabs->setObjectName("aboutTabs");
+    QWidget *pOverview = new QWidget(m_pTabs);
     QVBoxLayout *pOverviewLayout = new QVBoxLayout(pOverview);
     pOverviewLayout->setContentsMargins(14, 12, 14, 12);
     pOverviewLayout->setSpacing(12);
-    pOverviewLayout->addWidget(uiAboutLabel(tr("NAVE - The Virtualization Architecture"), pOverview, 2, true));
-    pOverviewLayout->addWidget(uiAboutLabel(tr("FOUR PILLARS. ONE VIRTUAL WORLD."), pOverview));
+    m_pOverviewHeading = uiAboutLabel(QString(), pOverview, 2, true);
+    m_pOverviewIntroduction = uiAboutLabel(QString(), pOverview);
+    pOverviewLayout->addWidget(m_pOverviewHeading);
+    pOverviewLayout->addWidget(m_pOverviewIntroduction);
     QGridLayout *pPillars = new QGridLayout;
     pPillars->setSpacing(14);
-    const QStringList titles = QStringList() << tr("Network of Worlds") << tr("Architecture")
-                                            << tr("Virtualization") << tr("Efficiency");
-    const QStringList descriptions = QStringList()
-        << tr("Connect independent virtual machines in one workspace.")
-        << tr("A flexible, modular foundation for virtual environments.")
-        << tr("Create, run and manage multiple systems on one computer.")
-        << tr("Stay in control of compute, memory and storage resources.");
     const QString strLetters = QStringLiteral("NAVE");
     for (int i = 0; i < 4; ++i)
     {
@@ -191,46 +269,55 @@ void VBoxAboutDlg::preparePages()
         pCardLayout->setContentsMargins(0, 0, 8, 0);
         pCardLayout->setSpacing(5);
         pCardLayout->addWidget(uiAboutLabel(strLetters.mid(i, 1), pCard, 10, true));
-        pCardLayout->addWidget(uiAboutLabel(titles.at(i), pCard, 0, true));
-        pCardLayout->addWidget(uiAboutLabel(descriptions.at(i), pCard));
+        m_apPillarTitles[i] = uiAboutLabel(QString(), pCard, 0, true);
+        m_apPillarDescriptions[i] = uiAboutLabel(QString(), pCard);
+        pCardLayout->addWidget(m_apPillarTitles[i]);
+        pCardLayout->addWidget(m_apPillarDescriptions[i]);
         pCardLayout->addStretch();
         pPillars->addWidget(pCard, i / 2, i % 2);
     }
     pPillars->setColumnStretch(0, 1);
     pPillars->setColumnStretch(1, 1);
     pOverviewLayout->addLayout(pPillars);
-    QScrollArea *pStoryScroll = new QScrollArea(pTabs);
+    QScrollArea *pStoryScroll = new QScrollArea(m_pTabs);
     pStoryScroll->setFrameShape(QFrame::NoFrame);
     pStoryScroll->setWidgetResizable(true);
     pStoryScroll->setWidget(pOverview);
-    pTabs->addTab(pStoryScroll, tr("Overview"));
+    m_pTabs->addTab(pStoryScroll, QString());
 
-    QWidget *pContact = new QWidget(pTabs);
+    QWidget *pContact = new QWidget(m_pTabs);
     QVBoxLayout *pContactLayout = new QVBoxLayout(pContact);
     pContactLayout->setContentsMargins(18, 18, 18, 18);
     pContactLayout->setSpacing(12);
-    pContactLayout->addWidget(uiAboutLabel(tr("Contact"), pContact, 4, true));
+    m_pContactHeading = uiAboutLabel(QString(), pContact, 4, true);
+    pContactLayout->addWidget(m_pContactHeading);
     pContactLayout->addWidget(uiAboutLabel(UIBranding::author(), pContact, 1, true));
-    QLabel *pEmail = uiAboutLabel(QStringLiteral("<a style=\"color:%2\" href=\"mailto:%1\">%1</a>")
-                                .arg(UIBranding::email(), uiAboutLinkColor(palette())), pContact);
-    pEmail->setOpenExternalLinks(true);
-    pContactLayout->addWidget(pEmail);
+    m_pEmail = uiAboutLabel(QString(), pContact);
+    m_pEmail->setOpenExternalLinks(true);
+    pContactLayout->addWidget(m_pEmail);
     pContactLayout->addSpacing(8);
     m_pLabel = uiAboutLabel(QString(), pContact);
     m_pLabel->setOpenExternalLinks(true);
     pContactLayout->addWidget(m_pLabel);
+    m_pBuildInformation = uiAboutLabel(QString(), pContact);
+    m_pBuildInformation->setTextFormat(Qt::PlainText);
+    pContactLayout->addWidget(m_pBuildInformation);
     pContactLayout->addStretch();
-    QScrollArea *pContactScroll = new QScrollArea(pTabs);
+    QScrollArea *pContactScroll = new QScrollArea(m_pTabs);
     pContactScroll->setFrameShape(QFrame::NoFrame);
     pContactScroll->setWidgetResizable(true);
     pContactScroll->setWidget(pContact);
-    pTabs->addTab(pContactScroll, tr("Contact && Credits"));
-    m_pMainLayout->addWidget(pTabs, 1);
+    m_pTabs->addTab(pContactScroll, QString());
+    m_pMainLayout->addWidget(m_pTabs, 1);
 }
 
 void VBoxAboutDlg::prepareCloseButton()
 {
     QIDialogButtonBox *pButtonBox = new QIDialogButtonBox(QDialogButtonBox::Close, Qt::Horizontal, this);
+    m_pCopyBuildInformation = pButtonBox->addButton(QString(), QDialogButtonBox::ActionRole);
+    m_pCopyBuildInformation->setObjectName("copyBuildInformationButton");
+    m_pCopyBuildInformation->setAutoDefault(false);
+    connect(m_pCopyBuildInformation, &QPushButton::clicked, this, &VBoxAboutDlg::sltCopyBuildInformation);
     connect(pButtonBox, &QDialogButtonBox::rejected, this, &VBoxAboutDlg::close);
     m_pMainLayout->addWidget(pButtonBox);
 }

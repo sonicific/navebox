@@ -39,6 +39,8 @@
 
 /* Forward declarations: */
 class QLabel;
+class QPushButton;
+class QTabWidget;
 class QVBoxLayout;
 
 /** QDialog extension
@@ -57,11 +59,15 @@ protected:
 
     /** Handles show @a pEvent. */
     virtual void showEvent(QShowEvent *pEvent) RT_OVERRIDE;
+    /** Updates translated text and palette-dependent links. */
+    virtual void changeEvent(QEvent *pEvent) RT_OVERRIDE;
 
 private slots:
 
     /** Handles translation event. */
     void sltRetranslateUI();
+    /** Copies version and build provenance for support requests. */
+    void sltCopyBuildInformation();
 
 private:
 
@@ -73,6 +79,8 @@ private:
     void preparePages();
     /** Prepares close-button. */
     void prepareCloseButton();
+    /** Returns plain-text version and build provenance, without user or VM data. */
+    QString buildInformation() const;
 
     /** Holds the pseudo-parent widget reference. */
     QWidget *m_pPseudoParent;
@@ -87,6 +95,24 @@ private:
     QVBoxLayout *m_pMainLayout;
     /** Holds the version and upstream attribution label. */
     QLabel      *m_pLabel;
+    /** Holds the overview and contact tabs. */
+    QTabWidget  *m_pTabs;
+    /** Holds the overview heading. */
+    QLabel      *m_pOverviewHeading;
+    /** Holds the overview introduction. */
+    QLabel      *m_pOverviewIntroduction;
+    /** Holds the translated pillar titles. */
+    QLabel      *m_apPillarTitles[4];
+    /** Holds the translated pillar descriptions. */
+    QLabel      *m_apPillarDescriptions[4];
+    /** Holds the contact heading. */
+    QLabel      *m_pContactHeading;
+    /** Holds the palette-dependent contact link. */
+    QLabel      *m_pEmail;
+    /** Holds the build status and provenance. */
+    QLabel      *m_pBuildInformation;
+    /** Holds the support-information copy button. */
+    QPushButton *m_pCopyBuildInformation;
 };
 
 #endif /* !FEQT_INCLUDED_SRC_VBoxAboutDlg_h */

@@ -1,5 +1,11 @@
 # Oracle VirtualBox
 
+This checkout contains the **Navebox** desktop frontend, based on Oracle
+VirtualBox. Internal API, service and VM-file identifiers remain compatible
+with the underlying platform. A development build is not a qualified release.
+See the [Navebox release and validation guide](doc/navebox-release.md) for
+the regression checks, supported-scope decisions and release acceptance gates.
+
 VirtualBox is a general-purpose full virtualization software for x86_64
 hardware (with version 7.1 additionally for macOS/Arm), targeted at laptop,
 desktop, server and embedded use.

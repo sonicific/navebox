@@ -126,6 +126,14 @@
         <source>Mismatching CPU Architecture</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>%1 - Error In %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 - Runtime Error</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QIArrowButtonPress</name>
@@ -2990,6 +2998,10 @@
         <source>Send the ACPI shutdown signal to the virtual machine</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>&amp;About</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>UIAddDiskEncryptionPasswordDialog</name>
@@ -3089,6 +3101,11 @@
     </message>
     <message>
         <source>VirtualBox - Preferences</source>
+        <comment>global preferences dialog name</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Preferences</source>
         <comment>global preferences dialog name</comment>
         <translation type="unfinished"></translation>
     </message>
@@ -10737,6 +10754,14 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Expert Mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;h3&gt;%2&lt;/h3&gt;&lt;p&gt;%3&lt;/p&gt;&lt;p&gt;&lt;a href=#configure#&gt;Configure %2 to work with your computer&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=#create#&gt;Create a new virtual machine (VM)&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=#open#&gt;Open a saved virtual machine&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=#import#&gt;Import a VM from open virtualization or cloud formats&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Refer to the &lt;a href=https://docs.oracle.com/en/virtualization/virtualbox/index.html&gt;VirtualBox documentation&lt;/a&gt; or press %1 for help.&lt;/p&gt;&lt;p&gt;Visit &lt;a href=https://www.virtualbox.org&gt;virtualbox.org&lt;/a&gt; to download test builds, access the source code, and more.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;h3&gt;Please choose Experience Mode!&lt;/h3&gt;By default, %1 is hiding some options, tools and wizards. &lt;p&gt;The &lt;b&gt;Basic Mode&lt;/b&gt; is intended for those users who are not interested in advanced functionality and prefer a simpler, cleaner interface.&lt;/p&gt;&lt;p&gt;The &lt;b&gt;Expert Mode&lt;/b&gt; is intended for experienced users who wish to utilize all %1 functionality.&lt;/p&gt;&lt;p&gt;You can choose whether you are a beginner or experienced user by selecting required option at the right. This choice can always be changed in Global Preferences or Machine Settings windows.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -27275,6 +27300,90 @@ p, li { white-space: pre-wrap; }
     <message>
         <source>Version %1</source>
         <translation>Версія %1</translation>
+    </message>
+    <message>
+        <source>A flexible, modular foundation for virtual environments.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>About</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Architecture</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Build type: %1; source revision: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Built on the VirtualBox open-source platform.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Connect independent virtual machines in one workspace.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Contact</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Contact &amp;&amp; Credits</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copy Build Information</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Create, run and manage multiple systems on one computer.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Development build</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Distributed under the &lt;a style="color:%1" href="https://www.gnu.org/licenses/gpl-3.0.html"&gt;GNU General Public License version 3&lt;/a&gt;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>EXPERIMENTAL build %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Efficiency</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>FOUR PILLARS. ONE VIRTUAL WORLD.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>NAVE - The Virtualization Architecture</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Network of Worlds</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Overview</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Stay in control of compute, memory and storage resources.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Version %1 | Qt %2 (%3)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Virtualization</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

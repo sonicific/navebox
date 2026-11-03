@@ -45,7 +45,6 @@
 /* Forward declarations: */
 class QAction;
 class QImage;
-class QPixmap;
 class QMenu;
 class QTimer;
 
@@ -197,10 +196,6 @@ private:
         QMap<AspectRatioPreset, QSize>     m_sizes;
         /** Holds the aspect-ratio preset ratios. */
         QMap<AspectRatioPreset, double>    m_ratios;
-        /** Holds the aspect-ratio preset empty pixmaps. */
-        QMap<AspectRatioPreset, QPixmap*>  m_emptyPixmaps;
-        /** Holds the aspect-ratio preset filled pixmaps. */
-        QMap<AspectRatioPreset, QPixmap*>  m_fullPixmaps;
     /** @} */
 
     /** @name Painting stuff.

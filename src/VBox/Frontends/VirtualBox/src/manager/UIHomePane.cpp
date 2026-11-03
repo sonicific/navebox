@@ -86,8 +86,8 @@ void UIHomePane::sltRetranslateUI()
 {
     /* Translate greetings text: */
     if (m_pLabelGreetings)
-        m_pLabelGreetings->setText(tr("<h3>Navebox</h3><p>Command Your Virtual World</p>"
-                                      "<p><a href=#configure#>Configure Navebox to work with your computer</a></p>"
+        m_pLabelGreetings->setText(tr("<h3>%2</h3><p>%3</p>"
+                                      "<p><a href=#configure#>Configure %2 to work with your computer</a></p>"
                                       "<p><a href=#create#>Create a new virtual machine (VM)</a></p>"
                                       "<p><a href=#open#>Open a saved virtual machine</a></p>"
                                       "<p><a href=#import#>Import a VM from open virtualization or cloud formats</a></p>"
@@ -97,19 +97,20 @@ void UIHomePane::sltRetranslateUI()
                                       "<p>Visit "
                                       "<a href=https://www.virtualbox.org>"
                                       "virtualbox.org</a> to download test builds, access the source code, and more.</p>")
-                                      .arg(QKeySequence(QKeySequence::HelpContents).toString(QKeySequence::NativeText)));
+                                      .arg(QKeySequence(QKeySequence::HelpContents).toString(QKeySequence::NativeText),
+                                           UIBranding::name().toHtmlEscaped(), UIBranding::slogan().toHtmlEscaped()));
 
     /* Translate experience mode stuff: */
     if (m_pLabelMode)
         m_pLabelMode->setText(tr("<h3>Please choose Experience Mode!</h3>"
-                                 "By default, Navebox is hiding some options, tools and wizards. "
+                                 "By default, %1 is hiding some options, tools and wizards. "
                                  "<p>The <b>Basic Mode</b> is intended for those users who are not interested in advanced "
                                  "functionality and prefer a simpler, cleaner interface.</p>"
                                  "<p>The <b>Expert Mode</b> is intended for experienced users who wish to utilize all "
-                                 "Navebox functionality.</p>"
+                                 "%1 functionality.</p>"
                                  "<p>You can choose whether you are a beginner or experienced user by selecting required "
                                  "option at the right. This choice can always be changed in Global Preferences or Machine "
-                                 "Settings windows.</p>"));
+                                 "Settings windows.</p>").arg(UIBranding::name().toHtmlEscaped()));
     if (m_buttons.contains(false))
         m_buttons.value(false)->setText(tr("Basic Mode"));
     if (m_buttons.contains(true))

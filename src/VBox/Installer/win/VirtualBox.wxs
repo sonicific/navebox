@@ -209,7 +209,7 @@
     <!-- Note: Only if we include FE/Qt, we offer to start VirtualBox at the end of a successful installation. -->
 <?if $(env.VBOX_WITH_QTGUI) = "yes" ?>
     <!-- Note: Make sure to set the CWD (via 'Directory' attribute) to not run off a possibly temporary directory or some such (see @bugref{10203}). -->
-    <CustomAction Id="ca_StartVBox" Directory="INSTALLDIR" ExeCommand="[INSTALLDIR]VirtualBox.exe" Return="asyncNoWait" Impersonate="yes" />
+    <CustomAction Id="ca_StartVBox" Directory="INSTALLDIR" ExeCommand="[INSTALLDIR]Navebox.exe" Return="asyncNoWait" Impersonate="yes" />
 <?endif?>
     <!-- General custom action for starting an application or opening a file using the system's default open handler. Ignores result.
          The "WixShellExecTarget" property must be set beforehand as the actual execution parameter.
@@ -543,7 +543,9 @@
     <StandardDirectory Id="ProgramMenuFolder">
         <Directory Id="dir_StartMenuVBox" Name="$(env.VBOX_PRODUCT)">
             <Component Id="cp_StartMenuVBox" Guid="C2DC321A-CE63-40EE-8A98-724DF8BD12FB" Condition="VBOX_INSTALLSTARTMENUENTRIES" Bitness="$(var.Property_Bitness)">
-                <Shortcut Id="sc_StartMenuVBox" Directory="dir_StartMenuVBox" Name="$(env.VBOX_PRODUCT)" Description="$(env.VBOX_PRODUCT)" Target="[INSTALLDIR]VirtualBox.exe" WorkingDirectory="INSTALLDIR" />
+                <Shortcut Id="sc_StartMenuVBox" Directory="dir_StartMenuVBox" Name="Navebox" Description="Navebox" Target="[INSTALLDIR]Navebox.exe" WorkingDirectory="INSTALLDIR">
+                    <ShortcutProperty Key="System.AppUserModel.ID" Value="Navebox.Desktop" />
+                </Shortcut>
                 <RegistryValue Root="HKCU" Key="$(var.Property_RegKeyInstall)" Type="string" Value="installed" KeyPath="yes" />
                 <?include $(env.PATH_TARGET)\Shortcuts_StartMenu.wxi ?>
                 <RemoveFolder Id="rmf_ShortcutStartMenu" On="uninstall" />
@@ -554,7 +556,9 @@
     <!-- Desktop shortcut -->
     <StandardDirectory Id="DesktopFolder">
         <Component Id="cp_DesktopShortcut" Guid="668F8A1A-F5CE-48B3-BB1A-3042EE27B279" Condition="VBOX_INSTALLDESKTOPSHORTCUT" Bitness="$(var.Property_Bitness)">
-            <Shortcut Id="sc_DesktopVBox" Directory="DesktopFolder" Name="$(env.VBOX_PRODUCT)" Description="$(env.VBOX_PRODUCT)" Target="[INSTALLDIR]VirtualBox.exe" WorkingDirectory="INSTALLDIR" />
+            <Shortcut Id="sc_DesktopVBox" Directory="DesktopFolder" Name="Navebox" Description="Navebox" Target="[INSTALLDIR]Navebox.exe" WorkingDirectory="INSTALLDIR">
+                <ShortcutProperty Key="System.AppUserModel.ID" Value="Navebox.Desktop" />
+            </Shortcut>
             <RegistryValue Root="HKCU" Key="$(var.Property_RegKeyInstall)" Type="string" Value="installed" KeyPath="yes" />
             <RemoveFolder Id="rmf_ShortcutDesktop" On="uninstall" />
         </Component>
