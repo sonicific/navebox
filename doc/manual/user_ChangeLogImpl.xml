@@ -104,6 +104,11 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
+        <para>BIOS: Replaced the default guest boot splash with the Navebox
+          identity while retaining custom boot images and the F12 boot menu</para>
+      </listitem>
+
+      <listitem>
         <para>GUI: Introduced Navebox branding, desktop icons and product
           information with a separate About action next to Help, and replaced
           heavy native input and group-box frames with lighter borders</para>

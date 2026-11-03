@@ -18,6 +18,21 @@ and `Qt6Core.lib Qt6Gui.lib Qt6Svg.lib`. Then run:
 render-navebox-branding.exe images/Navebox/navebox.svg images/Navebox
 ```
 
+The legacy BIOS uses a separate compiled bitmap, selected by
+`VBOX_BRAND_BIOS_LOGO` in both OSE and non-OSE configurations. Regenerate it from
+the same icon SVG and the geometric, font-independent boot wordmark:
+
+```text
+render-navebox-branding.exe --boot images/Navebox/navebox.svg ../../Artwork/Navebox/boot-wordmark.svg ../../Artwork/Navebox/navebox-bios.bmp
+```
+
+Paths above are relative to the frontend directory. The output is a 560x160,
+uncompressed, bottom-up 24-bit BMP on black, centered by the BIOS with its F12
+boot-menu prompt retained. Rebuild `VBoxDD` after changing this asset; changing
+the desktop icon alone does not change the guest boot display. Custom per-VM
+boot images retain priority. EFI logos belong to the separate EFI firmware;
+updating this BIOS bitmap does not modify prebuilt EFI images.
+
 Product name, slogan and contact data are centralized in
 `src/globals/UIBranding.h`. Windows builds install `Navebox.exe` alongside the
 internal compatibility executable. The two entry points share the same code,

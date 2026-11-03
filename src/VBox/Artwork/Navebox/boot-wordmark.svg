@@ -1,0 +1,17 @@
+<!-- $Id$
+  Navebox geometric boot wordmark, drawn without font dependencies.
+  Copyright (C) 2026 Oracle and/or its affiliates.
+  SPDX-License-Identifier: GPL-3.0-only
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="364" height="80" viewBox="0 0 364 80">
+  <title>Navebox boot wordmark</title>
+  <g fill="none" stroke="#f4f8ff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 68V12l42 56V12"/>
+    <path d="M102 28v40m0-20c0-12-8-21-20-21S62 36 62 48s8 21 20 21 20-9 20-21z"/>
+    <path d="m116 28 17 40 17-40"/>
+    <path d="M163 48h38c0-12-8-21-19-21s-20 9-20 21 8 21 20 21c8 0 15-4 18-8"/>
+    <path d="M217 12v56m0-20c0-12 8-21 20-21s20 9 20 21-8 21-20 21-20-9-20-21z"/>
+    <path d="M310 48c0-12-8-21-20-21s-20 9-20 21 8 21 20 21 20-9 20-21z"/>
+    <path d="m324 28 32 40m0-40-32 40"/>
+  </g>
+</svg>

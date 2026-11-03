@@ -121,6 +121,23 @@ class NaveboxPackagingTests(unittest.TestCase):
             resolutions.add(width or 256)
         self.assertTrue({16, 32, 48, 256}.issubset(resolutions))
 
+    def test_bios_boot_logo(self):
+        """Both product configurations embed a bitmap accepted by the BIOS loader."""
+        logo = ROOT_DIR / 'src/VBox/Artwork/Navebox/navebox-bios.bmp'
+        data = logo.read_bytes()
+        self.assertEqual(data[:2], b'BM')
+        size, _, _, offset = struct.unpack_from('<IHHI', data, 2)
+        header, width, height, planes, bits, compression = struct.unpack_from('<IiiHHI', data, 14)
+        self.assertEqual(size, len(data))
+        self.assertEqual((header, width, height, planes, bits, compression), (40, 560, 160, 1, 24, 0))
+        self.assertEqual(offset, 54)
+        self.assertEqual(len(data) - offset, ((width * 3 + 3) & ~3) * height)
+        self.assertEqual(data[offset:offset + 3], b'\0\0\0')
+        self.assertTrue(any(data[offset:]))
+        config = (ROOT_DIR / 'Config.kmk').read_text(encoding='utf-8')
+        choices = re.findall(r'^\s*VBOX_BRAND_BIOS_LOGO\s*:=\s*(\S+)', config, re.MULTILINE)
+        self.assertEqual(choices, ['$(PATH_ROOT)/src/VBox/Artwork/Navebox/navebox-bios.bmp'] * 2)
+
     def test_about_catalogs(self):
         """All catalogues expose current About messages; finished placeholders survive."""
         sources = about_sources()

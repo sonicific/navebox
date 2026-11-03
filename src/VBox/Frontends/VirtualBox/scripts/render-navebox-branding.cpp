@@ -1,6 +1,6 @@
 /* $Id$ */
 /** @file
- * VBox Qt GUI - Render the Navebox vector identity into desktop icon assets.
+ * VBox Qt GUI - Render the Navebox vector identity into desktop and BIOS assets.
  */
 
 /*
@@ -36,10 +36,11 @@
 #include <QPainter>
 #include <QSvgRenderer>
 
-/** @page pg_navebox_brand_assets Navebox Desktop Icon Assets
+/** @page pg_navebox_brand_assets Navebox Identity Assets
  *
  * Developer-only Qt Core/Gui/Svg utility.  Run with the SVG path and output
  * directory.  The SVG is the editable source; PNG, ICO and ICNS are exports.
+ * The --boot mode renders an uncompressed 24-bit BMP for the legacy BIOS.
  * No image editing or SVG library is added to the application runtime.
  */
 
@@ -52,9 +53,29 @@ static qint64 uiBrandWrite(const QString &strPath, const QByteArray &data)
     return file.write(data);
 }
 
+/** Renders the identity and font-independent wordmark in the BIOS bitmap format. */
+static int uiBrandRenderBootLogo(const QString &strIcon, const QString &strWordmark, const QString &strOutput)
+{
+    QSvgRenderer icon(strIcon);
+    QSvgRenderer wordmark(strWordmark);
+    if (!icon.isValid() || !wordmark.isValid())
+        return 2;
+    QImage image(560, 160, QImage::Format_RGB888);
+    image.fill(Qt::black);
+    QPainter painter(&image);
+    painter.setRenderHint(QPainter::Antialiasing);
+    icon.render(&painter, QRectF(0, 0, 160, 160));
+    wordmark.render(&painter, QRectF(176, 38, 384, 84));
+    painter.end();
+    return image.save(strOutput, "BMP") ? 0 : 5;
+}
+
 int main(int argc, char **argv)
 {
     QCoreApplication app(argc, argv);
+    if (argc == 5 && qstrcmp(argv[1], "--boot") == 0)
+        return uiBrandRenderBootLogo(QString::fromLocal8Bit(argv[2]), QString::fromLocal8Bit(argv[3]),
+                                     QString::fromLocal8Bit(argv[4]));
     if (argc != 3)
         return 1;
     QSvgRenderer renderer(QString::fromLocal8Bit(argv[1]));

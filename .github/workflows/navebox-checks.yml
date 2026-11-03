@@ -4,11 +4,15 @@ on:
   pull_request:
     paths:
       - '.github/workflows/navebox-checks.yml'
+      - 'Config.kmk'
+      - 'src/VBox/Artwork/Navebox/**'
       - 'src/VBox/Frontends/VirtualBox/**'
       - 'src/VBox/Installer/win/**'
   push:
     paths:
       - '.github/workflows/navebox-checks.yml'
+      - 'Config.kmk'
+      - 'src/VBox/Artwork/Navebox/**'
       - 'src/VBox/Frontends/VirtualBox/**'
       - 'src/VBox/Installer/win/**'
   workflow_dispatch:
@@ -27,6 +31,7 @@ jobs:
           sparse-checkout: |
             src/VBox/Frontends/VirtualBox
             src/VBox/Installer/win
+            src/VBox/Artwork/Navebox
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: '3.12'
