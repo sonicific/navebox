@@ -4,6 +4,8 @@
 /env.sh
 /env.bat
 /LocalConfig.kmk
+/LocalConfig.release.kmk
+/navebox-build.local.json
 /prebuild/
 /SVN_REVISION
 

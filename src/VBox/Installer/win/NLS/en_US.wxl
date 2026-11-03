@@ -60,17 +60,17 @@
     <String Id="VB_Network" Value="[ProductName] network device drivers for networking support." />
     <String Id="VB_NetLwfDriver" Value="[ProductName] driver for NDIS6 Bridged Networking." />
     <String Id="VB_NetAdp6Driver" Value="[ProductName] virtual network adapter driver for NDIS6 Host-Only Networking." />
-    <String Id="VB_Python" Value="Python support for VirtualBox." />
+    <String Id="VB_Python" Value="Python support for [ProductName]." />
 
     <!---->
 
-    <String Id="UsedByOtherApp" Value="It was detected an application which has been using currently installed VirtualBox version. You must remove this application before continuing installation. See the file dependency.dep in the VirtualBox installation directory for details." />
+    <String Id="UsedByOtherApp" Value="It was detected an application which has been using currently installed [ProductName] version. You must remove this application before continuing installation. See the file dependency.dep in the [ProductName] installation directory for details." />
     <String Id="NeedAdmin" Value="You need to have administrator rights to (un)install [ProductName]! This installer will close now." />
     <String Id="NeedMSCRT" Value="[ProductName] needs the Microsoft Visual C++ 2019 Redistributable Package being installed first. Please install and restart the installation of [ProductName]." />
     <String Id="WrongOS" Value="[ProductName] only runs on Windows 10 or above." />
     <String Id="Only64Bit" Value="[ProductName] only runs on 64-bit Windows systems." />
     <String Id="WrongPlatformArch" Value="This version of [ProductName] was developed for a different platform architecture and therefore cannot be installed. Please install a matching version of [ProductName]!" />
-    <String Id="NewerVersionDetected" Value="A newer version of VirtualBox is already installed. Please uninstall it first before installing older versions of VirtualBox." />
+    <String Id="NewerVersionDetected" Value="A newer version of [ProductName] is already installed. Please uninstall it first before installing older versions of [ProductName]." />
     <String Id="InvalidTargetDir" Value="Invalid installation directory specified! Please use another installation directory to install [ProductName]. Refer to the [ProductName] manual for more information." />
 
     <!---->
@@ -98,7 +98,7 @@
     <!---->
 
     <String Id="CheckSerialDlg_Header" Value="Serial Number" />
-    <String Id="CheckSerialDlg_Body" Value="Please enter your serial number in the fields below. You'll find it on the sticker inside the VirtualBox CD case." />
+    <String Id="CheckSerialDlg_Body" Value="Please enter your serial number in the fields below. You'll find it on the sticker inside the [ProductName] CD case." />
     <String Id="CheckSerialDlg_Footer" Value="When done entering the serial number, press the &quot;Check&quot; button below." />
 
     <!---->
@@ -159,7 +159,7 @@
     <String Id="WarnPythonDlg_Title" Value="Missing Dependencies" />
     <String Id="WarnPythonDlg_Title2" Value="Python Core and win32api" />
     <String Id="WarnPythonDlg_Desc" Value="Installing the [ProductName] Python bindings requires the Python Core package and the win32api bindings to be installed." />
-    <String Id="WarnPythonDlg_Desc2" Value="You can install and configure these later. For instructions, refer to the [ProductName] SDK Programming Guide. Alternatively, install them before continuing with the Oracle VirtualBox installation." />
+    <String Id="WarnPythonDlg_Desc2" Value="You can install and configure these later. For instructions, refer to the [ProductName] SDK Programming Guide. Alternatively, install them before continuing with the [ProductName] installation." />
 
     <!---->
 
@@ -184,7 +184,7 @@
 
     <!---->
 
-    <String Id="ExitDlg_ClickFinish" Value="You may also need the VirtualBox Extension Pack. Refer to the VirtualBox User Guide for more information." />
+    <String Id="ExitDlg_ClickFinish" Value="For usage and optional components, consult the [ProductName] documentation." />
     <String Id="ExitDlg_InstComplete" Value="[ProductName] has been installed." />
     <String Id="ExitDlg_StartVBox" Value="Start [ProductName]?" />
 

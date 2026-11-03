@@ -60,17 +60,17 @@
     <String Id="VB_Network" Value="[ProductName] drivrutiner för nätverksenheter för nätverksstöd." />
     <String Id="VB_NetLwfDriver" Value="[ProductName] drivrutin för NDIS6 bryggat nätverk." />
     <String Id="VB_NetAdp6Driver" Value="[ProductName] virtual network adapter driver for NDIS6 Host-Only Networking." />
-    <String Id="VB_Python" Value="Python-stöd för VirtualBox." />
+    <String Id="VB_Python" Value="Python-stöd för [ProductName]." />
 
     <!---->
 
-    <String Id="UsedByOtherApp" Value="En applikation som använder den nu installerade versionen av VirtualBox har upptäckts. Du måste ta bort denna applikation innan du fortsätter installationen. Se filen dependency.dep i VirtualBox-installationskatalogen för mer information.." />
+    <String Id="UsedByOtherApp" Value="En applikation som använder den nu installerade versionen av [ProductName] har upptäckts. Du måste ta bort denna applikation innan du fortsätter installationen. Se filen dependency.dep i [ProductName]-installationskatalogen för mer information.." />
     <String Id="NeedAdmin" Value="Du måste ha administratörsrättigheter för att (av)installera [ProductName]! Installationsprogrammet stängs nu.." />
     <String Id="NeedMSCRT" Value="[ProductName] kräver att Microsoft Visual C++ 2019 Redistributable Package installeras först. Installera och starta om installationen av [ProductName]." />
     <String Id="WrongOS" Value="[ProductName] kan endast köras på Windows 10 eller senare." />
     <String Id="Only64Bit" Value="[ProductName] kan endast köras på 64-bitars Windows-system." />
     <String Id="WrongPlatformArch" Value="Denna version av [ProductName] har utvecklats för en annan plattformsarkitektur och kan därför inte installeras. Installera en version som passar [ProductName]!" />
-    <String Id="NewerVersionDetected" Value="A newer version of VirtualBox is already installed. Please uninstall it first before installing older versions of VirtualBox." />
+    <String Id="NewerVersionDetected" Value="A newer version of [ProductName] is already installed. Please uninstall it first before installing older versions of [ProductName]." />
     <String Id="InvalidTargetDir" Value="Ogiltig installationskatalog angiven! Använd en annan installationskatalog för att installera [ProductName]. Mer information finns i manualen för [ProductName]." />
 
     <!---->
@@ -98,7 +98,7 @@
     <!---->
 
     <String Id="CheckSerialDlg_Header" Value="Serienummer" />
-    <String Id="CheckSerialDlg_Body" Value="Ange ditt serienummer i fälten nedan. Du hittar det på etiketten inuti VirtualBox-CD-fodralet." />
+    <String Id="CheckSerialDlg_Body" Value="Ange ditt serienummer i fälten nedan. Du hittar det på etiketten inuti [ProductName]-CD-fodralet." />
     <String Id="CheckSerialDlg_Footer" Value="När du har angett serienumret trycker du på knappen &quot;Kontrollera&quot; nedan.." />
 
     <!---->
@@ -159,7 +159,7 @@
     <String Id="WarnPythonDlg_Title" Value="Saknade beroenden" />
     <String Id="WarnPythonDlg_Title2" Value="Python Core och win32api" />
     <String Id="WarnPythonDlg_Desc" Value="För att installera Python-bindningarna för [ProductName] måste Python Core-paketet och win32api-bindningarna vara installerade." />
-    <String Id="WarnPythonDlg_Desc2" Value="Du kan installera och konfigurera dessa senare. Anvisningar finns i [ProductName] SDK-programmeringsguide. Alternativt kan du installera dem innan du fortsätter med installationen av Oracle VirtualBox." />
+    <String Id="WarnPythonDlg_Desc2" Value="Du kan installera och konfigurera dessa senare. Anvisningar finns i [ProductName] SDK-programmeringsguide. Alternativt kan du installera dem innan du fortsätter med installationen av [ProductName]." />
 
     <!---->
 
@@ -184,7 +184,7 @@
 
     <!---->
 
-    <String Id="ExitDlg_ClickFinish" Value="Du kan också behöva VirtualBox-tilläggspaket. Mer information finns i VirtualBox-användarhandboken." />
+    <String Id="ExitDlg_ClickFinish" Value="Du kan också behöva [ProductName]-tilläggspaket. Mer information finns i [ProductName]-användarhandboken." />
     <String Id="ExitDlg_InstComplete" Value="[ProductName] har installerats." />
     <String Id="ExitDlg_StartVBox" Value="Starta [ProductName]?" />
 

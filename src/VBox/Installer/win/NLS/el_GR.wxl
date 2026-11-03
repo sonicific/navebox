@@ -60,17 +60,17 @@
     <String Id="VB_Network" Value="Οδηγός συσκευών δικτύου [ProductName] για υποστήριξη δικτύου." />
     <String Id="VB_NetLwfDriver" Value="Οδηγός [ProductName] για NDIS6 γεφυρωμένα δίκτυα." />
     <String Id="VB_NetAdp6Driver" Value="Οδηγός [ProductName] εικονικής κάρτας δικτύου για NDIS6 μόνο-με-οικοδεσπότη δίκτυα." />
-    <String Id="VB_Python" Value="Υποστήριξη Python για το VirtualBox." />
+    <String Id="VB_Python" Value="Υποστήριξη Python για το [ProductName]." />
 
     <!---->
 
-    <String Id="UsedByOtherApp" Value="It was detected an application which has been using currently installed VirtualBox version. You must remove this application before continuing installation. See the file dependency.dep in the VirtualBox installation directory for details." />
+    <String Id="UsedByOtherApp" Value="It was detected an application which has been using currently installed [ProductName] version. You must remove this application before continuing installation. See the file dependency.dep in the [ProductName] installation directory for details." />
     <String Id="NeedAdmin" Value="Πρέπει να έχετε δικαιώματα διαχειριστή για την (απ)εγκατάσταση του [ProductName]! Η εφαρμογή θα τερματιστεί τώρα." />
     <String Id="NeedMSCRT" Value="[ProductName] needs the Microsoft Visual C++ 2019 Redistributable Package being installed first. Please install and restart the installation of [ProductName]." />
     <String Id="WrongOS" Value="[ProductName] τρέχει μόνο σε Windows 10 ή παραπάνω." />
     <String Id="Only64Bit" Value="[ProductName] τρέχει μόνο σε συστήματα Windows 64 bit." />
     <String Id="WrongPlatformArch" Value="This version of [ProductName] was developed for a different platform architecture and therefore cannot be installed. Please install a matching version of [ProductName]!" />
-    <String Id="NewerVersionDetected" Value="A newer version of VirtualBox is already installed. Please uninstall it first before installing older versions of VirtualBox." />
+    <String Id="NewerVersionDetected" Value="A newer version of [ProductName] is already installed. Please uninstall it first before installing older versions of [ProductName]." />
     <String Id="InvalidTargetDir" Value="Invalid installation directory specified! Please use another installation directory to install [ProductName]." />
 
     <!---->
@@ -98,7 +98,7 @@
     <!---->
 
     <String Id="CheckSerialDlg_Header" Value="Σειριακός Αριθμός" />
-    <String Id="CheckSerialDlg_Body" Value="Εισάγετε τον σειριακό αριθμό σας στα παρακάτω πεδία. Θα το βρείτε στο αυτοκόλλητο μέσα στην θήκη του CD του VirtualBox." />
+    <String Id="CheckSerialDlg_Body" Value="Εισάγετε τον σειριακό αριθμό σας στα παρακάτω πεδία. Θα το βρείτε στο αυτοκόλλητο μέσα στην θήκη του CD του [ProductName]." />
     <String Id="CheckSerialDlg_Footer" Value="Όταν ολοκληρώσετε την εισαγωγή του σειριακού αριθμού, πατήστε το κουμπί &quot;Check&quot; παρακάτω." />
 
     <!---->

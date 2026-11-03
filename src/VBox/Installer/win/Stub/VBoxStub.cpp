@@ -78,7 +78,7 @@
 /*********************************************************************************************************************************
 *   Defined Constants And Macros                                                                                                 *
 *********************************************************************************************************************************/
-#define VBOX_STUB_TITLE "VirtualBox Installer"
+#define VBOX_STUB_TITLE VBOX_PRODUCT " Installer"
 
 #define MY_UNICODE_SUB(str) L ##str
 #define MY_UNICODE(str)     MY_UNICODE_SUB(str)
@@ -1612,14 +1612,14 @@ int main(int argc, char **argv)
                          "    quoting the property value if necessary\n"
 #ifdef VBOX_WITH_CODE_SIGNING
                          "--no-silent-cert\n"
-                         "    Do not install VirtualBox Certificate automatically\n"
+                         "    Do not install the code-signing certificate automatically\n"
                          "    when --silent option is specified\n"
 #endif
 #ifdef VBOX_WITH_VBOX_LEGACY_TS_CA
                          "--force-install-timestamp-ca\n"
                          "    Install the timestamp CA needed for supporting\n"
                          "    legacy Windows versions regardless of the version or\n"
-                         "    type of Windows VirtualBox is being installed on.\n"
+                         "    type of Windows " VBOX_PRODUCT " is being installed on.\n"
                          "    Default: All except Windows 10 & 11 desktop\n"
                          "--no-install-timestamp-ca\n"
                          "    Do not install the above mentioned timestamp CA.\n"
@@ -1627,7 +1627,7 @@ int main(int argc, char **argv)
                          "--path\n"
                          "    Sets the path of the extraction directory\n"
                          "--reinstall\n"
-                         "    Forces VirtualBox to get re-installed\n"
+                         "    Forces " VBOX_PRODUCT " to get re-installed\n"
                          "--ignore-reboot\n"
                          "   Do not set exit code to 3010 if a reboot is required\n"
                          "--silent\n"
@@ -1642,7 +1642,7 @@ int main(int argc, char **argv)
 #endif
                          "\n"
                          "Examples:\n"
-                         "  %s --msiparams \"INSTALLDIR=\"\"C:\\Program Files\\VirtualBox\"\"\"\n"
+                         "  %s --msiparams \"INSTALLDIR=\"\"C:\\Program Files\\Navebox\"\"\"\n"
                          "  %s --extract -path C:\\VBox",
                          VBOX_STUB_TITLE, VBOX_VERSION_MAJOR, VBOX_VERSION_MINOR, VBOX_VERSION_BUILD, VBOX_SVN_REV,
                          argv[0], argv[0]);
@@ -1813,7 +1813,7 @@ int main(int argc, char **argv)
     if (   !fExtractOnly
         && !g_fSilent
         && enmPkgArch == VBOXSTUBPKGARCH_X86)
-        rcExit = ShowError("32-bit Windows hosts are not supported by this VirtualBox release.");
+        rcExit = ShowError("32-bit Windows hosts are not supported by this " VBOX_PRODUCT " release.");
     else
     {
         /*

@@ -48,11 +48,11 @@
 <?endif?>
 
     <Package UpgradeCode="C4BAD770-BFE8-4D2C-A592-693028A7215B" Name="$(env.VBOX_PRODUCT) $(env.VBOX_VERSION_STRING)"
-        Language="!(loc.LANG)" Version="$(var.Property_Version)" Manufacturer="$(env.VBOX_VENDOR)"
+        Language="!(loc.LANG)" Version="$(var.Property_Version)" Manufacturer="$(env.VBOX_BRAND_WIN_INST_PUBLISHER)"
         InstallerVersion="$(var.VBoxProperty_MsiInstallerVersion)">
 
         <SummaryInformation Keywords="Installer"
-            Description="$(env.VBOX_PRODUCT) $(var.Property_VersionExt) installation package" Manufacturer="$(env.VBOX_VENDOR)" />
+            Description="$(env.VBOX_PRODUCT) $(var.Property_VersionExt) installation package" Manufacturer="$(env.VBOX_BRAND_WIN_INST_PUBLISHER)" />
 
     <?include CommonProperties.wxi ?>
 
@@ -62,8 +62,8 @@
     <!-- @todo indentation is wrong here and it goes on to about line 525. -->
     <!-- Global properties -->
     <Property Id="ARPPRODUCTICON" Value="IconVirtualBox" />
-    <Property Id="ARPURLINFOABOUT" Value="http://www.virtualbox.org" />
-    <Property Id="ARPURLUPDATEINFO" Value="http://www.virtualbox.org" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/sonicific/navebox" />
+    <Property Id="ARPURLUPDATEINFO" Value="https://github.com/sonicific/navebox/releases" />
 
     <Property Id="NETWORKTYPE" Value="NDIS6" Secure="yes" />
 
@@ -457,8 +457,8 @@
     </InstallExecuteSequence>
 
         <Directory Id="$(var.Property_ProgramFiles)" Name="PFiles">
-            <Directory Id="VENDOR" Name="$(env.VBOX_VENDOR_SHORT)">
-                <Directory Id="INSTALLDIR" Name="VirtualBox">
+            <Directory Id="VENDOR" Name=".">
+                <Directory Id="INSTALLDIR" Name="$(env.VBOX_PRODUCT)">
                     <!-- Components for removing empty folder after cleaning traces -->
                     <Component Id="cp_INSTALLDIR" Guid="374723AF-5990-4552-A1B0-82C72EFA360F">
                         <RemoveFolder Id="INSTALLDIR" On="uninstall" />

@@ -104,6 +104,12 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
+        <para>Windows installer: Applied Navebox product metadata, setup artwork,
+          distributor information and localized product references while retaining
+          original component licenses and compatible service identifiers</para>
+      </listitem>
+
+      <listitem>
         <para>BIOS: Replaced the default guest boot splash with the Navebox
           identity while retaining custom boot images and the F12 boot menu</para>
       </listitem>

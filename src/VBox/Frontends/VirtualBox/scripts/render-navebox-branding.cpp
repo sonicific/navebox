@@ -32,6 +32,7 @@
 #include <QDir>
 #include <QFile>
 #include <QImage>
+#include <QLinearGradient>
 #include <QMap>
 #include <QPainter>
 #include <QSvgRenderer>
@@ -41,6 +42,7 @@
  * Developer-only Qt Core/Gui/Svg utility.  Run with the SVG path and output
  * directory.  The SVG is the editable source; PNG, ICO and ICNS are exports.
  * The --boot mode renders an uncompressed 24-bit BMP for the legacy BIOS.
+ * The --installer mode renders the Windows MSI and EXE backgrounds.
  * No image editing or SVG library is added to the application runtime.
  */
 
@@ -70,12 +72,59 @@ static int uiBrandRenderBootLogo(const QString &strIcon, const QString &strWordm
     return image.save(strOutput, "BMP") ? 0 : 5;
 }
 
+/** Renders the MSI dialog/banner and the bootstrapper splash from the shared vectors. */
+static int uiBrandRenderInstallerAssets(const QString &strIcon, const QString &strWordmark, const QString &strOutput)
+{
+    QSvgRenderer icon(strIcon);
+    QSvgRenderer wordmark(strWordmark);
+    const QDir output(strOutput);
+    if (!icon.isValid() || !wordmark.isValid())
+        return 2;
+    if (!QDir().mkpath(output.absolutePath()))
+        return 3;
+    QImage dialog(493, 313, QImage::Format_RGB32);
+    dialog.fill(Qt::white);
+    QPainter painter(&dialog);
+    painter.setRenderHint(QPainter::Antialiasing);
+    QLinearGradient gradient(0, 0, 164, 313);
+    gradient.setColorAt(0, QColor(16, 37, 65));
+    gradient.setColorAt(1, QColor(6, 88, 180));
+    painter.fillRect(QRect(0, 0, 164, 313), gradient);
+    icon.render(&painter, QRectF(28, 92, 108, 108));
+    wordmark.render(&painter, QRectF(20, 214, 124, 28));
+    painter.end();
+    if (!dialog.save(output.filePath(QStringLiteral("installer-dialog.jpg")), "JPG", 95))
+        return 5;
+    QImage banner(493, 58, QImage::Format_RGB32);
+    banner.fill(Qt::white);
+    painter.begin(&banner);
+    painter.setRenderHint(QPainter::Antialiasing);
+    icon.render(&painter, QRectF(439, 4, 50, 50));
+    painter.end();
+    if (!banner.save(output.filePath(QStringLiteral("installer-banner.jpg")), "JPG", 95))
+        return 5;
+    QImage splash(800, 200, QImage::Format_RGB32);
+    painter.begin(&splash);
+    painter.setRenderHint(QPainter::Antialiasing);
+    QLinearGradient splashGradient(0, 0, 800, 200);
+    splashGradient.setColorAt(0, QColor(16, 37, 65));
+    splashGradient.setColorAt(1, QColor(6, 88, 180));
+    painter.fillRect(splash.rect(), splashGradient);
+    icon.render(&painter, QRectF(38, 30, 140, 140));
+    wordmark.render(&painter, QRectF(211, 47, 440, 96));
+    painter.end();
+    return splash.save(output.filePath(QStringLiteral("installer-splash.png")), "PNG") ? 0 : 5;
+}
+
 int main(int argc, char **argv)
 {
     QCoreApplication app(argc, argv);
     if (argc == 5 && qstrcmp(argv[1], "--boot") == 0)
         return uiBrandRenderBootLogo(QString::fromLocal8Bit(argv[2]), QString::fromLocal8Bit(argv[3]),
                                      QString::fromLocal8Bit(argv[4]));
+    if (argc == 5 && qstrcmp(argv[1], "--installer") == 0)
+        return uiBrandRenderInstallerAssets(QString::fromLocal8Bit(argv[2]), QString::fromLocal8Bit(argv[3]),
+                                           QString::fromLocal8Bit(argv[4]));
     if (argc != 3)
         return 1;
     QSvgRenderer renderer(QString::fromLocal8Bit(argv[1]));

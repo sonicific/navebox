@@ -60,17 +60,17 @@
     <String Id="VB_Network" Value="[ProductName] 网络设备驱动程序针对网络支持。" />
     <String Id="VB_NetLwfDriver" Value="[ProductName] driver for NDIS6 Bridged Networking." />
     <String Id="VB_NetAdp6Driver" Value="[ProductName] virtual network adapter driver for NDIS6 Host-Only Networking." />
-    <String Id="VB_Python" Value="VirtualBox 的 Python 支持。" />
+    <String Id="VB_Python" Value="[ProductName] 的 Python 支持。" />
 
     <!---->
 
-    <String Id="UsedByOtherApp" Value="检测到一个应用程序正在使用当前安装的 VirtualBox 版本。在继续安装之前，您必须删除该应用程序。有关详细信息，请参阅 VirtualBox 安装目录中的 dependency.dep 文件." />
+    <String Id="UsedByOtherApp" Value="检测到一个应用程序正在使用当前安装的 [ProductName] 版本。在继续安装之前，您必须删除该应用程序。有关详细信息，请参阅 [ProductName] 安装目录中的 dependency.dep 文件." />
     <String Id="NeedAdmin" Value="需要系统管理员权限安装 （或卸载）[ProductName]！此安装程序现在将中止。" />
     <String Id="NeedMSCRT" Value="[ProductName] needs the Microsoft Visual C++ 2019 Redistributable Package being installed first. Please install and restart the installation of [ProductName]." />
     <String Id="WrongOS" Value="此应用程序只能运行在 Windows 10 或以上。" />
     <String Id="Only64Bit" Value="此应用程序只能运行在 64 位 Windows 系统。 请安装 [ProductName] 的 32 位版本！" />
     <String Id="WrongPlatformArch" Value="This version of [ProductName] was developed for a different platform architecture and therefore cannot be installed. Please install a matching version of [ProductName]!" />
-    <String Id="NewerVersionDetected" Value="A newer version of VirtualBox is already installed. Please uninstall it first before installing older versions of VirtualBox." />
+    <String Id="NewerVersionDetected" Value="A newer version of [ProductName] is already installed. Please uninstall it first before installing older versions of [ProductName]." />
     <String Id="InvalidTargetDir" Value="Invalid installation directory specified! Please use another installation directory to install [ProductName]. Refer to the [ProductName] manual for more information." />
 
     <!---->
@@ -98,7 +98,7 @@
     <!---->
 
     <String Id="CheckSerialDlg_Header" Value="序号" />
-    <String Id="CheckSerialDlg_Body" Value="请在以下字段输入你的序号。 你可以在 VirtualBox CD 盒内的贴纸找到。" />
+    <String Id="CheckSerialDlg_Body" Value="请在以下字段输入你的序号。 你可以在 [ProductName] CD 盒内的贴纸找到。" />
     <String Id="CheckSerialDlg_Footer" Value="序号输入完成时，单击以下&quot;检查&quot;按钮。" />
 
     <!---->

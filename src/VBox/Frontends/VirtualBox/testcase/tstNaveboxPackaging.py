@@ -161,6 +161,30 @@ class NaveboxPackagingTests(unittest.TestCase):
                         self.assertEqual(set(re.findall(r'%(?:[1-9][0-9]?|n)', source)),
                                          set(re.findall(r'%(?:[1-9][0-9]?|n)', ''.join(translation.itertext()))))
 
+    def test_windows_installer_identity(self):
+        """Setup product, publisher, artwork and catalog messages use the same brand."""
+        config = (ROOT_DIR / 'Config.kmk').read_text(encoding='utf-8')
+        self.assertRegex(config, r'(?m)^VBOX_PRODUCT\s*=\s*Navebox$')
+        self.assertRegex(config, r'(?m)^VBOX_BRAND_WIN_INST_PUBLISHER\s*:=\s*Navebox$')
+        installer = ROOT_DIR / 'src/VBox/Installer/win'
+        package = ET.parse(installer / 'VirtualBox.wxs').getroot().find('w:Package', WIX_NS)
+        self.assertEqual(package.attrib['Name'], '$(env.VBOX_PRODUCT) $(env.VBOX_VERSION_STRING)')
+        self.assertEqual(package.attrib['Manufacturer'], '$(env.VBOX_BRAND_WIN_INST_PUBLISHER)')
+        self.assertEqual(package.find('.//w:Directory[@Id="INSTALLDIR"]', WIX_NS).attrib['Name'], '$(env.VBOX_PRODUCT)')
+        interface = ET.parse(installer / 'UserInterface.wxi')
+        for identifier, variable in (('dlgjpg', 'DLGJPG'), ('bannerjpg', 'BANNER')):
+            node = interface.find('.//w:Binary[@Id="' + identifier + '"]', WIX_NS)
+            self.assertEqual(node.attrib['SourceFile'], '$(env.VBOX_BRAND_WIN_INST_' + variable + ')')
+        for name in ('installer-dialog.jpg', 'installer-banner.jpg', 'installer-splash.png'):
+            path = ROOT_DIR / 'src/VBox/Artwork/Navebox' / name
+            self.assertGreater(path.stat().st_size, 100)
+            self.assertIn(path.as_posix().split('/src/')[1], config)
+        namespace = {'w': 'http://wixtoolset.org/schemas/v4/wxl'}
+        for path in sorted((installer / 'NLS').glob('*.wxl')):
+            for node in ET.parse(path).findall('w:String', namespace):
+                with self.subTest(catalog=path.name, message=node.attrib['Id']):
+                    self.assertNotRegex(node.attrib.get('Value', ''), r'Oracle|VirtualBox')
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

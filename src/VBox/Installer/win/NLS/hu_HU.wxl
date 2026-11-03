@@ -60,17 +60,17 @@
     <String Id="VB_Network" Value="[ProductName] hálózati illesztőprogram a hálózat támogatásához." />
     <String Id="VB_NetLwfDriver" Value="[ProductName] illesztőprogram NDIS6 bridge-el hálózathoz." />
     <String Id="VB_NetAdp6Driver" Value="[ProductName] virtuális hálózati illesztőprogram NDIS6 host-only hálózat támogatásához." />
-    <String Id="VB_Python" Value="Python támogatás VirtualBox alatt." />
+    <String Id="VB_Python" Value="Python támogatás [ProductName] alatt." />
 
     <!---->
 
-    <String Id="UsedByOtherApp" Value="A jelenleg telepített VirtualBox verziót használó alkalmazás észlelhető. A telepítés folytatása előtt el kell távolítani ezt az alkalmazást. További részletek a VirtualBox telepítési mappájában található dependency.dep fájlban." />
+    <String Id="UsedByOtherApp" Value="A jelenleg telepített [ProductName] verziót használó alkalmazás észlelhető. A telepítés folytatása előtt el kell távolítani ezt az alkalmazást. További részletek a [ProductName] telepítési mappájában található dependency.dep fájlban." />
     <String Id="NeedAdmin" Value="Rendszergazdai engedélyek szükségesek a(z) [ProductName] telepítéséhez vagy eltávolításához! A telepítő most bezáródik." />
     <String Id="NeedMSCRT" Value="[ProductName] működéséhez Microsoft Visual C++ 2019 Redistributable Package szükséges. Telepítse, majd indítsa újra ezt a telepítőt." />
     <String Id="WrongOS" Value="A(z) [ProductName] futtatásához legalább Windows 10 szükséges." />
     <String Id="Only64Bit" Value="A(z) [ProductName] csak 64-bites Windows rendszeren fut." />
     <String Id="WrongPlatformArch" Value="A(z) [ProductName] ezen verziója más architektúrára lett fejlesztve, ezért nem telepíthető. Kérjük, telepítse a megfelelő [ProductName] verziót!" />
-    <String Id="NewerVersionDetected" Value="A newer version of VirtualBox is already installed. Please uninstall it first before installing older versions of VirtualBox." />
+    <String Id="NewerVersionDetected" Value="A newer version of [ProductName] is already installed. Please uninstall it first before installing older versions of [ProductName]." />
     <String Id="InvalidTargetDir" Value="A megadott elérési út érvénytelen! Válasszon másik telepítési mappát a(z) [ProductName] telepítéséhez. További információk a(z) [ProductName] használati útmutatójában." />
 
     <!---->
@@ -98,7 +98,7 @@
     <!---->
 
     <String Id="CheckSerialDlg_Header" Value="Sorozatszám" />
-    <String Id="CheckSerialDlg_Body" Value="Adja meg a sorozatszámát az alábbi mezőben. Ezt a VirtualBox CD-tokjában levő matricán találja." />
+    <String Id="CheckSerialDlg_Body" Value="Adja meg a sorozatszámát az alábbi mezőben. Ezt a [ProductName] CD-tokjában levő matricán találja." />
     <String Id="CheckSerialDlg_Footer" Value="A sorozatszám beírása után nyomja meg az &quot;Ellenőrzés&quot; gombot." />
 
     <!---->
@@ -159,7 +159,7 @@
     <String Id="WarnPythonDlg_Title" Value="Hiányzó függőségek" />
     <String Id="WarnPythonDlg_Title2" Value="Python Core és win32api" />
     <String Id="WarnPythonDlg_Desc" Value="A(z) [ProductName] függőségei miatt a Python Core és win32api csomagokat telepíteni kell." />
-    <String Id="WarnPythonDlg_Desc2" Value="Később is telepítheti és beállíthatja. További információk a(z) [ProductName] SDK dokumentációban. Vagy telepítse őket, mielőtt folytatná az Oracle VirtualBox telepítését." />
+    <String Id="WarnPythonDlg_Desc2" Value="Később is telepítheti és beállíthatja. További információk a(z) [ProductName] SDK dokumentációban. Vagy telepítse őket, mielőtt folytatná az [ProductName] telepítését." />
 
     <!---->
 
@@ -184,7 +184,7 @@
 
     <!---->
 
-    <String Id="ExitDlg_ClickFinish" Value="Szükség lehet a VirtualBox Kiterjesztő csomagra is. További információkért olvassa el a VirtualBox felhasználói útmutatót." />
+    <String Id="ExitDlg_ClickFinish" Value="Szükség lehet a [ProductName] Kiterjesztő csomagra is. További információkért olvassa el a [ProductName] felhasználói útmutatót." />
     <String Id="ExitDlg_InstComplete" Value="A(z) [ProductName] telepítésre került." />
     <String Id="ExitDlg_StartVBox" Value="[ProductName] indítása?" />
 

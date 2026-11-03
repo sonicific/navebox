@@ -60,17 +60,17 @@
     <String Id="VB_Network" Value="Device driver jaringan [ProductName] untuk dukungan jaringan." />
     <String Id="VB_NetLwfDriver" Value="Driver [ProductName] untuk Jaringan Bridge NDIS6." />
     <String Id="VB_NetAdp6Driver" Value="Driver adaptor jaringan virtual [ProductName] untuk Jaringan Hanya Host NDIS6." />
-    <String Id="VB_Python" Value="Dukungan Python bagi VirtualBox." />
+    <String Id="VB_Python" Value="Dukungan Python bagi [ProductName]." />
 
     <!---->
 
-    <String Id="UsedByOtherApp" Value="Terdeteksi suatu aplikasi yang sedang memakai versi VirtualBox yang kini terpasang. Anda mesti membuang aplikasi ini sebelum melanjutkan instalasi. Lihat berkas dependency.dep dalam direktori instalasi VirtualBox untuk rinciannya." />
+    <String Id="UsedByOtherApp" Value="Terdeteksi suatu aplikasi yang sedang memakai versi [ProductName] yang kini terpasang. Anda mesti membuang aplikasi ini sebelum melanjutkan instalasi. Lihat berkas dependency.dep dalam direktori instalasi [ProductName] untuk rinciannya." />
     <String Id="NeedAdmin" Value="Anda perlu punya hak administrator untuk membongkar/memasang [ProductName]! Pemasang ini sekarang akan ditutup." />
     <String Id="NeedMSCRT" Value="[ProductName] memerlukan terpasangnya Microsoft Visual C++ 2019 Redistributable Package terlebih dahulu. Harap pasang dan mulai ulang instalasi [ProductName]." />
     <String Id="WrongOS" Value="[ProductName] hanya berjalan pada Windows 10 atau yang lebih tinggi." />
     <String Id="Only64Bit" Value="[ProductName] hanya berjalan pada sistem Windows 64-bit." />
     <String Id="WrongPlatformArch" Value="Versi [ProductName] ini dikembangkan untuk arsitektur platform lain sehingga tidak bisa dipasang. Harap pasang versi yang cocok dari [ProductName]!" />
-    <String Id="NewerVersionDetected" Value="A newer version of VirtualBox is already installed. Please uninstall it first before installing older versions of VirtualBox." />
+    <String Id="NewerVersionDetected" Value="A newer version of [ProductName] is already installed. Please uninstall it first before installing older versions of [ProductName]." />
     <String Id="InvalidTargetDir" Value="Direktori instalasi yang tidak valid ditentukan! Harap pakai direktori instalasi lain untuk memasang [ProductName]. Lihat manual [ProductName] untuk informasi lebih lanjut." />
 
     <!---->
@@ -98,7 +98,7 @@
     <!---->
 
     <String Id="CheckSerialDlg_Header" Value="Nomor Seri" />
-    <String Id="CheckSerialDlg_Body" Value="Silakan masukkan nomor seri dalam bidang di bawah. Anda akan menemukannya pada stiker di dalam kotak CD VirtualBox." />
+    <String Id="CheckSerialDlg_Body" Value="Silakan masukkan nomor seri dalam bidang di bawah. Anda akan menemukannya pada stiker di dalam kotak CD [ProductName]." />
     <String Id="CheckSerialDlg_Footer" Value="Setelah memasukkan nomor seri, tekan tombol &quot;Periksa&quot; di bawah." />
 
     <!---->
@@ -159,7 +159,7 @@
     <String Id="WarnPythonDlg_Title" Value="Kurang Ketergantungan" />
     <String Id="WarnPythonDlg_Title2" Value="Python Core dan win32api" />
     <String Id="WarnPythonDlg_Desc" Value="Memasang pengikatan Python [ProductName] memerlukan terpasangnya paket Python Core dan pengikatan win32api." />
-    <String Id="WarnPythonDlg_Desc2" Value="Anda dapat memasang dan mengonfigurasi ini nanti. Untuk instruksi, lihat Panduan Pemrograman SDK [ProductName]. Atau pasang mereka sebelum melanjutkan dengan instalasi Oracle VirtualBox." />
+    <String Id="WarnPythonDlg_Desc2" Value="Anda dapat memasang dan mengonfigurasi ini nanti. Untuk instruksi, lihat Panduan Pemrograman SDK [ProductName]. Atau pasang mereka sebelum melanjutkan dengan instalasi [ProductName]." />
 
     <!---->
 
@@ -184,7 +184,7 @@
 
     <!---->
 
-    <String Id="ExitDlg_ClickFinish" Value="Anda mungkin juga perlu VirtualBox Extension Pack. Baca Panduan Pengguna VirtualBox untuk informasi lebih lanjut." />
+    <String Id="ExitDlg_ClickFinish" Value="Anda mungkin juga perlu [ProductName] Extension Pack. Baca Panduan Pengguna [ProductName] untuk informasi lebih lanjut." />
     <String Id="ExitDlg_InstComplete" Value="[ProductName] telah dipasang." />
     <String Id="ExitDlg_StartVBox" Value="Mulai Jalankan [ProductName]?" />
 

@@ -107,8 +107,8 @@
                - VirtualBox.idl (module name),
                - VBoxSDS.cpp and VBoxProxyStub.cpp -->
         <ServiceInstall Id="VBoxSDSInstall" Account="LocalSystem" Type="ownProcess"
-                        Name="VBoxSDS" DisplayName="VirtualBox system service"
-                        Description="Used as a COM server for VirtualBox API."
+                        Name="VBoxSDS" DisplayName="Navebox system service"
+                        Description="Provides the VirtualBox-compatible API for Navebox."
                         Start="demand" Interactive="no" ErrorControl="normal" Vital="yes">
             <ServiceDependency Id="RPCSS" />
         </ServiceInstall>
@@ -265,7 +265,7 @@
 
          Note! Registering the file extensions must be done in the same component where the binaries of FE/Qt live.
                Otherwise the MSI validation will fail.  -->
-    <ProgId Id="progId_VirtualBox.Shell.vbox" Description="VirtualBox Machine Definition" Icon="file_VBoxRes.dll" IconIndex="-201">
+    <ProgId Id="progId_VirtualBox.Shell.vbox" Description="Navebox Machine Definition" Icon="file_VBoxRes.dll" IconIndex="-201">
         <Extension Id="vbox" ContentType="application/x-virtualbox-vbox">
             <Verb Id="open" Command="Open" TargetFile="file_VirtualBox.exe" Argument="&quot;%1&quot;" />
         </Extension>

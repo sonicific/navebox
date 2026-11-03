@@ -1,0 +1,59 @@
+# $Id$
+## @file
+# Navebox Windows host-only release profile example.
+#
+# Copyright (C) 2026 Oracle and/or its affiliates.
+#
+# This file is part of VirtualBox base platform packages, as
+# available from https://www.virtualbox.org.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation, in version 3 of the
+# License.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see <https://www.gnu.org/licenses>.
+#
+# SPDX-License-Identifier: GPL-3.0-only
+#
+#
+# Copy to LocalConfig.release.kmk, then configure your SDKs and signing inputs.
+# Keep private paths, credentials and compiler workarounds in that local file.
+# The helper supplies tool paths from navebox-build.local.json.
+#
+VBOX_OSE := 1
+VBOX_WITH_INSTALLER := 1
+VBOX_WITH_QT_PAYLOAD := 1
+VBOX_WITHOUT_ADDITIONS := 1
+VBOX_WITHOUT_DOCS := 1
+VBOX_WITH_ADDITIONS_PACKING :=
+VBOX_WITH_DOCS :=
+VBOX_WITH_DOCS_PACKING :=
+VBOX_WITH_DOCS_QHELP_PACKING :=
+VBOX_WITH_PYTHON :=
+VBOX_WITH_JAVA :=
+VBOX_WITH_WEBSERVICES :=
+VBOX_WITH_JWS :=
+VBOX_WITH_TESTCASES :=
+VBOX_INSTALLER_LANGUAGES := en_US
+VBOX_INSTALLER_MERGE_LANGUAGES := en_US
+
+# Use the verified BIOS assembly when the external toolchain has no Watcom.
+VBOX_WITH_OPEN_WATCOM :=
+
+# Public Qt headers use their own warning policy.
+VBOX_LOCAL_QT_CXXFLAGS := -external:I$(VBOX_PATH_QT)/include -external:W0
+VirtualBox_CXXFLAGS.win += $(VBOX_LOCAL_QT_CXXFLAGS)
+VirtualBoxVM_CXXFLAGS.win += $(VBOX_LOCAL_QT_CXXFLAGS)
+UICommon_CXXFLAGS.win += $(VBOX_LOCAL_QT_CXXFLAGS)
+VBoxDbg_CXXFLAGS.win += $(VBOX_LOCAL_QT_CXXFLAGS)
+
+# Configure VBOX_SIGNING_MODE and the signing inputs for your environment here.
+# Do not disable hardening or force driverless execution for the conventional
+# driver-backed package. Production driver trust requires separate qualification.

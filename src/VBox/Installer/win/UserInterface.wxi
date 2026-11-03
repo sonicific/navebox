@@ -1094,7 +1094,7 @@
 
         <!-- Graphic files used for the UI -->
         <!-- See: http://wix.sourceforge.net/manual-wix3/WixUI_customizations.htm -->
-        <Binary Id="bannerjpg" SourceFile="$(env.VBOX_PATH_WIN_INST_SRC)\Binary\Banner.jpg" />
+        <Binary Id="bannerjpg" SourceFile="$(env.VBOX_BRAND_WIN_INST_BANNER)" />
         <Binary Id="dlgjpg" SourceFile="$(env.VBOX_BRAND_WIN_INST_DLGJPG)" />
 
         <!-- Aliases for the graphic files -->

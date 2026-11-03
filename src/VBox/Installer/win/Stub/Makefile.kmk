@@ -62,12 +62,19 @@ VBOX_STUB_WITH_SPLASH = 1
 ifdef VBOX_STUB_WITH_SPLASH
  VBoxStub.cpp_DEFS += VBOX_STUB_WITH_SPLASH
  VBoxStub.rc_DEFS  += VBOX_STUB_WITH_SPLASH
+ VBoxStub.rc_DEPS  += $(VBoxStub_0_OUTDIR)/VBoxStub-splash.rc
+ VBoxStub_CLEAN    += $(VBoxStub_0_OUTDIR)/VBoxStub-splash.rc
  VBoxStub_CXXFLAGS += -wd5039 # pointer or reference to potentially throwing function passed to 'extern "C"' function under -EHc. Undefined behavior may occur if this function throws an exception.
  VBOX_STUB_IMPORTS += user32.dll shlwapi.dll gdi32.dll
  # gdiplus apparently forgets to uninit COM in GdiplusShutdown(), so we have to do that ourselves via CoUninitialize().
  # Not doing that will result in a debug assertion in experimental code in rtThreadNativeUninitComAndOle()
  # where we check for dangling COM inits.
  VBOX_STUB_IMPORTS += ole32.dll
+endif
+
+if defined(VBOX_STUB_WITH_SPLASH)
+ $$(VBoxStub_0_OUTDIR)/VBoxStub-splash.rc: $(VBOX_BRAND_WIN_INST_SPLASH) $(MAKEFILE_CURRENT) | $$(dir $$@)
+	$(APPEND) -t $@ 'IDB_SPLASH PNG "$(subst /,\\,$(VBOX_BRAND_WIN_INST_SPLASH))"'
 endif
 
 VBoxStub_LDFLAGS = -SubSystem:Windows

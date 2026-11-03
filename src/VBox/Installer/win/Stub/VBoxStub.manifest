@@ -6,7 +6,7 @@
     name="VBoxStub.exe"
     type="win32"
 />
-<description>VirtualBox Windows Installer</description>
+<description>Navebox Windows Installer</description>
 <dependency>
     <dependentAssembly>
         <assemblyIdentity

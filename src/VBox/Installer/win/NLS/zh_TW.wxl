@@ -60,17 +60,17 @@
     <String Id="VB_Network" Value="[ProductName] 網路裝置驅動程式針對網路支援。" />
     <String Id="VB_NetLwfDriver" Value="[ProductName] 驅動程式針對 NDIS6 橋接網路。" />
     <String Id="VB_NetAdp6Driver" Value="[ProductName] 虛擬網路介面卡針對 NDIS6 「僅限主機」網路。" />
-    <String Id="VB_Python" Value="VirtualBox 的 Python 支援。" />
+    <String Id="VB_Python" Value="[ProductName] 的 Python 支援。" />
 
     <!---->
 
-    <String Id="UsedByOtherApp" Value="偵測到某個應用程式正在使用目前安裝的 VirtualBox 版本。 您必須先移除這個應用程式才能繼續安裝。 請參閱 VirtualBox 安裝目錄中的 dependency.dep 檔案取得詳細資料。" />
+    <String Id="UsedByOtherApp" Value="偵測到某個應用程式正在使用目前安裝的 [ProductName] 版本。 您必須先移除這個應用程式才能繼續安裝。 請參閱 [ProductName] 安裝目錄中的 dependency.dep 檔案取得詳細資料。" />
     <String Id="NeedAdmin" Value="您需要有系統管理員特殊權限以安裝 (或解除安裝) [ProductName]! 此安裝程式現在將關閉。" />
     <String Id="NeedMSCRT" Value="[ProductName] 需要先安裝 Microsoft Visual C++ 2019 可分發套件。 請安裝並重新啟動 [ProductName] 安裝。" />
     <String Id="WrongOS" Value="[ProductName] 只能執行在 Windows 10 或以上。" />
     <String Id="Only64Bit" Value="[ProductName] 只能執行在 64 位元的 Windows 系統。" />
     <String Id="WrongPlatformArch" Value="這個版本的 [ProductName] 是為其它平台架構開發的，因此無法安裝。 請安裝符合版本的 [ProductName]!" />
-    <String Id="NewerVersionDetected" Value="A newer version of VirtualBox is already installed. Please uninstall it first before installing older versions of VirtualBox." />
+    <String Id="NewerVersionDetected" Value="A newer version of [ProductName] is already installed. Please uninstall it first before installing older versions of [ProductName]." />
     <String Id="InvalidTargetDir" Value="指定的安裝目錄無效! 請使用另一個安裝目錄來安裝 [ProductName]。 參閱 [ProductName] 手冊取得詳細資訊。" />
 
     <!---->
@@ -98,7 +98,7 @@
     <!---->
 
     <String Id="CheckSerialDlg_Header" Value="序號" />
-    <String Id="CheckSerialDlg_Body" Value="請在以下欄位輸入您的序號。 您可以在 VirtualBox CD 盒內的貼紙找到。" />
+    <String Id="CheckSerialDlg_Body" Value="請在以下欄位輸入您的序號。 您可以在 [ProductName] CD 盒內的貼紙找到。" />
     <String Id="CheckSerialDlg_Footer" Value="序號輸入完成時，按一下以下「檢查」按鈕。" />
 
     <!---->
@@ -159,7 +159,7 @@
     <String Id="WarnPythonDlg_Title" Value="缺少相依項" />
     <String Id="WarnPythonDlg_Title2" Value="Python 核心和 win32api" />
     <String Id="WarnPythonDlg_Desc" Value="安裝 [ProductName] Python 綁定需要安裝 Python 核心包和 win32api 綁定。" />
-    <String Id="WarnPythonDlg_Desc2" Value="您可以稍後安裝和組態這些組件。 有關說明，請參閱 [ProductName] SDK 程式設計指南。 或者，您也可以在繼續安裝 Oracle VirtualBox 之前先安裝它們。" />
+    <String Id="WarnPythonDlg_Desc2" Value="您可以稍後安裝和組態這些組件。 有關說明，請參閱 [ProductName] SDK 程式設計指南。 或者，您也可以在繼續安裝 [ProductName] 之前先安裝它們。" />
 
     <!---->
 
@@ -184,7 +184,7 @@
 
     <!---->
 
-    <String Id="ExitDlg_ClickFinish" Value="您可能還需要 VirtualBox 擴充包。 請參閱 VirtualBox 使用者指南以了解更多資訊。" />
+    <String Id="ExitDlg_ClickFinish" Value="您可能還需要 [ProductName] 擴充包。 請參閱 [ProductName] 使用者指南以了解更多資訊。" />
     <String Id="ExitDlg_InstComplete" Value="[ProductName] 已安裝。" />
     <String Id="ExitDlg_StartVBox" Value="啟動 [ProductName]?" />
 

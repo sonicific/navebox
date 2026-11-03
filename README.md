@@ -80,17 +80,28 @@ In a prepared developer shell, build the tree with:
 kmk
 ```
 
-For a Windows release-oriented build, prepare the required SDKs, signing
-inputs, drivers and installer dependencies first:
+For Windows x64, the repository includes a build entry point. After preparing
+the local configuration, run:
 
 ```text
-kmk KBUILD_TYPE=release
-kmk KBUILD_TYPE=release NaveboxLauncher VirtualBoxManifest
-kmk KBUILD_TYPE=release packing
+.\build.cmd doctor
+.\build.cmd check
+.\build.cmd release
 ```
 
-These commands describe the release pipeline. They do not replace installer
-signing, clean-host installation tests or hypervisor qualification.
+`release` compiles, stages Qt, builds MSI/EXE, verifies the embedded artwork and
+payload, then writes installers, a manifest and SHA256 hashes to
+`out/win.amd64/release/delivery`. Run `build.cmd --help` for individual stages.
+It does not install the application or change Windows security settings.
+
+For a new checkout, copy `navebox-build.example.json` to
+`navebox-build.local.json`, prepare `LocalConfig.release.kmk` using
+`tools/navebox/LocalConfig.release.example.kmk`, and configure the actual SDK
+paths and signing inputs. Both local files are ignored. The example is a
+host-only profile; compiler/SDK compatibility fixes remain machine-local.
+See the [build guide](doc/navebox-release.md#windows-build-entry-point) for
+requirements and commands. These builds still need signing, clean-host
+installation tests and hypervisor qualification before public release.
 
 ## 🧪 Testing
 

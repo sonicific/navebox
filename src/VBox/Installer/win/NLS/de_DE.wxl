@@ -60,17 +60,17 @@
     <String Id="VB_Network" Value="[ProductName] Treiber für Netzwerk-Unterstützung." />
     <String Id="VB_NetLwfDriver" Value="[ProductName] Treiber für NDIS6-Netzwerkbrücke." />
     <String Id="VB_NetAdp6Driver" Value="[ProductName] Treiber für virtuellen Netzwerk-Adapter für NDIS6-Host-only-Netzwerke." />
-    <String Id="VB_Python" Value="Python-Support für VirtualBox." />
+    <String Id="VB_Python" Value="Python-Support für [ProductName]." />
 
     <!---->
 
-    <String Id="UsedByOtherApp" Value="Es wurde eine Anwendung erkannt, die die aktuell installierte VirtualBox-Version verwendet. Sie müssen diese Anwendung entfernen, bevor Sie mit der Installation fortfahren." />
+    <String Id="UsedByOtherApp" Value="Es wurde eine Anwendung erkannt, die die aktuell installierte [ProductName]-Version verwendet. Sie müssen diese Anwendung entfernen, bevor Sie mit der Installation fortfahren." />
     <String Id="NeedAdmin" Value="Sie benötigen Administrations-Rechte zum (De-)Installieren von [ProductName]! Das Setup wird nun beendet." />
     <String Id="NeedMSCRT" Value="Für [ProductName] muss zuerst das Microsoft Visual C++ 2019 Redistributable Package installiert werden. Bitte installieren und danach die Installation von [ProductName] wiederholen." />
     <String Id="WrongOS" Value="[ProductName] läuft nur auf Windows 10 oder höher!" />
     <String Id="Only64Bit" Value="[ProductName] läuft nur auf 64-bit Windows-Systemen." />
     <String Id="WrongPlatformArch" Value="Diese Version von [ProductName] wurde für eine andere Plattform-Architektur entwickelt und kann daher nicht installiert werden. Bitte die passende Version für [ProductName] installieren!" />
-    <String Id="NewerVersionDetected" Value="Eine neuere Version von VirtualBox ist bereits installiert. Bitte erst diese deinstallieren um ältere Versionen von VirtualBox zu installieren." />
+    <String Id="NewerVersionDetected" Value="Eine neuere Version von [ProductName] ist bereits installiert. Bitte erst diese deinstallieren um ältere Versionen von [ProductName] zu installieren." />
     <String Id="InvalidTargetDir" Value="Ungültiges Installationsverzeichnis angegeben. Bitte ein anderes Installationsverzeichnis wählen, um [ProductName] zu installieren. Für mehr Informationen bitte im [ProductName] Handbuch nachschlagen." />
 
     <!---->
@@ -98,7 +98,7 @@
     <!---->
 
     <String Id="CheckSerialDlg_Header" Value="Seriennummer" />
-    <String Id="CheckSerialDlg_Body" Value="Bitte geben Sie die Seriennummer in die unten stehenden Felder ein. Sie finden die Nummer auf dem Aufkleber in der VirtualBox CD-Hülle." />
+    <String Id="CheckSerialDlg_Body" Value="Bitte geben Sie die Seriennummer in die unten stehenden Felder ein. Sie finden die Nummer auf dem Aufkleber in der [ProductName] CD-Hülle." />
     <String Id="CheckSerialDlg_Footer" Value="Wenn Sie fertig mit der Eingabe sind, drücken Sie bitte den &quot;Überprüfen&quot;-Knopf unten." />
 
     <!---->

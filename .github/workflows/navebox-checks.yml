@@ -5,6 +5,9 @@ on:
     paths:
       - '.github/workflows/navebox-checks.yml'
       - 'Config.kmk'
+      - 'tools/navebox/**'
+      - 'build.cmd'
+      - 'navebox-build.example.json'
       - 'src/VBox/Artwork/Navebox/**'
       - 'src/VBox/Frontends/VirtualBox/**'
       - 'src/VBox/Installer/win/**'
@@ -12,6 +15,9 @@ on:
     paths:
       - '.github/workflows/navebox-checks.yml'
       - 'Config.kmk'
+      - 'tools/navebox/**'
+      - 'build.cmd'
+      - 'navebox-build.example.json'
       - 'src/VBox/Artwork/Navebox/**'
       - 'src/VBox/Frontends/VirtualBox/**'
       - 'src/VBox/Installer/win/**'
@@ -32,8 +38,11 @@ jobs:
             src/VBox/Frontends/VirtualBox
             src/VBox/Installer/win
             src/VBox/Artwork/Navebox
+            tools/navebox
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: '3.12'
       - name: Check assets, installer entry points and translation catalogs
         run: python src/VBox/Frontends/VirtualBox/testcase/tstNaveboxPackaging.py
+      - name: Check build configuration handling
+        run: python -m unittest discover -s tools/navebox -p 'test_*.py' -v

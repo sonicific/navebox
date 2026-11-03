@@ -1,0 +1,12 @@
+{
+  "local_config": "LocalConfig.release.kmk",
+  "msvc_root": "C:/Program Files (x86)/Microsoft Visual Studio/18/BuildTools/VC/Tools/MSVC/14.44.35207",
+  "windows_sdk_root": "C:/Program Files (x86)/Windows Kits/10",
+  "windows_sdk_version": "10.0.22621.0",
+  "qt_root": "prebuild/Qt/6.8.0/msvc2022_64",
+  "wix_root": "prebuild/navebox-release/wix-4.0.5",
+  "nasm_root": "prebuild/nasm/nasm-3.02",
+  "yasm_root": "prebuild/yasm-built/bin",
+  "xml_tools_root": "prebuild/xml-tools/bin",
+  "svn_revision": 0
+}

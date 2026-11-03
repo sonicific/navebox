@@ -60,17 +60,17 @@
     <String Id="VB_Network" Value="Драйвера [ProductName] для поддержки сетевых устройств." />
     <String Id="VB_NetLwfDriver" Value="Драйвер [ProductName] для сетевого моста NDIS6." />
     <String Id="VB_NetAdp6Driver" Value="Драйвер [ProductName] для виртуального сетевого адаптера NDIS6." />
-    <String Id="VB_Python" Value="Поддержка Python для VirtualBox." />
+    <String Id="VB_Python" Value="Поддержка Python для [ProductName]." />
 
     <!---->
 
-    <String Id="UsedByOtherApp" Value="Было обнаружено приложение, использующее установленную в данный момент версию VirtualBox. Перед тем как продолжить установку вам необходимо удалить данное приложение. Для более подробной информации проверьте файл dependency.dep в каталоге установки VirtualBox." />
+    <String Id="UsedByOtherApp" Value="Было обнаружено приложение, использующее установленную в данный момент версию [ProductName]. Перед тем как продолжить установку вам необходимо удалить данное приложение. Для более подробной информации проверьте файл dependency.dep в каталоге установки [ProductName]." />
     <String Id="NeedAdmin" Value="Вам необходимы права администратора для установки/удаления [ProductName]! Данный установщик будет завершён." />
     <String Id="NeedMSCRT" Value="Приложению [ProductName] требуется Microsoft Visual C++ 2019 Redistributable Package. Пожалуйста, установите и перезапустите установку [ProductName]." />
     <String Id="WrongOS" Value="Приложение [ProductName] может быть запущено только на Windows 10 или более новой." />
     <String Id="Only64Bit" Value="Приложение [ProductName] может быть запущено только на 64-битной версии Windows." />
     <String Id="WrongPlatformArch" Value="Эта версия [ProductName] была разработана для другой платформенной архитектуры и потому не может быть установлена. Пожалуйста, установите соответствующую версию [ProductName]!" />
-    <String Id="NewerVersionDetected" Value="A newer version of VirtualBox is already installed. Please uninstall it first before installing older versions of VirtualBox." />
+    <String Id="NewerVersionDetected" Value="A newer version of [ProductName] is already installed. Please uninstall it first before installing older versions of [ProductName]." />
     <String Id="InvalidTargetDir" Value="Указана неверная директория установки! Пожалуйста, используйте другую директорию для установки [ProductName]. Обратитесь к Руководству пользователя [ProductName] для более подробной информации." />
 
     <!---->
@@ -98,7 +98,7 @@
     <!---->
 
     <String Id="CheckSerialDlg_Header" Value="Серийный номер" />
-    <String Id="CheckSerialDlg_Body" Value="Пожалуйста, введите серийный номер в поле ниже. Вы можете найти его на стикере в коробке VirtualBox CD." />
+    <String Id="CheckSerialDlg_Body" Value="Пожалуйста, введите серийный номер в поле ниже. Вы можете найти его на стикере в коробке [ProductName] CD." />
     <String Id="CheckSerialDlg_Footer" Value="Закончив ввод серийного номера, нажмите кнопку &quot;Проверить&quot;." />
 
     <!---->
@@ -159,7 +159,7 @@
     <String Id="WarnPythonDlg_Title" Value="Отсутствующие зависимости" />
     <String Id="WarnPythonDlg_Title2" Value="Python Core и win32api" />
     <String Id="WarnPythonDlg_Desc" Value="Для установки привязок [ProductName] Python требуется пакет Python Core и привязки win32api." />
-    <String Id="WarnPythonDlg_Desc2" Value="Вы можете установить и настроить их позже. Ознакомьтесь с Руководством разработки [ProductName] SDK для дальнейших инструкций. Альтернативно, установите их до того, как продолжите с установкой Oracle VirtualBox." />
+    <String Id="WarnPythonDlg_Desc2" Value="Вы можете установить и настроить их позже. Ознакомьтесь с Руководством разработки [ProductName] SDK для дальнейших инструкций. Альтернативно, установите их до того, как продолжите с установкой [ProductName]." />
 
     <!---->
 
@@ -184,7 +184,7 @@
 
     <!---->
 
-    <String Id="ExitDlg_ClickFinish" Value="Вам может потребоваться пакет расширений VirtualBox. Обратитесь к Руководству пользователя." />
+    <String Id="ExitDlg_ClickFinish" Value="Вам может потребоваться пакет расширений [ProductName]. Обратитесь к Руководству пользователя." />
     <String Id="ExitDlg_InstComplete" Value="Приложение [ProductName] было установлено." />
     <String Id="ExitDlg_StartVBox" Value="Запустить [ProductName]?" />
 

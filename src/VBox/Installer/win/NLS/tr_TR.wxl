@@ -60,17 +60,17 @@
     <String Id="VB_Network" Value="Ağ oluşturma desteği için [ProductName] ağ aygıtı sürücüleri." />
     <String Id="VB_NetLwfDriver" Value="NDIS6 Köprü Ağı Oluşturma için [ProductName] sürücüsü." />
     <String Id="VB_NetAdp6Driver" Value="NDIS6 Yalnızca-Anamakine Ağı Oluşturma için [ProductName] sanal ağ bağdaştırıcısı sürücüsü." />
-    <String Id="VB_Python" Value="VirtualBox için Python desteği." />
+    <String Id="VB_Python" Value="[ProductName] için Python desteği." />
 
     <!---->
 
-    <String Id="UsedByOtherApp" Value="Şu anda yüklü olan VirtualBox sürümünü kullanan bir uygulama algılandı. Kuruluma devam etmeden önce bu uygulamayı kaldırmak zorundasınız. Ayrıntılar için VirtualBox kurulum dizinindeki dependency.dep dosyasına bakın." />
+    <String Id="UsedByOtherApp" Value="Şu anda yüklü olan [ProductName] sürümünü kullanan bir uygulama algılandı. Kuruluma devam etmeden önce bu uygulamayı kaldırmak zorundasınız. Ayrıntılar için [ProductName] kurulum dizinindeki dependency.dep dosyasına bakın." />
     <String Id="NeedAdmin" Value="[ProductName] uygulamasını yüklemek(kaldırmak) için yönetici haklarına sahip olmanız gerekir! Bu kur şimdi iptal edilecek." />
     <String Id="NeedMSCRT" Value="[ProductName] uygulamasının öncelikle Microsoft Visual C++ 2019 Yeniden Dağıtılabilir Paketinin yüklenmesine ihtiyacı var. Lütfen [ProductName] uygulamasının kurulumunu yeniden başlatın ve yükleyin." />
     <String Id="WrongOS" Value="[ProductName] yalnızca Windows 10 veya üzerinde çalışır." />
     <String Id="Only64Bit" Value="[ProductName] yalnızca 64-bit Windows sistemlerinde çalışır." />
     <String Id="WrongPlatformArch" Value="[ProductName] uygulamasının bu sürümü farklı bir platform mimarisi için geliştirilmiştir ve bu nedenle yüklenemez. Lütfen [ProductName] uygulamasının eşleşen bir sürümünü yükleyin!" />
-    <String Id="NewerVersionDetected" Value="VirtualBox'ın daha yeni bir sürümü zaten yüklü. Lütfen VirtualBox'ın eski sürümlerini kurmadan önce bunu kaldırın." />
+    <String Id="NewerVersionDetected" Value="[ProductName]'ın daha yeni bir sürümü zaten yüklü. Lütfen [ProductName]'ın eski sürümlerini kurmadan önce bunu kaldırın." />
     <String Id="InvalidTargetDir" Value="Geçersiz kurulum dizini belirtildi! [ProductName] uygulamasını yüklemek için lütfen başka bir kurulum dizini kullanın. Daha fazla bilgi için [ProductName] kılavuzuna bakın." />
 
     <!---->
@@ -98,7 +98,7 @@
     <!---->
 
     <String Id="CheckSerialDlg_Header" Value="Seri Numarası" />
-    <String Id="CheckSerialDlg_Body" Value="Lütfen aşağıdaki alana seri numaranızı girin. VirtualBox CD kutusu içerisindeki etikette bulacaksınız." />
+    <String Id="CheckSerialDlg_Body" Value="Lütfen aşağıdaki alana seri numaranızı girin. [ProductName] CD kutusu içerisindeki etikette bulacaksınız." />
     <String Id="CheckSerialDlg_Footer" Value="Seri numarasını girmeniz bittiğinde, aşağıdaki &quot;Denetle&quot; düğmesine basın&quot;." />
 
     <!---->

@@ -105,7 +105,7 @@ PROPS_MISCBINS_ACCUMULATE_L  += INTERMEDIATES
 # Some info on the vendor
 VBOX_VENDOR       = Oracle and/or its affiliates
 VBOX_VENDOR_SHORT = Oracle
-VBOX_PRODUCT      = $(VBOX_VENDOR_SHORT) VirtualBox
+VBOX_PRODUCT      = Navebox
 VBOX_PUEL_PRODUCT = $(VBOX_PRODUCT) Extension Pack
 # Not all could be done automatically. Here is a list of known places which
 # have to be updated manually, please keep this up to date:
@@ -1345,7 +1345,11 @@ VBOX_BRAND_GUI_VBOX_40PX_PNG         := $(PATH_ROOT)/src/VBox/Frontends/VirtualB
 VBOX_BRAND_GUI_VBOX_48PX_PNG         := $(PATH_ROOT)/src/VBox/Frontends/VirtualBox/images/NonOSE/VirtualBox_48px.png
 VBOX_BRAND_GUI_VBOX_64PX_PNG         := $(PATH_ROOT)/src/VBox/Frontends/VirtualBox/images/NonOSE/VirtualBox_64px.png
 VBOX_BRAND_GUI_VBOX_SVG              := $(PATH_ROOT)/src/VBox/Artwork/NonOSE/virtualbox.svg
-VBOX_BRAND_WIN_INST_DLGJPG           := $(PATH_ROOT)/src/VBox/Installer/win/Binary/Dialog.jpg
+VBOX_BRAND_WIN_INST_DLGJPG           := $(PATH_ROOT)/src/VBox/Artwork/Navebox/installer-dialog.jpg
+VBOX_BRAND_WIN_INST_BANNER           := $(PATH_ROOT)/src/VBox/Artwork/Navebox/installer-banner.jpg
+VBOX_BRAND_WIN_INST_SPLASH           := $(PATH_ROOT)/src/VBox/Artwork/Navebox/installer-splash.png
+## Distributor displayed by Windows Installer; upstream copyright is unchanged.
+VBOX_BRAND_WIN_INST_PUBLISHER        := Navebox
 VBOX_BRAND_WIN_INST_EXT              :=
 VBOX_BRAND_WIN_ADD_INST_DLGBMP       := $(PATH_ROOT)/src/VBox/Additions/win/Installer/welcome.bmp
 VBOX_BRAND_DARWIN_DISKIMAGE_DS_STORE := $(PATH_ROOT)/src/VBox/Installer/darwin/DiskImage/DS_Store

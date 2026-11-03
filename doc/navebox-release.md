@@ -78,6 +78,65 @@ target remains the full catalog-maintenance entry point.
 
 ## Windows distribution checks
 
+### Windows build entry point
+
+`build.cmd` is the Windows x64 entry point, backed by separate configuration,
+pipeline and package-verification modules under `tools/navebox/`. It requires
+Python 3.9 or newer. The `check` command also works directly through Python on
+other hosts without SDKs:
+
+```text
+.\build.cmd doctor
+.\build.cmd check
+.\build.cmd release
+```
+
+On this development machine, `navebox-build.local.json` points to the existing
+machine-local release profile and toolchains. For a new checkout:
+
+1. Copy `navebox-build.example.json` to `navebox-build.local.json` and edit all
+   tool paths, including MSVC x64/x86, SDK, Qt, WiX 4, NASM, YASM and XML tools.
+   Relative paths resolve against the repository, regardless of shell location.
+2. Prepare `LocalConfig.release.kmk` from
+   `tools/navebox/LocalConfig.release.example.kmk`, together with the external
+   developer setup described above. Set the signing inputs there and resolve
+   compiler/SDK compatibility issues locally. The example contains no signing
+   credentials and intentionally omits Guest Additions and documentation.
+3. Set `local_config` to that file in the JSON configuration. Both local files
+   are ignored. `svn_revision` must be explicit; 0 identifies an unversioned
+   test build and must not be presented as an actual upstream SVN revision.
+4. Run `build.cmd doctor` to check tool entry points, then `build.cmd check`
+   and `build.cmd release`. Doctor checks file presence; successful compilation
+   and release qualification are separate requirements.
+
+`release` runs compilation, Qt deployment, MSI/EXE packaging and read-only MSI
+verification, then exports artifacts, `build-manifest.json`, `README-FIRST.txt`
+and `SHA256SUMS.txt` under `out/win.amd64/release/delivery/`. Logs and extracted
+verification files are under `prebuild/navebox-build/`. The verifier checks the
+product/publisher, setup artwork, UI strings, core payload, BIOS bitmap and
+unchanged upstream license. It never executes installation actions.
+
+Individual stages and a different local configuration are available:
+
+```text
+.\build.cmd compile --jobs 8
+.\build.cmd package --jobs 8
+.\build.cmd release --config path/to/local-build.json
+```
+
+`compile` builds binaries; `package` uses matching existing release output,
+stages Qt and builds/verifies installers. Use `release` for the complete
+sequence after source changes. The helper does not download dependencies,
+create/install certificates, register COM/services/drivers, install the app,
+or alter Windows security settings. The current local certificate is only a
+test identity; ordinary Windows driver trust remains unqualified.
+
+The setup title, Installed Apps entry, publisher display, Start menu and fresh
+default folder use Navebox. Copyright, component license text, compatibility
+registry keys, COM identifiers and the MSI upgrade identity retain their
+upstream meanings. An upgrade may reuse an existing installation directory.
+The EXE and MSI therefore still require upgrade/coexistence qualification.
+
 Build the normal installer targets in a release environment with the required
 WiX tools and signing credentials. `NaveboxLauncher` and `VirtualBoxManifest`
 are installation targets in the frontend makefile. A standalone developer
@@ -124,8 +183,9 @@ kmk KBUILD_TYPE=release NaveboxLauncher VirtualBoxManifest
 kmk KBUILD_TYPE=release packing
 ```
 
-These commands describe the release pipeline; they have not been executed or
-qualified with this machine's current development configuration. This tree's
+These commands describe the underlying kBuild pipeline. The helper above has
+been exercised with a separate machine-local release configuration; a local
+test build does not qualify a public release. This tree's
 Windows installer uses WiX 4 (the default tool path in `Config.kmk` is v4.0.5),
 not older instructions based on `candle.exe`/`light.exe`. A source build with
 forced driverless execution is not by itself a driver-free installer: the

@@ -33,6 +33,19 @@ the desktop icon alone does not change the guest boot display. Custom per-VM
 boot images retain priority. EFI logos belong to the separate EFI firmware;
 updating this BIOS bitmap does not modify prebuilt EFI images.
 
+Windows setup artwork also uses the same icon and wordmark. With the Qt JPEG
+image plugin available to the renderer, export all three installer backgrounds:
+
+```text
+render-navebox-branding.exe --installer images/Navebox/navebox.svg ../../Artwork/Navebox/boot-wordmark.svg ../../Artwork/Navebox
+```
+
+The dialog is 493x313, the banner 493x58 and the EXE splash 800x200 pixels.
+The corresponding `VBOX_BRAND_WIN_INST_*` variables select these files; their
+build dependencies force resources to update when artwork changes. MSI product
+name comes from `VBOX_PRODUCT`, and distributor display from
+`VBOX_BRAND_WIN_INST_PUBLISHER`. Original license/copyright text is retained.
+
 Product name, slogan and contact data are centralized in
 `src/globals/UIBranding.h`. Windows builds install `Navebox.exe` alongside the
 internal compatibility executable. The two entry points share the same code,
