@@ -545,6 +545,7 @@ VBOX_WIN_INST_ENV := \
 	-E 'VBOX_WITH_ORACLE_QT=$(if $(VBOX_WITH_ORACLE_QT),yes,no)' \
 	-E 'VBOX_WITH_PYTHON=$(if $(VBOX_WITH_PYTHON),yes,no)' \
 	-E 'VBOX_WITH_QTGUI=$(if $(VBOX_WITH_QTGUI),yes,no)' \
+	-E 'VBOX_WITH_QT_PAYLOAD=$(if $(VBOX_WITH_QT_PAYLOAD),yes,no)' \
 	-E 'VBOX_WITH_R0_MODULES=$(if $(VBOX_WITH_R0_MODULES),yes,no)' \
 	-E 'VBOX_WITH_RAW_MODE=$(if $(VBOX_WITH_RAW_MODE),yes,no)' \
 	-E 'VBOX_WITH_SDS=$(if $(VBOX_WITH_SDS),yes,no)' \

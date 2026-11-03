@@ -99,6 +99,11 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
+        <para>Windows installer: Included staged Qt libraries and required
+          plugins when building Navebox with the public Qt SDK payload</para>
+      </listitem>
+
+      <listitem>
         <para>GUI: Introduced Navebox branding, desktop icons and product
           information with a separate About action next to Help, and replaced
           heavy native input and group-box frames with lighter borders</para>

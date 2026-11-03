@@ -294,10 +294,15 @@
         <ComponentRef Id="cp_UnattendedTemplates" />
     <?endif?>
     <ComponentRef Id="cp_MainBinaries" />
-    <?if $(env.VBOX_WITH_QTGUI) = "yes" and $(env.VBOX_WITH_ORACLE_QT) = "yes" ?>
+    <?if $(env.VBOX_WITH_QTGUI) = "yes" and ($(env.VBOX_WITH_ORACLE_QT) = "yes" or $(env.VBOX_WITH_QT_PAYLOAD) = "yes") ?>
         <ComponentRef Id="cp_QtPlatforms" />
         <ComponentRef Id="cp_QtSqldrivers" />
         <ComponentRef Id="cp_QtStyles" />
+        <?if $(env.VBOX_WITH_QT_PAYLOAD) = "yes" ?>
+        <ComponentRef Id="cp_QtImageformats" />
+        <ComponentRef Id="cp_QtTls" />
+        <ComponentRef Id="cp_QtNetworkinformation" />
+        <?endif?>
     <?endif?>
     <?if $(env.VBOX_WITH_PYTHON) = "yes" ?>
         <ComponentRef Id="cp_VBoxPyInst" />

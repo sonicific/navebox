@@ -241,7 +241,7 @@
     <?if $(env.VBOX_WITH_HARDENING) = "yes" ?>
         <File Id="file_VirtualBoxVM.dll" Name="VirtualBoxVM.dll" Source="$(env.PATH_OUT)\bin\VirtualBoxVM.dll" />
     <?endif?>
-    <?if $(env.VBOX_WITH_ORACLE_QT) = "yes" ?>
+    <?if $(env.VBOX_WITH_ORACLE_QT) = "yes" or $(env.VBOX_WITH_QT_PAYLOAD) = "yes" ?>
         <File Id="file_Qt6Core$(var.VBOX_QT_INFIX).dll" Name="Qt6Core$(var.VBOX_QT_INFIX).dll" Source="$(env.PATH_OUT)\bin\Qt6Core$(var.VBOX_QT_INFIX).dll" />
         <File Id="file_Qt6Gui$(var.VBOX_QT_INFIX).dll" Name="Qt6Gui$(var.VBOX_QT_INFIX).dll" Source="$(env.PATH_OUT)\bin\Qt6Gui$(var.VBOX_QT_INFIX).dll" />
         <File Id="file_Qt6Widgets$(var.VBOX_QT_INFIX).dll" Name="Qt6Widgets$(var.VBOX_QT_INFIX).dll" Source="$(env.PATH_OUT)\bin\Qt6Widgets$(var.VBOX_QT_INFIX).dll" />
@@ -250,6 +250,10 @@
         <File Id="file_Qt6Help$(var.VBOX_QT_INFIX).dll" Name="Qt6Help$(var.VBOX_QT_INFIX).dll" Source="$(env.PATH_OUT)\bin\Qt6Help$(var.VBOX_QT_INFIX).dll" />
         <!-- @todo r=bird: why file_vSql* and not file_Qt6Sql* like the 6 files above? -->
         <File Id="file_vSql$(var.VBOX_QT_INFIX).dll" Name="Qt6Sql$(var.VBOX_QT_INFIX).dll" Source="$(env.PATH_OUT)\bin\Qt6Sql$(var.VBOX_QT_INFIX).dll" />
+        <?if $(env.VBOX_WITH_QT_PAYLOAD) = "yes" ?>
+        <File Id="file_Qt6Network$(var.VBOX_QT_INFIX).dll" Name="Qt6Network$(var.VBOX_QT_INFIX).dll" Source="$(env.PATH_OUT)\bin\Qt6Network$(var.VBOX_QT_INFIX).dll" />
+        <File Id="file_Qt6Svg$(var.VBOX_QT_INFIX).dll" Name="Qt6Svg$(var.VBOX_QT_INFIX).dll" Source="$(env.PATH_OUT)\bin\Qt6Svg$(var.VBOX_QT_INFIX).dll" />
+        <?endif?>
     <?endif?>
         <File Id="file_VirtualBox.VisualElementsManifest.xml" Name="VirtualBox.VisualElementsManifest.xml" Source="$(env.PATH_OUT)\bin\VirtualBox.VisualElementsManifest.xml" />
         <File Id="file_Navebox.VisualElementsManifest.xml" Name="Navebox.VisualElementsManifest.xml" Source="$(env.PATH_OUT)\bin\Navebox.VisualElementsManifest.xml" />
@@ -327,7 +331,7 @@
 
     </Component> <!-- MainBinaries -->
 
-<?if $(env.VBOX_WITH_QTGUI) = "yes" And $(env.VBOX_WITH_ORACLE_QT) = "yes" ?>
+<?if $(env.VBOX_WITH_QTGUI) = "yes" and ($(env.VBOX_WITH_ORACLE_QT) = "yes" or $(env.VBOX_WITH_QT_PAYLOAD) = "yes") ?>
     <!-- Qt platforms plugins -->
     <Directory Id="dir_VBoxAppPlatforms" Name="platforms">
         <Component Id="cp_QtPlatforms" Guid="842367ec-6094-4ddc-93d8-6ca70fc1ca24" Bitness="$(var.Property_Bitness)">
@@ -348,6 +352,27 @@
             <File Id="file_qmodernwindowsstyle$(var.VBOX_QT_INFIX).dll" Name="qmodernwindowsstyle$(var.VBOX_QT_INFIX).dll" Source="$(env.PATH_OUT)\bin\styles\qmodernwindowsstyle$(var.VBOX_QT_INFIX).dll" />
         </Component>
     </Directory>
+    <?if $(env.VBOX_WITH_QT_PAYLOAD) = "yes" ?>
+    <!-- Public Qt SDK image loaders required by application icons and previews. -->
+    <Directory Id="dir_VBoxAppImageformats" Name="imageformats">
+        <Component Id="cp_QtImageformats" Guid="BA995CB5-88D7-4C64-8A46-1EFA1DD6CC42" Bitness="$(var.Property_Bitness)">
+            <File Id="file_qico$(var.VBOX_QT_INFIX).dll" Name="qico$(var.VBOX_QT_INFIX).dll" Source="$(env.PATH_OUT)\bin\imageformats\qico$(var.VBOX_QT_INFIX).dll" />
+            <File Id="file_qjpeg$(var.VBOX_QT_INFIX).dll" Name="qjpeg$(var.VBOX_QT_INFIX).dll" Source="$(env.PATH_OUT)\bin\imageformats\qjpeg$(var.VBOX_QT_INFIX).dll" />
+            <File Id="file_qsvg$(var.VBOX_QT_INFIX).dll" Name="qsvg$(var.VBOX_QT_INFIX).dll" Source="$(env.PATH_OUT)\bin\imageformats\qsvg$(var.VBOX_QT_INFIX).dll" />
+        </Component>
+    </Directory>
+    <!-- Use the Windows TLS backend without requiring an external OpenSSL DLL. -->
+    <Directory Id="dir_VBoxAppTls" Name="tls">
+        <Component Id="cp_QtTls" Guid="5374FCBB-B219-4B10-ACBD-BC6474F89A5D" Bitness="$(var.Property_Bitness)">
+            <File Id="file_qschannelbackend$(var.VBOX_QT_INFIX).dll" Name="qschannelbackend$(var.VBOX_QT_INFIX).dll" Source="$(env.PATH_OUT)\bin\tls\qschannelbackend$(var.VBOX_QT_INFIX).dll" />
+        </Component>
+    </Directory>
+    <Directory Id="dir_VBoxAppNetworkinformation" Name="networkinformation">
+        <Component Id="cp_QtNetworkinformation" Guid="603CD411-770F-42C3-9459-1C4D3CC57938" Bitness="$(var.Property_Bitness)">
+            <File Id="file_qnetworklistmanager$(var.VBOX_QT_INFIX).dll" Name="qnetworklistmanager$(var.VBOX_QT_INFIX).dll" Source="$(env.PATH_OUT)\bin\networkinformation\qnetworklistmanager$(var.VBOX_QT_INFIX).dll" />
+        </Component>
+    </Directory>
+    <?endif?>
 <?endif?>
 
 <?if $(env.VBOX_WITH_VBOXSDL) = "yes" ?>

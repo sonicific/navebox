@@ -1,13 +1,29 @@
+# Machine-local configuration and fetched dependencies.
 /AutoConfig.kmk
 /configure.log
 /env.sh
 /env.bat
-/out
 /LocalConfig.kmk
-/prebuild
-/SlickEdit
-/virtualbox.vscode-workspace
+/prebuild/
 /SVN_REVISION
+
+# Build outputs and local diagnostics (source-tree fixtures remain visible).
+/out/
+/????-??-??-??-??-??.???-*.log
+/VBox*.log*
+/VirtualBox*.log*
+/Navebox*.log*
 /tbox_patches
 /tinderclient.log
-.vscode
+
+# Local editor and Python development state.
+/SlickEdit
+/virtualbox.vscode-workspace
+/*.code-workspace
+/.vscode/
+/.vs/
+/.venv/
+/venv/
+__pycache__/
+*.pyc
+*.pyo

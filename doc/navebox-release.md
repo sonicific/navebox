@@ -85,6 +85,112 @@ build of only selected executables must also build these targets before
 packaging. Retain `VirtualBox.exe` and its file associations for compatibility;
 the desktop/Start-menu entries and post-install launch use `Navebox.exe`.
 
+### Moving the application to another computer
+
+`Navebox.exe` is an entry point into a complete VirtualBox installation. Copying
+that executable alone does not produce a portable application. The destination
+needs the matching frontend/backend DLLs, COM registration and VBoxSDS service,
+plus the Qt libraries/plugins and firmware payloads required by the selected
+features. The Windows installer sources already describe these components.
+Registering COM to a directory that is later moved leaves stale absolute paths.
+
+Prefer a release installer for end-user distribution. The destination does not
+need Visual Studio, the Windows/Qt SDKs, Python build tools or this source tree
+to run the normal desktop application. It needs a supported Windows version
+and architecture, the runtime dependencies and an available execution backend.
+Optional integrations, including Python bindings, have their own prerequisites.
+Do not require users to install a separate Oracle VirtualBox build: internal
+COM and service identifiers are shared and ownership must be handled by the
+installer's upgrade/repair logic.
+
+The current machine-local development configuration is not a release profile:
+it forces driverless execution, disables hardening and installer generation,
+omits Guest Additions and documentation, and contains local SDK paths. Changing
+only `KBUILD_TYPE` does not remove these overrides. Prepare a separate release
+configuration and output tree. For a conventional Windows x64 package, remove
+the developer overrides for `VBOX_WITH_DRIVERLESS_FORCED`,
+`VBOX_WITH_DRIVERLESS_NEM_FALLBACK` and `VBOX_WITHOUT_HARDENING`, retain the normal
+Windows hardening defaults, and enable `VBOX_WITH_INSTALLER`. Build and package
+the matching support driver and optional network/USB drivers that the product
+claims to provide. Merely copying another installation's drivers is not a
+replacement for building and qualifying a matching set.
+
+Once configuration, SDKs, signing inputs and payloads are ready, the build
+sequence in the prepared developer shell is:
+
+```text
+kmk KBUILD_TYPE=release
+kmk KBUILD_TYPE=release NaveboxLauncher VirtualBoxManifest
+kmk KBUILD_TYPE=release packing
+```
+
+These commands describe the release pipeline; they have not been executed or
+qualified with this machine's current development configuration. This tree's
+Windows installer uses WiX 4 (the default tool path in `Config.kmk` is v4.0.5),
+not older instructions based on `candle.exe`/`light.exe`. A source build with
+forced driverless execution is not by itself a driver-free installer: the
+current MSI application module still includes the support-driver components.
+
+Deployment dependencies must be shipped or installed explicitly:
+
+- Qt runtime libraries and plugins, including the Windows platform plugin.
+  Stage the matching SDK's release DLLs/plugins in the build's `bin` directory
+  before packing. `VBOX_WITH_QT_PAYLOAD` includes these staged files in the MSI,
+  including the ICO/JPEG/SVG loaders, Windows TLS and network-information
+  plugins used with the public Qt SDK. Qt's `windeployqt` is useful
+  for dependency inspection/staging, but does not register VirtualBox COM,
+  install its services/drivers, or find every dynamically loaded VBox module.
+- The official Microsoft Visual C++ v14 Redistributable matching the binary
+  architecture and at least the MSVC toolset version used to build it. Include
+  the runtime for any shipped 32-bit helper components as well. Users need the
+  runtime, not the compiler toolchain.
+- Appropriately signed kernel drivers for a driver-backed release. Normal
+  Windows driver-signing policy remains part of the deployment requirements.
+- Matching Guest Additions/documentation and optional feature payloads, or an
+  explicit, tested policy for features that are excluded.
+
+Installing COM/services/drivers normally requires administrator rights. Daily
+Manager and VM use should work as an ordinary user after installation. A ZIP
+of a developer `bin` directory can be useful for controlled testing after
+deployment/registration, but is not a zero-install portable distribution.
+
+### Windows execution backends
+
+The host execution backend is distinct from the VM's **Hyper-V
+paravirtualization provider**. The latter is an interface presented to a Windows
+guest and can also be used with direct VT-x/AMD-V execution; its selection alone
+does not prove that the host is running Microsoft's hypervisor.
+
+| Destination capability | Forced-driverless Windows x64 build | Qualified conventional driver-backed build |
+| --- | --- | --- |
+| Hyper-V and Windows Hypervisor Platform usable | NEM/WHP execution, subject to supported capabilities | NEM/WHP execution; test this path separately |
+| WHP unavailable, VT-x/AMD-V enabled and available | No automatic HM fallback; ordinary VM startup fails | HM can use VT-x/AMD-V via the matching installed VBoxSup driver |
+| Virtualization disabled in firmware | No usable standard backend | Enable the required firmware setting before using HM/NEM |
+| CPU lacks required virtualization features | No supported HM/NEM path | No supported HM/NEM path |
+
+`VBOX_WITH_DRIVERLESS_FORCED` adds `SUPR3INIT_F_DRIVERLESS` in `SUPLib.cpp`.
+On x86/amd64, `HMR3-x86.cpp` defaults `FallbackToIEM` to false. The presence of
+the IEM interpreter in the source therefore does not provide an automatic,
+qualified software-emulation fallback. Any explicit interpreter/recompiler
+profile needs its own feature, performance and guest compatibility validation.
+
+When WHP is absent, distinguish an unavailable/disabled Windows feature from
+missing CPU virtualization support. The Hyper-V role, its management tools and
+WHP are different components. A Windows edition without the full Hyper-V role
+does not, by itself, establish which backend capabilities are available. Query
+WHP capabilities and verify firmware/driver status rather than inferring them
+from a GUI checkbox. A conventional package should select an available backend
+and explain missing prerequisites before attempting to start a VM.
+
+Primary deployment references:
+[Qt Windows deployment](https://doc.qt.io/qt-6/windows-deployment.html),
+[Microsoft C++ runtime](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist),
+[Windows driver signing](https://learn.microsoft.com/en-us/windows-hardware/drivers/install/kernel-mode-code-signing-policy--windows-vista-and-later-),
+[Windows Hypervisor Platform API](https://learn.microsoft.com/en-us/virtualization/api/hypervisor-platform/hypervisor-platform),
+[VirtualBox with Hyper-V](https://docs.oracle.com/en/virtualization/virtualbox/7.2/user/AdvancedTopics.html).
+
+### Clean-host acceptance
+
 On disposable clean hosts, verify:
 
 1. Fresh install, first launch and VM creation as an ordinary user, without
