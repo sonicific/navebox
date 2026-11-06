@@ -345,10 +345,12 @@ static void tstBackend(const QString &strRoot, const QString &strSdk, const QStr
     RTTESTI_CHECK(!fSuccess);
     RTTESTI_CHECK(!backend.devices().first().m_fStarting);
     tstControl(strRoot, "acceleration", true);
-    backend.startPhone(strId, true);
+    backend.startPhone(strId, true, true);
     RTTESTI_CHECK(tstWait(backend));
     RTTESTI_CHECK(fSuccess);
     RTTESTI_CHECK(tstWaitStarted(strRoot));
+    const QByteArray launch = tstRead(strRoot + "/calls.jsonl");
+    RTTESTI_CHECK(launch.contains("\"-gpu\",\"software\",\"-no-snapshot-load\",\"-no-snapshot-save\""));
     backend.refresh();
     RTTESTI_CHECK(tstWait(backend));
     RTTESTI_CHECK(backend.devices().first().m_fStarting);
@@ -358,6 +360,14 @@ static void tstBackend(const QString &strRoot, const QString &strSdk, const QStr
     backend.refresh();
     RTTESTI_CHECK(tstWait(backend));
     RTTESTI_CHECK(backend.devices().first().m_fBooted);
+    tstControl(strRoot, "delay", 200);
+    backend.refresh();
+    RTTESTI_CHECK(backend.isRefreshing());
+    backend.sendKey(strId, 3);
+    RTTESTI_CHECK(!backend.isRefreshing());
+    RTTESTI_CHECK(tstWait(backend));
+    RTTESTI_CHECK(fSuccess && backend.devices().first().m_fBooted);
+    tstControl(strRoot, "delay", 0);
     backend.startPhone(strId);
     RTTESTI_CHECK(!backend.isBusy());
     RTTESTI_CHECK(!fSuccess);
@@ -436,6 +446,33 @@ static void tstBackend(const QString &strRoot, const QString &strSdk, const QStr
             RTTESTI_CHECK(args.at(1).toString().startsWith("emulator-"));
             RTTESTI_CHECK(!args.contains(QJsonValue("physical-phone")));
         }
+    }
+
+    RTTestISub("Varied profiles preserve independent AVDs");
+    UIPhoneBackend fleet(0, strRoot + "/fleet-data");
+    RTTESTI_CHECK(fleet.configure(strSdk, strJava, strError));
+    options.m_fVaryProfile = true;
+    const QList<UIPhoneProfile> profiles = UIPhoneBackend::profiles();
+    for (qsizetype i = 0; i < profiles.size(); ++i)
+    {
+        fleet.createPhone(options);
+        RTTESTI_CHECK(tstWait(fleet));
+    }
+    UIPhoneBackend reopened(0, fleet.dataRoot());
+    RTTESTI_CHECK(reopened.devices().size() == profiles.size());
+    for (const UIPhoneProfile &profile : profiles)
+    {
+        int cMatches = 0;
+        for (const UIPhoneDevice &device : reopened.devices())
+            if (device.m_strProfile == profile.m_pszSdkDevice)
+            {
+                ++cMatches;
+                const QByteArray settings = tstRead(fleet.dataRoot() + "/avd/" + device.m_strId + ".avd/config.ini");
+                RTTESTI_CHECK(settings.contains("hw.lcd.width=" + QByteArray::number(profile.m_iWidth) + '\n'));
+                RTTESTI_CHECK(settings.contains("hw.lcd.height=" + QByteArray::number(profile.m_iHeight) + '\n'));
+                RTTESTI_CHECK(settings.contains("hw.lcd.density=" + QByteArray::number(profile.m_iDensity) + '\n'));
+            }
+        RTTESTI_CHECK(cMatches == 1);
     }
 }
 
@@ -562,6 +599,49 @@ static void tstDialog(const QString &strRoot, const QString &strSdk, const QStri
     dialog.hide();
 }
 
+/** Exercises SDK view resizing and reopening a phone dialog after moving its owner. */
+static void tstDialogCentering(const QString &strRoot)
+{
+    RTTestISub("Phone dialog centering");
+    const QRect available = gpDesktop->availableGeometry();
+    QWidget owner;
+    owner.setGeometry(available.adjusted(30, 45, -30, -75));
+    owner.show();
+    QApplication::processEvents();
+    UIPhoneManager dialog(&owner, strRoot + "/center-dialog-data");
+    dialog.show();
+    QApplication::processEvents();
+    QPushButton *pSdkSettings = dialog.findChild<QPushButton*>("phoneSdkSettings");
+    RTTESTI_CHECK_RETV(pSdkSettings);
+
+    /* Move the dialog by hand before opening SDK settings. The resized frame
+     * should stay around that point, even away from its original owner center. */
+    dialog.move(dialog.pos() - QPoint(0, 18));
+    const QPoint manualCenter = dialog.frameGeometry().center();
+    for (int i = 0; i < 2; ++i)
+    {
+        pSdkSettings->click();
+        QApplication::processEvents();
+        const QPoint delta = dialog.frameGeometry().center() - manualCenter;
+        RTTESTI_CHECK(qAbs(delta.x()) <= 2 && qAbs(delta.y()) <= 2);
+    }
+
+    dialog.hide();
+    dialog.show();
+    QApplication::processEvents();
+    const QPoint unchangedDelta = dialog.frameGeometry().center() - manualCenter;
+    RTTESTI_CHECK(qAbs(unchangedDelta.x()) <= 2 && qAbs(unchangedDelta.y()) <= 2);
+
+    dialog.hide();
+    owner.move(owner.pos() + QPoint(0, 48));
+    QApplication::processEvents();
+    dialog.show();
+    QApplication::processEvents();
+    const QPoint target = owner.frameGeometry().intersected(available).center();
+    const QPoint delta = dialog.frameGeometry().center() - target;
+    RTTESTI_CHECK(qAbs(delta.x()) <= 2 && qAbs(delta.y()) <= 2);
+}
+
 int main(int argc, char **argv)
 {
     const QString strTool = QFileInfo(QString::fromLocal8Bit(argv[0])).completeBaseName();
@@ -605,6 +685,7 @@ int main(int argc, char **argv)
             tstBackend(directory.path(), strSdk, strJava);
         if (fPrepared)
             tstDialog(directory.path(), strSdk, strJava);
+        tstDialogCentering(directory.path());
         qunsetenv("NAVEBOX_PHONE_FAKE_ROOT");
     }
     UIDesktopWidgetWatchdog::destroy();

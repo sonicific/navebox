@@ -33,6 +33,7 @@
 #include <QJsonObject>
 #include <QLockFile>
 #include <QProcess>
+#include <QRandomGenerator>
 #include <QRegularExpression>
 #include <QSaveFile>
 #include <QSharedPointer>
@@ -106,6 +107,7 @@ UIPhoneBackend::UIPhoneBackend(QObject *pParent, const QString &strDataRoot)
                     : QFileInfo(strDataRoot).absoluteFilePath()))
     , m_pCommand(0)
     , m_fBusy(false)
+    , m_fRefreshing(false)
 {
     QFile settings(m_strDataRoot + "/settings.json");
     if (settings.open(QIODevice::ReadOnly) && settings.size() <= 16384)
@@ -217,10 +219,15 @@ bool UIPhoneBackend::isConfigured(QString &strError) const
 bool UIPhoneBackend::configure(const QString &strSdkRoot, const QString &strJavaHome, QString &strError)
 {
     strError.clear();
-    if (m_fBusy)
+    if (m_fBusy && !m_fRefreshing)
     {
         strError = tr("Wait for the current phone operation to finish.");
         return false;
+    }
+    if (m_fRefreshing)
+    {
+        cancelRefresh();
+        setBusy(false);
     }
     const QString strOldSdk = m_strSdkRoot;
     const QString strOldJava = m_strJavaHome;
@@ -272,6 +279,47 @@ QList<UIPhoneImage> UIPhoneBackend::images() const
     return result;
 }
 
+/* static */
+QList<UIPhoneProfile> UIPhoneBackend::profiles()
+{
+    return {{"pixel",       720, 1280, 320},
+            {"pixel_xl",   1080, 1920, 420},
+            {"pixel_2_xl", 1080, 2160, 420}};
+}
+
+/** Resolves explicit display settings to a supported hardware definition. */
+static const char *uiPhoneProfileFor(const UIPhoneOptions &options)
+{
+    for (const UIPhoneProfile &profile : UIPhoneBackend::profiles())
+        if (   profile.m_iWidth == options.m_iWidth && profile.m_iHeight == options.m_iHeight
+            && profile.m_iDensity == options.m_iDensity)
+            return profile.m_pszSdkDevice;
+    return 0;
+}
+
+UIPhoneProfile UIPhoneBackend::chooseProfile() const
+{
+    QMap<QString, int> counts;
+    for (const UIPhoneDevice &device : m_devices)
+        ++counts[device.m_strProfile];
+
+    /* Spread automatic selections across the fleet, randomizing ties. */
+    QList<UIPhoneProfile> candidates;
+    int cFewest = m_devices.size();
+    for (const UIPhoneProfile &profile : profiles())
+    {
+        const int cDevices = counts.value(profile.m_pszSdkDevice);
+        if (cDevices < cFewest)
+        {
+            candidates.clear();
+            cFewest = cDevices;
+        }
+        if (cDevices == cFewest)
+            candidates << profile;
+    }
+    return candidates.at(QRandomGenerator::global()->bounded(int(candidates.size())));
+}
+
 bool UIPhoneBackend::validate(const UIPhoneOptions &options, QString &strError) const
 {
     if (!isConfigured(strError))
@@ -293,9 +341,8 @@ bool UIPhoneBackend::validate(const UIPhoneOptions &options, QString &strError) 
         strError = tr("Choose a CPU count supported by this host (at most 8).");
     else if (!QList<int>({8, 16, 32, 64}).contains(options.m_iStorageGB))
         strError = tr("Choose 8, 16, 32 or 64 GB of phone storage.");
-    else if (!(   (options.m_iWidth == 720 && options.m_iHeight == 1280 && options.m_iDensity == 320)
-               || (options.m_iWidth == 1080 && options.m_iHeight == 1920 && options.m_iDensity == 420)))
-        strError = tr("Choose a supported portrait display preset.");
+    else if (!options.m_fVaryProfile && !uiPhoneProfileFor(options))
+        strError = tr("Choose a supported portrait profile.");
     else
     {
         foreach (const UIPhoneImage &image, images())
@@ -346,6 +393,7 @@ void UIPhoneBackend::loadCatalog()
         UIPhoneDevice device = previous.value(strId);
         device.m_strId = strId;
         device.m_strName = object.value("name").toString().left(64);
+        device.m_strProfile = object.value("profile").toString();
         m_devices.insert(strId, device);
     }
 }
@@ -353,12 +401,27 @@ void UIPhoneBackend::loadCatalog()
 void UIPhoneBackend::setBusy(bool fBusy)
 {
     m_fBusy = fBusy;
+    if (!fBusy)
+        m_fRefreshing = false;
     emit sigBusyChanged(fBusy);
 }
 
-bool UIPhoneBackend::beginOperation()
+void UIPhoneBackend::cancelRefresh()
 {
-    if (m_fBusy)
+    if (m_pCommand)
+    {
+        m_pCommand->disconnect(this);
+        m_pCommand->kill();
+        m_pCommand->deleteLater();
+        m_pCommand = 0;
+    }
+    m_refreshDevices.clear();
+    m_refreshStarting.clear();
+}
+
+bool UIPhoneBackend::beginOperation(bool fRefresh)
+{
+    if (m_fBusy && (!m_fRefreshing || fRefresh))
         return false;
     QString strError;
     if (!isConfigured(strError))
@@ -366,6 +429,9 @@ bool UIPhoneBackend::beginOperation()
         emit sigOperationFinished(false, strError);
         return false;
     }
+    if (m_fRefreshing)
+        cancelRefresh();
+    m_fRefreshing = fRefresh;
     setBusy(true);
     return true;
 }
@@ -477,7 +543,7 @@ bool UIPhoneBackend::writePhoneConfig(const QString &strId, const UIPhoneOptions
     for (auto it = values.cbegin(); it != values.cend(); ++it)
         data += (it.key() + '=' + it.value() + '\n').toUtf8();
     const QJsonObject metadata{{"version", 1}, {"id", strId}, {"name", options.m_strName.trimmed()},
-                               {"image", options.m_strPackage}};
+                               {"image", options.m_strPackage}, {"profile", uiPhoneProfileFor(options)}};
     if (!uiPhoneWrite(strConfig, data) || !uiPhoneWrite(strDirectory + "/navebox.json", QJsonDocument(metadata).toJson()))
     {
         strError = tr("Cannot save the new phone configuration. Check free disk space and directory permissions.");
@@ -502,6 +568,15 @@ void UIPhoneBackend::createPhone(const UIPhoneOptions &options)
         complete(false, tr("At least 4 GB of free disk space is required to create a phone."));
         return;
     }
+    UIPhoneOptions resolved = options;
+    if (options.m_fVaryProfile)
+    {
+        loadCatalog();
+        const UIPhoneProfile profile = chooseProfile();
+        resolved.m_iWidth = profile.m_iWidth;
+        resolved.m_iHeight = profile.m_iHeight;
+        resolved.m_iDensity = profile.m_iDensity;
+    }
     const QString strId = "navebox_" + QUuid::createUuid().toString(QUuid::Id128);
     const QString strTools = commandLineToolsRoot();
     const QString strJava = m_strJavaHome + "/bin/java"
@@ -515,12 +590,12 @@ void UIPhoneBackend::createPhone(const UIPhoneOptions &options)
         << "-Dcom.android.sdkmanager.toolsdir=" + strTools
         << "-cp" << strTools + "/lib/avdmanager-classpath.jar" << "com.android.sdklib.tool.AvdManagerCli"
         << "create" << "avd" << "--name" << strId << "--package" << options.m_strPackage
-        << "--device" << "pixel" << "--path" << avdRoot() + '/' + strId + ".avd";
-    runTool(strJava, arguments, 120000, [this, strId, options](bool fSuccess, const QString &strOutput)
+        << "--device" << uiPhoneProfileFor(resolved) << "--path" << avdRoot() + '/' + strId + ".avd";
+    runTool(strJava, arguments, 120000, [this, strId, resolved](bool fSuccess, const QString &strOutput)
     {
         QString strError;
         if (fSuccess)
-            fSuccess = writePhoneConfig(strId, options, strError);
+            fSuccess = writePhoneConfig(strId, resolved, strError);
         loadCatalog();
         if (fSuccess && !m_devices.contains(strId))
         {
@@ -536,7 +611,7 @@ void UIPhoneBackend::createPhone(const UIPhoneOptions &options)
 
 void UIPhoneBackend::refresh()
 {
-    if (!beginOperation())
+    if (!beginOperation(true))
         return;
     loadCatalog();
     runTool(toolPath("adb"), QStringList() << "devices", 15000, [this](bool fSuccess, const QString &strOutput)
@@ -546,16 +621,18 @@ void UIPhoneBackend::refresh()
             complete(false, tr("Cannot query running phones. %1").arg(strOutput));
             return;
         }
-        for (auto it = m_devices.begin(); it != m_devices.end(); ++it)
+        m_refreshDevices = m_devices;
+        m_refreshStarting = m_starting;
+        for (auto it = m_refreshDevices.begin(); it != m_refreshDevices.end(); ++it)
         {
             it->m_strSerial.clear();
             it->m_fBooted = false;
-            it->m_fStarting = m_starting.contains(it.key());
-            if (it->m_fStarting && m_starting.value(it.key()).elapsed() > 300000)
+            it->m_fStarting = m_refreshStarting.contains(it.key());
+            if (it->m_fStarting && m_refreshStarting.value(it.key()).elapsed() > 300000)
             {
                 it->m_fStarting = false;
-                it->m_strProblem = tr("Boot timed out. Check the phone log or try Cold Boot.");
-                m_starting.remove(it.key());
+                it->m_strProblem = tr("Boot timed out. Check the phone log. If graphics failed, try Cold Boot with Software Graphics.");
+                m_refreshStarting.remove(it.key());
             }
         }
         QStringList serials;
@@ -574,6 +651,8 @@ void UIPhoneBackend::queryNextDevice(QStringList serials)
 {
     if (serials.isEmpty())
     {
+        m_devices = std::move(m_refreshDevices);
+        m_starting = std::move(m_refreshStarting);
         setBusy(false);
         emit sigDevicesChanged();
         return;
@@ -583,25 +662,26 @@ void UIPhoneBackend::queryNextDevice(QStringList serials)
             [this, strSerial, serials](bool fSuccess, const QString &strOutput)
     {
         const QString strId = strOutput.section('\n', 0, 0).trimmed();
-        if (!fSuccess || !m_devices.contains(strId))
+        if (!fSuccess || !m_refreshDevices.contains(strId))
         {
             queryNextDevice(serials);
             return;
         }
-        m_devices[strId].m_strSerial = strSerial;
-        m_devices[strId].m_fStarting = m_devices[strId].m_strProblem.isEmpty();
-        if (m_devices[strId].m_fStarting && !m_starting.contains(strId))
-            m_starting[strId].start();
+        UIPhoneDevice &device = m_refreshDevices[strId];
+        device.m_strSerial = strSerial;
+        device.m_fStarting = device.m_strProblem.isEmpty();
+        if (device.m_fStarting && !m_refreshStarting.contains(strId))
+            m_refreshStarting[strId].start();
         runTool(toolPath("adb"), QStringList() << "-s" << strSerial << "shell" << "getprop" << "sys.boot_completed", 5000,
                 [this, strId, serials](bool fBootQuery, const QString &strBootOutput)
         {
-            UIPhoneDevice &device = m_devices[strId];
+            UIPhoneDevice &device = m_refreshDevices[strId];
             device.m_fBooted = fBootQuery && strBootOutput.trimmed() == "1";
             if (device.m_fBooted)
             {
                 device.m_fStarting = false;
                 device.m_strProblem.clear();
-                m_starting.remove(strId);
+                m_refreshStarting.remove(strId);
             }
             queryNextDevice(serials);
         });
@@ -618,7 +698,7 @@ void UIPhoneBackend::checkAcceleration()
         });
 }
 
-void UIPhoneBackend::startPhone(const QString &strId, bool fColdBoot)
+void UIPhoneBackend::startPhone(const QString &strId, bool fColdBoot, bool fSoftwareGraphics)
 {
     if (!beginOperation())
         return;
@@ -630,7 +710,7 @@ void UIPhoneBackend::startPhone(const QString &strId, bool fColdBoot)
         return;
     }
     runTool(toolPath("emulator"), QStringList("-accel-check"), 15000,
-            [this, strId, fColdBoot](bool fSuccess, const QString &strOutput)
+            [this, strId, fColdBoot, fSoftwareGraphics](bool fSuccess, const QString &strOutput)
     {
         if (!fSuccess)
         {
@@ -645,9 +725,12 @@ void UIPhoneBackend::startPhone(const QString &strId, bool fColdBoot)
         }
         QProcess process;
         process.setProgram(toolPath("emulator"));
-        QStringList arguments = QStringList() << "-avd" << strId << "-accel" << "on" << "-gpu" << "auto";
-        if (fColdBoot)
+        const QString strGraphics = fSoftwareGraphics ? QStringLiteral("software") : QStringLiteral("auto");
+        QStringList arguments = QStringList() << "-avd" << strId << "-accel" << "on" << "-gpu" << strGraphics;
+        if (fColdBoot || fSoftwareGraphics)
             arguments << "-no-snapshot-load";
+        if (fSoftwareGraphics)
+            arguments << "-no-snapshot-save";
         process.setArguments(arguments);
         process.setProcessEnvironment(toolEnvironment());
         process.setWorkingDirectory(m_strSdkRoot);

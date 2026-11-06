@@ -142,7 +142,7 @@ class NaveboxPackagingTests(unittest.TestCase):
         """All catalogues expose current About messages; finished placeholders survive."""
         sources = about_sources()
         self.assertIn('Copy Build Information', sources)
-        self.assertIn('Overview', sources)
+        self.assertIn('Contact', sources)
         for path in sorted((GUI_DIR / 'nls').glob('VirtualBox_*.ts')):
             if path.name == 'VirtualBox_en.ts':  # English intentionally contains plural forms only.
                 continue

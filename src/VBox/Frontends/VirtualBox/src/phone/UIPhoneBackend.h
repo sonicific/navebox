@@ -51,6 +51,15 @@ struct UIPhoneImage
     int m_iApi;           /**< Android API level. */
 };
 
+/** A supported portrait profile based on a stock SDK hardware definition. */
+struct UIPhoneProfile
+{
+    const char *m_pszSdkDevice; /**< SDK hardware definition identifier. */
+    int m_iWidth;               /**< Display width in pixels. */
+    int m_iHeight;              /**< Display height in pixels. */
+    int m_iDensity;             /**< Display density in dots per inch. */
+};
+
 /** Parameters for a newly created phone; no shell command fragments are accepted. */
 struct UIPhoneOptions
 {
@@ -62,6 +71,7 @@ struct UIPhoneOptions
     int m_iWidth = 720;      /**< Portrait display width. */
     int m_iHeight = 1280;    /**< Portrait display height. */
     int m_iDensity = 320;    /**< Display density in dots per inch. */
+    bool m_fVaryProfile = false; /**< Pick a profile when creating the phone. */
 };
 
 /** One phone owned by Navebox and its most recently verified runtime state. */
@@ -71,6 +81,7 @@ struct UIPhoneDevice
     QString m_strName;     /**< User-visible name. */
     QString m_strSerial;   /**< Verified emulator ADB serial; never a USB device. */
     QString m_strProblem;  /**< Startup problem, if any. */
+    QString m_strProfile;  /**< Recorded stock SDK profile, if known. */
     bool m_fBooted = false; /**< Whether Android reports boot completion. */
     bool m_fStarting = false; /**< Whether startup is still pending. */
 };
@@ -96,10 +107,14 @@ public:
     QString dataRoot() const { return m_strDataRoot; }
     /** Returns installed compatible phone images, highest API first. */
     QList<UIPhoneImage> images() const;
+    /** Returns the portrait profiles available for creation. */
+    static QList<UIPhoneProfile> profiles();
     /** Returns the phone catalog and last verified runtime states. */
     QList<UIPhoneDevice> devices() const { return m_devices.values(); }
-    /** Returns whether a foreground SDK operation is in progress. */
+    /** Returns whether any SDK operation is in progress. */
     bool isBusy() const { return m_fBusy; }
+    /** Returns whether the current operation is a preemptible catalog refresh. */
+    bool isRefreshing() const { return m_fRefreshing; }
     /** Returns a suggested SDK directory without executing discovered files. */
     static QString suggestedSdkRoot();
     /** Returns a suggested Java home without executing discovered files. */
@@ -115,7 +130,7 @@ public:
     /** Creates an AVD from an installed image without replacing an existing AVD. */
     void createPhone(const UIPhoneOptions &options);
     /** Checks acceleration, then starts a phone in the emulator's native window. */
-    void startPhone(const QString &strId, bool fColdBoot = false);
+    void startPhone(const QString &strId, bool fColdBoot = false, bool fSoftwareGraphics = false);
     /** Requests emulator shutdown after revalidating its AVD identity. */
     void stopPhone(const QString &strId);
     /** Installs one APK on a booted phone after revalidating its identity. */
@@ -143,8 +158,10 @@ private:
     QString avdRoot() const;
     QProcessEnvironment toolEnvironment() const;
     void loadCatalog();
+    UIPhoneProfile chooseProfile() const;
     void setBusy(bool fBusy);
-    bool beginOperation();
+    bool beginOperation(bool fRefresh = false);
+    void cancelRefresh();
     void complete(bool fSuccess, const QString &strMessage);
     void runTool(const QString &strProgram, const QStringList &arguments, int cMsTimeout,
                  const Completion &completion, const QByteArray &input = QByteArray());
@@ -157,8 +174,11 @@ private:
     QString m_strJavaHome;                    /**< Explicitly selected Java runtime. */
     QMap<QString, UIPhoneDevice> m_devices;   /**< Only phones with valid ownership metadata. */
     QMap<QString, QElapsedTimer> m_starting;  /**< Startup deadlines, independent of ADB enumeration. */
+    QMap<QString, UIPhoneDevice> m_refreshDevices; /**< Device state being collected by a refresh. */
+    QMap<QString, QElapsedTimer> m_refreshStarting; /**< Startup deadlines staged with device state. */
     QProcess *m_pCommand;                     /**< At most one short-lived SDK command. */
     bool m_fBusy;                            /**< Serializes operations and identity checks. */
+    bool m_fRefreshing;                      /**< Whether foreground work can preempt the operation. */
 };
 
 #endif /* !FEQT_INCLUDED_SRC_phone_UIPhoneBackend_h */

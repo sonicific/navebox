@@ -82,7 +82,15 @@ Rules for adding a changelog entry to make them look more uniform:
       <listitem>
         <para>Navebox GUI: Added an Android Phones manager for creating private
           Android SDK virtual devices, checking acceleration, starting and
-          stopping phones, monitoring boot completion, and installing APKs.</para>
+          stopping phones, monitoring boot completion, and installing APKs.
+          Phone creation offers display and hardware profile variation for
+          testing and a software-rendered cold boot. Phone actions can interrupt
+          a status refresh.</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox GUI: Combined About, contact details, build information,
+          and credits in one scrollable dialog.</para>
       </listitem>
 
       <listitem>
@@ -137,6 +145,12 @@ Rules for adding a changelog entry to make them look more uniform:
           centered dialogs within the visible owner or screen area and showed
           startup errors in a separate centered window instead of displaying
           About behind the error</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox GUI: Center dialogs using their own window frame and keep
+          Android Phones centered when switching SDK views or reopening after
+          the manager moves</para>
       </listitem>
 
       <listitem>

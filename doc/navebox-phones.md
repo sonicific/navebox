@@ -27,6 +27,9 @@ SDK Settings temporarily replaces the phone pages with a setup card. Click
 **Done** to return. Applying an SDK keeps setup open so acceleration can be
 checked before creating a phone. Fields and actions share the same height,
 and paired Browse buttons and SDK action buttons have matching widths.
+Switching views preserves the current window center when it fits on the
+screen. The dialog centers on the manager again if its window position or
+work area changes between openings.
 Navebox uses installed SDK components and does not download packages, accept
 licenses, enable Windows features or change firmware/security settings.
 Setup instructions and acceleration requirements are maintained by Android:
@@ -53,11 +56,24 @@ check does not qualify every GPU driver or Android system image.
 ## Create and use a phone
 
 On **Create Phone**, enter a name, choose an installed image, and set RAM,
-CPUs, data-partition capacity and a portrait display. Defaults are 2048 MB,
+CPUs, data-partition capacity and a portrait device profile. Defaults are 2048 MB,
 up to two CPUs, an 8 GB data partition and 720 x 1280 pixels. Storage is a
 maximum partition capacity and can consume additional host space as apps
 and data accumulate. Leave enough RAM and disk space for the host and any
 VirtualBox VMs running concurrently.
+
+Choose **Vary for testing** to select from three stock SDK hardware profiles
+with different portrait dimensions and densities. Navebox favors the least
+used profiles in its catalog and picks randomly when their counts match. The
+choice is saved at creation and remains stable when the phone restarts. For
+repeatable tests, choose a specific resolution and density.
+
+Each new phone has its own AVD identifier and guest data directory. Android
+generates its app-scoped identifiers from the device and user state. Phones
+using the same system image can share the same `Build.FINGERPRINT`, which
+identifies the Android build. Use different installed Android images for build
+coverage. The hardware profile option leaves the Android image and its build
+properties intact.
 
 Click **Create Phone**. The manager opens **Phones** and selects the new phone;
 click **Start** to boot it. SDK settings and diagnostic output stay collapsed
@@ -68,10 +84,21 @@ actions under **More** are enabled after Android reports boot completion.
 loading a Quick Boot snapshot and preserves phone user data. **Stop** requests
 shutdown of the selected emulator. Snapshot persistence is provided by the
 installed emulator; no VirtualBox snapshot operations apply to these phones.
+If GPU Auto fails, try **More > Cold Boot with Software Graphics**. This uses
+the SDK's `-gpu software` mode for the session and skips loading or saving a
+Quick Boot snapshot. The SDK must support that graphics mode. VM acceleration
+and the writable Android data partition remain in use.
 
 Closing the phone manager or Navebox leaves emulator windows running. Reopen
 the manager and click **Refresh** to discover them again. Close a phone's
 emulator window, or use **Stop**, to end its session.
+
+With multiple phones, status refresh takes longer because each connected
+emulator is checked separately. A phone action can interrupt a refresh and
+uses the most recent completed status scan. Recheck **Ready** before running
+an action if the connection has just changed. Concurrent capacity depends on
+the host, image and emulator. Size the workload using measured RAM, disk,
+CPU and GPU usage before starting a fleet.
 
 Phone data is under `Phones` in Qt's application-local data directory.
 **More > Open Log** opens the selected phone's emulator startup log. AVDs are kept in
@@ -211,3 +238,28 @@ both `VirtualBox.exe` and `Navebox.exe` matched the linked frontend and that
 the updated Navebox, opened Android Phones, and confirmed **phone 1** was still
 Ready with the saved SDK configuration. The Android emulator was left running
 throughout the manager restart.
+
+## Multi-phone checks (2026-11-06)
+
+An isolated catalog on Windows x64 (build 26300.9711) used Android Emulator
+37.2.13, Platform-Tools 37.0.1, WHPX, and the API 35 Google APIs x86_64 image
+revision 9. The SDK still had the local emulator DLL workaround documented
+above. Eight consecutive creates took about 0.7–0.9 seconds each. Each had a
+different AVD ID and data directory. Automatic profile allocation distributed
+the eight devices across the three supported definitions with counts 3/3/2.
+
+Two phones cold-booted concurrently with Software Graphics and reached Ready
+in 54–57 seconds. One full status refresh took 234 ms. ADB observed different
+resolutions (1080 x 1920 and 1080 x 2160), distinct shell-scoped Android IDs and
+independent writable guest data. The Android build fingerprint, reported model,
+brand and device were equal because both used the same system image. The
+backend installed the image's stock Android Easter Egg APK on one fixture
+without affecting the other, reported a malformed APK, and stopped each phone
+individually. Eight created devices and two running devices are distinct test
+limits.
+
+One GPU Auto run lost an emulator during concurrent boot. Windows attributed
+the fault to the NVIDIA OpenGL driver (`nvoglv64.dll`). A repeat with GPU Auto
+passed. Software Graphics passed this two-device workload. This does not
+qualify long-running workloads, larger concurrent fleets, snapshots, other
+images/hosts, or coexistence with a running VirtualBox VM.

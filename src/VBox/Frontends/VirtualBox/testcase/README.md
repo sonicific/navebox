@@ -24,7 +24,7 @@ available via `QT_QPA_PLATFORM_PLUGIN_PATH`. The test selects offscreen unless
 settings. Clipboard assertions run only on offscreen platforms.
 
 Set `VBOX_GUI_TEST_SNAPSHOT_DIR` to a writable directory to export the real
-About pages in light and dark palettes for visual review. No images are
+About dialog in light and dark palettes for visual review. No images are
 written when this variable is absent. An offscreen platform without system
 font discovery can load a font file specified by `VBOX_GUI_TEST_FONT`. Make
 the image-format plugins available through the normal deployment layout or

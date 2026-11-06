@@ -35,7 +35,6 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QScrollArea>
-#include <QTabWidget>
 #include <QVBoxLayout>
 
 /* GUI includes: */
@@ -51,22 +50,33 @@
 
 /** @page pg_ui_navebox_about Navebox Product Information
  *
- * Present the product identity and the four NAVE pillars separately from
- * contact details, build information and upstream attribution.  Content can
- * scroll on small screens; font metrics and layouts handle display scaling.
+ * Present the product identity, the four NAVE pillars, contact details, build
+ * information and upstream attribution together. The page scrolls on small
+ * screens while the action buttons stay accessible.
  */
 
 /** Adds a word-wrapped label with the requested type hierarchy. */
 static QLabel *uiAboutLabel(const QString &strText, QWidget *pParent, int iPointDelta = 0, bool fBold = false)
 {
     QLabel *pLabel = new QLabel(strText, pParent);
+    pLabel->setTextFormat(Qt::PlainText);
     pLabel->setWordWrap(true);
-    pLabel->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::LinksAccessibleByMouse | Qt::LinksAccessibleByKeyboard);
     QFont labelFont = pLabel->font();
-    labelFont.setPointSize(qMax(8, labelFont.pointSize() + iPointDelta));
+    if (labelFont.pointSize() > 0)
+        labelFont.setPointSize(qMax(8, labelFont.pointSize() + iPointDelta));
+    else
+        labelFont.setPixelSize(qMax(12, labelFont.pixelSize() + iPointDelta));
     labelFont.setBold(fBold);
     pLabel->setFont(labelFont);
     return pLabel;
+}
+
+/** Makes a rich-text link label accessible by keyboard and mouse. */
+static void uiAboutEnableLinks(QLabel *pLabel)
+{
+    pLabel->setTextFormat(Qt::RichText);
+    pLabel->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::LinksAccessibleByMouse | Qt::LinksAccessibleByKeyboard);
+    pLabel->setOpenExternalLinks(true);
 }
 
 /** Returns a link color with enough visual weight on a dark About surface. */
@@ -88,9 +98,8 @@ VBoxAboutDlg::VBoxAboutDlg(QWidget *pParent /* = 0 */, const QString &strVersion
 #endif
     , m_fPolished(false)
     , m_strVersion(strVersion.isEmpty() ? QString::fromLatin1(RTBldCfgVersion()) : strVersion)
-    , m_pMainLayout(0)
-    , m_pLabel(0)
-    , m_pTabs(0)
+    , m_pVersion(0)
+    , m_pAttribution(0)
     , m_pOverviewHeading(0)
     , m_pOverviewIntroduction(0)
     , m_apPillarTitles{0, 0, 0, 0}
@@ -111,7 +120,7 @@ void VBoxAboutDlg::showEvent(QShowEvent *pEvent)
         m_fPolished = true;
         QWidget *pParent = m_pPseudoParent ? m_pPseudoParent : parentWidget();
         const QRect available = gpDesktop->availableGeometry(pParent);
-        resize(qMin(680, available.width() - 48), qMin(550, available.height() - 72));
+        resize(qMin(700, qMax(1, available.width() - 48)), qMin(570, qMax(1, available.height() - 72)));
         gpDesktop->centerWidget(this, pParent);
     }
 }
@@ -128,11 +137,9 @@ void VBoxAboutDlg::changeEvent(QEvent *pEvent)
 void VBoxAboutDlg::sltRetranslateUI()
 {
     setWindowTitle(tr("About"));
-    if (m_pTabs)
-    {
-        m_pTabs->setTabText(0, tr("Overview"));
-        m_pTabs->setTabText(1, tr("Contact && Credits"));
-    }
+    if (m_pVersion)
+        m_pVersion->setText(tr("Version %1 | Qt %2 (%3)")
+                            .arg(m_strVersion, QString::fromLatin1(qVersion()), QGuiApplication::platformName()));
     if (m_pOverviewHeading)
         m_pOverviewHeading->setText(tr("NAVE - The Virtualization Architecture"));
     if (m_pOverviewIntroduction)
@@ -167,22 +174,16 @@ void VBoxAboutDlg::sltRetranslateUI()
         strBuildStatus = tr("Development build");
 #endif
         const QString strBuildDetails = tr("Build type: %1; source revision: %2")
-                                        .arg(QString::fromLatin1(RTBldCfgType()))
-                                        .arg(RTBldCfgRevision());
+                                        .arg(QString::fromLatin1(RTBldCfgType())).arg(RTBldCfgRevision());
         m_pBuildInformation->setText(strBuildStatus.isEmpty() ? strBuildDetails
                                                             : strBuildStatus + QLatin1Char('\n') + strBuildDetails);
     }
-    if (m_pLabel)
-        m_pLabel->setText(tr("Version %1 | Qt %2 (%3)").arg(m_strVersion.toHtmlEscaped(),
-                                                         QString::fromLatin1(qVersion()),
-                                                         QGuiApplication::platformName().toHtmlEscaped())
-                         + QStringLiteral("<br/><br/>")
-                         + tr("Built on the VirtualBox open-source platform.")
-                         + QStringLiteral("<br/>")
-                         + QStringLiteral("Copyright &copy; 2004-" VBOX_C_YEAR " " VBOX_VENDOR ".")
-                         + QStringLiteral("<br/>")
-                         + tr("Distributed under the <a style=\"color:%1\" href=\"https://www.gnu.org/licenses/gpl-3.0.html\">"
-                              "GNU General Public License version 3</a>.").arg(uiAboutLinkColor(palette())));
+    if (m_pAttribution)
+        m_pAttribution->setText(tr("Built on the VirtualBox open-source platform.")
+                                + QStringLiteral("<br/>Copyright &copy; 2004-" VBOX_C_YEAR " " VBOX_VENDOR ". ")
+                                + tr("Distributed under the <a style=\"color:%1\" "
+                                     "href=\"https://www.gnu.org/licenses/gpl-3.0.html\">"
+                                     "GNU General Public License version 3</a>.").arg(uiAboutLinkColor(palette())));
 }
 
 QString VBoxAboutDlg::buildInformation() const
@@ -218,22 +219,44 @@ void VBoxAboutDlg::prepare()
 
 void VBoxAboutDlg::prepareMainLayout()
 {
-    m_pMainLayout = new QVBoxLayout(this);
-    m_pMainLayout->setContentsMargins(20, 20, 20, 16);
-    m_pMainLayout->setSpacing(16);
-    QFrame *pHero = new QFrame(this);
+    QVBoxLayout *pMainLayout = new QVBoxLayout(this);
+    pMainLayout->setContentsMargins(20, 20, 20, 16);
+    pMainLayout->setSpacing(14);
+
+    QScrollArea *pScroll = new QScrollArea(this);
+    pScroll->setObjectName("aboutScroll");
+    pScroll->setFrameShape(QFrame::NoFrame);
+    pScroll->setWidgetResizable(true);
+    QWidget *pPage = new QWidget;
+    pPage->setBackgroundRole(QPalette::Window);
+    QVBoxLayout *pPageLayout = new QVBoxLayout(pPage);
+    pPageLayout->setContentsMargins(0, 0, 0, 0);
+    pPageLayout->setSpacing(14);
+    prepareHero(pPage, pPageLayout);
+    prepareOverview(pPage, pPageLayout);
+    prepareSupport(pPage, pPageLayout);
+    pPageLayout->addStretch();
+    pScroll->setWidget(pPage);
+    pMainLayout->addWidget(pScroll, 1);
+    prepareActions(pMainLayout);
+}
+
+void VBoxAboutDlg::prepareHero(QWidget *pPage, QVBoxLayout *pLayout)
+{
+    QFrame *pHero = new QFrame(pPage);
     pHero->setObjectName("naveboxAboutHero");
     pHero->setStyleSheet(QStringLiteral(
         "QFrame#naveboxAboutHero { background: qlineargradient(x1:0,y1:0,x2:1,y2:1,"
         " stop:0 #203b58,stop:1 #0b192a); border-radius: 12px; }"
         "QFrame#naveboxAboutHero QLabel { color: #edf3fa; background: transparent; }"
-        "QLabel#naveboxSlogan { color: #bdcddd; }"));
+        "QLabel#naveboxSlogan, QLabel#naveboxVersion { color: #bdcddd; }"));
     QHBoxLayout *pHeroLayout = new QHBoxLayout(pHero);
     pHeroLayout->setContentsMargins(18, 16, 18, 16);
     pHeroLayout->setSpacing(16);
     QLabel *pLogo = new QLabel(pHero);
     const qreal dRatio = gpDesktop->devicePixelRatio(this);
     pLogo->setPixmap(UIBranding::icon().pixmap(QSize(64, 64), dRatio));
+    pLogo->setAccessibleName(UIBranding::name());
     pHeroLayout->addWidget(pLogo);
     QVBoxLayout *pIdentity = new QVBoxLayout;
     pIdentity->setSpacing(4);
@@ -241,77 +264,99 @@ void VBoxAboutDlg::prepareMainLayout()
     QLabel *pSlogan = uiAboutLabel(UIBranding::slogan(), pHero, 1);
     pSlogan->setObjectName("naveboxSlogan");
     pIdentity->addWidget(pSlogan);
+    m_pVersion = uiAboutLabel(QString(), pHero, 0, true);
+    m_pVersion->setObjectName("naveboxVersion");
+    pIdentity->addWidget(m_pVersion);
     pHeroLayout->addLayout(pIdentity, 1);
-    m_pMainLayout->addWidget(pHero);
-    preparePages();
-    prepareCloseButton();
+    pLayout->addWidget(pHero);
 }
 
-void VBoxAboutDlg::preparePages()
+void VBoxAboutDlg::prepareOverview(QWidget *pPage, QVBoxLayout *pLayout)
 {
-    m_pTabs = new QTabWidget(this);
-    m_pTabs->setObjectName("aboutTabs");
-    QWidget *pOverview = new QWidget(m_pTabs);
+    QWidget *pOverview = new QWidget(pPage);
     QVBoxLayout *pOverviewLayout = new QVBoxLayout(pOverview);
-    pOverviewLayout->setContentsMargins(14, 12, 14, 12);
-    pOverviewLayout->setSpacing(12);
+    pOverviewLayout->setContentsMargins(0, 0, 0, 0);
+    pOverviewLayout->setSpacing(6);
     m_pOverviewHeading = uiAboutLabel(QString(), pOverview, 2, true);
     m_pOverviewIntroduction = uiAboutLabel(QString(), pOverview);
     pOverviewLayout->addWidget(m_pOverviewHeading);
     pOverviewLayout->addWidget(m_pOverviewIntroduction);
+    pOverviewLayout->addSpacing(4);
     QGridLayout *pPillars = new QGridLayout;
-    pPillars->setSpacing(14);
+    pPillars->setSpacing(8);
     const QString strLetters = QStringLiteral("NAVE");
     for (int i = 0; i < 4; ++i)
     {
         QFrame *pCard = new QFrame(pOverview);
-        QVBoxLayout *pCardLayout = new QVBoxLayout(pCard);
-        pCardLayout->setContentsMargins(0, 0, 8, 0);
-        pCardLayout->setSpacing(5);
-        pCardLayout->addWidget(uiAboutLabel(strLetters.mid(i, 1), pCard, 10, true));
+        pCard->setObjectName("aboutPillar");
+        pCard->setStyleSheet(QStringLiteral(
+            "QFrame#aboutPillar { background: palette(base); border: 1px solid palette(midlight); border-radius: 8px; }"
+            "QLabel#aboutPillarLetter { background: #203b58; color: #edf3fa; border-radius: 6px; }"));
+        QHBoxLayout *pCardLayout = new QHBoxLayout(pCard);
+        pCardLayout->setContentsMargins(10, 10, 10, 10);
+        pCardLayout->setSpacing(10);
+        QLabel *pLetter = uiAboutLabel(strLetters.mid(i, 1), pCard, 2, true);
+        pLetter->setObjectName("aboutPillarLetter");
+        pLetter->setAlignment(Qt::AlignCenter);
+        const int iLetterSize = pLetter->fontMetrics().height() + 12;
+        pLetter->setFixedSize(iLetterSize, iLetterSize);
+        pCardLayout->addWidget(pLetter, 0, Qt::AlignTop);
+        QVBoxLayout *pCardText = new QVBoxLayout;
+        pCardText->setSpacing(3);
         m_apPillarTitles[i] = uiAboutLabel(QString(), pCard, 0, true);
         m_apPillarDescriptions[i] = uiAboutLabel(QString(), pCard);
-        pCardLayout->addWidget(m_apPillarTitles[i]);
-        pCardLayout->addWidget(m_apPillarDescriptions[i]);
-        pCardLayout->addStretch();
+        pCardText->addWidget(m_apPillarTitles[i]);
+        pCardText->addWidget(m_apPillarDescriptions[i]);
+        pCardText->addStretch();
+        pCardLayout->addLayout(pCardText, 1);
         pPillars->addWidget(pCard, i / 2, i % 2);
     }
     pPillars->setColumnStretch(0, 1);
     pPillars->setColumnStretch(1, 1);
     pOverviewLayout->addLayout(pPillars);
-    QScrollArea *pStoryScroll = new QScrollArea(m_pTabs);
-    pStoryScroll->setFrameShape(QFrame::NoFrame);
-    pStoryScroll->setWidgetResizable(true);
-    pStoryScroll->setWidget(pOverview);
-    m_pTabs->addTab(pStoryScroll, QString());
-
-    QWidget *pContact = new QWidget(m_pTabs);
-    QVBoxLayout *pContactLayout = new QVBoxLayout(pContact);
-    pContactLayout->setContentsMargins(18, 18, 18, 18);
-    pContactLayout->setSpacing(12);
-    m_pContactHeading = uiAboutLabel(QString(), pContact, 4, true);
-    pContactLayout->addWidget(m_pContactHeading);
-    pContactLayout->addWidget(uiAboutLabel(UIBranding::author(), pContact, 1, true));
-    m_pEmail = uiAboutLabel(QString(), pContact);
-    m_pEmail->setOpenExternalLinks(true);
-    pContactLayout->addWidget(m_pEmail);
-    pContactLayout->addSpacing(8);
-    m_pLabel = uiAboutLabel(QString(), pContact);
-    m_pLabel->setOpenExternalLinks(true);
-    pContactLayout->addWidget(m_pLabel);
-    m_pBuildInformation = uiAboutLabel(QString(), pContact);
-    m_pBuildInformation->setTextFormat(Qt::PlainText);
-    pContactLayout->addWidget(m_pBuildInformation);
-    pContactLayout->addStretch();
-    QScrollArea *pContactScroll = new QScrollArea(m_pTabs);
-    pContactScroll->setFrameShape(QFrame::NoFrame);
-    pContactScroll->setWidgetResizable(true);
-    pContactScroll->setWidget(pContact);
-    m_pTabs->addTab(pContactScroll, QString());
-    m_pMainLayout->addWidget(m_pTabs, 1);
+    pLayout->addWidget(pOverview);
 }
 
-void VBoxAboutDlg::prepareCloseButton()
+void VBoxAboutDlg::prepareSupport(QWidget *pPage, QVBoxLayout *pLayout)
+{
+    QFrame *pSupport = new QFrame(pPage);
+    pSupport->setObjectName("aboutSupport");
+    pSupport->setStyleSheet(QStringLiteral(
+        "QFrame#aboutSupport { background: palette(base); border: 1px solid palette(midlight); border-radius: 8px; }"));
+    QVBoxLayout *pSupportLayout = new QVBoxLayout(pSupport);
+    pSupportLayout->setContentsMargins(14, 12, 14, 12);
+    pSupportLayout->setSpacing(10);
+    QHBoxLayout *pDetails = new QHBoxLayout;
+    pDetails->setSpacing(16);
+    pSupportLayout->addLayout(pDetails);
+
+    QVBoxLayout *pContact = new QVBoxLayout;
+    pContact->setSpacing(4);
+    m_pContactHeading = uiAboutLabel(QString(), pSupport, 1, true);
+    pContact->addWidget(m_pContactHeading);
+    pContact->addWidget(uiAboutLabel(UIBranding::author(), pSupport));
+    m_pEmail = uiAboutLabel(QString(), pSupport);
+    uiAboutEnableLinks(m_pEmail);
+    pContact->addWidget(m_pEmail);
+    pContact->addStretch();
+    pDetails->addLayout(pContact, 1);
+
+    m_pBuildInformation = uiAboutLabel(QString(), pSupport);
+    m_pBuildInformation->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    pDetails->addWidget(m_pBuildInformation, 1, Qt::AlignTop);
+
+    QFrame *pSeparator = new QFrame(pSupport);
+    pSeparator->setFrameShape(QFrame::HLine);
+    pSeparator->setStyleSheet(QStringLiteral("background: palette(midlight); border: none;"));
+    pSeparator->setFixedHeight(1);
+    pSupportLayout->addWidget(pSeparator);
+    m_pAttribution = uiAboutLabel(QString(), pSupport);
+    uiAboutEnableLinks(m_pAttribution);
+    pSupportLayout->addWidget(m_pAttribution);
+    pLayout->addWidget(pSupport);
+}
+
+void VBoxAboutDlg::prepareActions(QVBoxLayout *pLayout)
 {
     QIDialogButtonBox *pButtonBox = new QIDialogButtonBox(QDialogButtonBox::Close, Qt::Horizontal, this);
     m_pCopyBuildInformation = pButtonBox->addButton(QString(), QDialogButtonBox::ActionRole);
@@ -319,5 +364,5 @@ void VBoxAboutDlg::prepareCloseButton()
     m_pCopyBuildInformation->setAutoDefault(false);
     connect(m_pCopyBuildInformation, &QPushButton::clicked, this, &VBoxAboutDlg::sltCopyBuildInformation);
     connect(pButtonBox, &QDialogButtonBox::rejected, this, &VBoxAboutDlg::close);
-    m_pMainLayout->addWidget(pButtonBox);
+    pLayout->addWidget(pButtonBox);
 }

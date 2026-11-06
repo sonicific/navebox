@@ -63,6 +63,8 @@ public:
 protected:
     /** Updates all labels after a live language change. */
     virtual void changeEvent(QEvent *pEvent) RT_OVERRIDE;
+    /** Centers the reused window if its owner or available work area changed. */
+    virtual void showEvent(QShowEvent *pEvent) RT_OVERRIDE;
 
 private:
     void prepareHeader(QVBoxLayout *pLayout);
@@ -107,6 +109,7 @@ private:
     QPushButton *m_pRefresh;    /**< Explicit runtime refresh. */
     QPushButton *m_pStart;      /**< Normal startup, allowing Quick Boot. */
     QAction *m_pColdBoot;       /**< Startup without loading a snapshot. */
+    QAction *m_pSoftwareBoot;   /**< Cold boot with a software renderer. */
     QPushButton *m_pStop;       /**< Targeted emulator shutdown. */
     QPushButton *m_pInstall;    /**< Targeted APK installation. */
     QToolButton *m_pMore;       /**< Secondary phone actions. */
@@ -133,6 +136,8 @@ private:
     QPushButton *m_pDetails;    /**< Expands the diagnostic output. */
     QPushButton *m_pClose;      /**< Hides the manager without stopping phones. */
     int m_iSdkCollapsedHeight; /**< Restores the dialog height after hiding SDK settings. */
+    QRect m_ownerFrame;         /**< Owner frame when the dialog was last shown. */
+    QRect m_workArea;           /**< Available desktop area when the dialog was last shown. */
 };
 
 #endif /* !FEQT_INCLUDED_SRC_phone_UIPhoneManager_h */

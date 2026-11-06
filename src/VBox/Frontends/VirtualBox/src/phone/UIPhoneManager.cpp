@@ -51,6 +51,7 @@
 #include <QVBoxLayout>
 
 /* GUI includes: */
+#include "UIDesktopWidgetWatchdog.h"
 #include "UIPhoneBackend.h"
 #include "UIPhoneManager.h"
 
@@ -270,6 +271,7 @@ void UIPhoneManager::preparePhones()
     m_pMore->setPopupMode(QToolButton::InstantPopup);
     QMenu *pMore = new QMenu(m_pMore);
     m_pColdBoot = pMore->addAction(QString());
+    m_pSoftwareBoot = pMore->addAction(QString());
     m_pLog = pMore->addAction(QString());
     pMore->addSeparator();
     m_pBack = pMore->addAction(QString());
@@ -326,8 +328,10 @@ void UIPhoneManager::prepareCreation()
     for (int iSize : {8, 16, 32, 64})
         m_pStorage->addItem(QString::number(iSize) + " GB", iSize);
     m_pDisplay = new QComboBox(pFormCard);
-    m_pDisplay->addItem("720 x 1280 (320 dpi)", QSize(720, 1280));
-    m_pDisplay->addItem("1080 x 1920 (420 dpi)", QSize(1080, 1920));
+    m_pDisplay->setObjectName("phoneProfile");
+    for (const UIPhoneProfile &profile : UIPhoneBackend::profiles())
+        m_pDisplay->addItem(QString(), QVariant::fromValue(QSize(profile.m_iWidth, profile.m_iHeight)));
+    m_pDisplay->addItem(QString());
     foreach (QWidget *pField, QList<QWidget*>() << m_pName << m_pImage << m_pMemory << m_pCpus << m_pStorage << m_pDisplay)
     {
         pField->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -405,6 +409,8 @@ void UIPhoneManager::prepareConnections()
 {
     connect(m_pSdkSettings, &QPushButton::toggled, this, [this](bool fExpanded)
     {
+        const QPoint center = frameGeometry().center();
+        const QRect available = gpDesktop->availableGeometry(this);
         if (fExpanded)
             m_iSdkCollapsedHeight = height();
         m_pSdkSettings->setText(fExpanded ? tr("Done") : tr("SDK Settings"));
@@ -414,6 +420,13 @@ void UIPhoneManager::prepareConnections()
         layout()->activate();
         resize(width(), fExpanded ? minimumSizeHint().height()
                                  : qMax(m_iSdkCollapsedHeight, minimumSizeHint().height()));
+        if (isVisible())
+        {
+            /* Keep the frame centered around the user's current window position. */
+            QRect frame = frameGeometry();
+            frame.moveCenter(center);
+            move(UIDesktopWidgetWatchdog::normalizeGeometry(frame, available, false).topLeft());
+        }
     });
     connect(m_pDetails, &QPushButton::toggled, m_pResult, &QWidget::setVisible);
     connect(m_pEmptyAction, &QPushButton::clicked, this, [this]()
@@ -450,6 +463,7 @@ void UIPhoneManager::prepareConnections()
     connect(m_pRefresh, &QPushButton::clicked, this, [this]() { refresh(); });
     connect(m_pStart, &QPushButton::clicked, this, [this]() { m_pBackend->startPhone(selectedId()); });
     connect(m_pColdBoot, &QAction::triggered, this, [this]() { m_pBackend->startPhone(selectedId(), true); });
+    connect(m_pSoftwareBoot, &QAction::triggered, this, [this]() { m_pBackend->startPhone(selectedId(), true, true); });
     connect(m_pStop, &QPushButton::clicked, this, [this]() { m_pBackend->stopPhone(selectedId()); });
     connect(m_pInstall, &QPushButton::clicked, this, [this]()
     {
@@ -510,6 +524,19 @@ void UIPhoneManager::changeEvent(QEvent *pEvent)
         updateControlGeometry();
 }
 
+void UIPhoneManager::showEvent(QShowEvent *pEvent)
+{
+    QIDialog::showEvent(pEvent);
+
+    QWidget *pOwner = parentWidget() ? parentWidget()->window() : 0;
+    const QRect ownerFrame = pOwner ? pOwner->frameGeometry() : QRect();
+    const QRect workArea = gpDesktop->availableGeometry(pOwner);
+    if (m_workArea.isValid() && (ownerFrame != m_ownerFrame || workArea != m_workArea))
+        gpDesktop->centerWidget(this, pOwner, false);
+    m_ownerFrame = ownerFrame;
+    m_workArea = workArea;
+}
+
 void UIPhoneManager::updateControlGeometry()
 {
     QList<QWidget*> controls = QList<QWidget*>() << m_pSdkPath << m_pJavaHome << m_pName << m_pImage
@@ -568,6 +595,8 @@ void UIPhoneManager::retranslateUi()
     m_pStart->setText(tr("Start"));
     m_pColdBoot->setText(tr("Cold Boot"));
     m_pColdBoot->setToolTip(tr("Start without loading a Quick Boot snapshot; user data is preserved."));
+    m_pSoftwareBoot->setText(tr("Cold Boot with Software Graphics"));
+    m_pSoftwareBoot->setToolTip(tr("Use software graphics for this session without loading or saving a Quick Boot snapshot."));
     m_pStop->setText(tr("Stop"));
     m_pInstall->setText(tr("Install APK..."));
     m_pMore->setText(tr("More"));
@@ -577,7 +606,7 @@ void UIPhoneManager::retranslateUi()
     m_pRecent->setText(tr("Recent Apps"));
     m_pLog->setText(tr("Open Log"));
     const QStringList labels = QStringList() << tr("Phone name:") << tr("Android image:") << tr("Memory:")
-                                             << tr("CPUs:") << tr("Storage:") << tr("Display:");
+                                             << tr("CPUs:") << tr("Storage:") << tr("Device profile:");
     for (int i = 0; i < labels.size(); ++i)
         qobject_cast<QLabel*>(m_pCreateForm->itemAt(i, QFormLayout::LabelRole)->widget())->setText(labels.at(i));
     m_pName->setPlaceholderText(tr("My Android Phone"));
@@ -585,6 +614,14 @@ void UIPhoneManager::retranslateUi()
     m_pCreateTitle->setText(tr("Phone configuration"));
     m_pPreviewTitle->setText(tr("Device preview"));
     m_pPreviewScreen->setText(tr("Android"));
+    const QList<UIPhoneProfile> profiles = UIPhoneBackend::profiles();
+    for (int i = 0; i < profiles.size(); ++i)
+    {
+        const UIPhoneProfile &profile = profiles.at(i);
+        m_pDisplay->setItemText(i, tr("%1 x %2 (%3 dpi)").arg(profile.m_iWidth).arg(profile.m_iHeight).arg(profile.m_iDensity));
+    }
+    m_pDisplay->setItemText(profiles.size(), tr("Vary for testing"));
+    m_pDisplay->setToolTip(tr("Vary for testing assigns a display and SDK hardware profile when the phone is created."));
     m_pCreate->setText(tr("Create Phone"));
     m_pResult->setAccessibleName(tr("Phone operation result"));
     m_pDetails->setText(tr("Details"));
@@ -599,7 +636,8 @@ void UIPhoneManager::retranslateUi()
 void UIPhoneManager::updatePreview()
 {
     const QSize size = m_pDisplay->currentData().toSize();
-    m_pPreviewDisplay->setText(tr("%1 x %2 pixels").arg(size.width()).arg(size.height()));
+    m_pPreviewDisplay->setText(size.isValid() ? tr("%1 x %2 pixels").arg(size.width()).arg(size.height())
+                                            : tr("Selected at creation"));
     const QString strCpus = m_pCpus->value() == 1 ? tr("1 CPU") : tr("%1 CPUs").arg(m_pCpus->value());
     m_pPreviewMemory->setText(tr("%1 MB RAM / %2").arg(m_pMemory->value()).arg(strCpus));
 }
@@ -681,7 +719,7 @@ void UIPhoneManager::updateDevices()
 void UIPhoneManager::updateControls()
 {
     QString strError;
-    const bool fIdle = !m_pBackend->isBusy();
+    const bool fIdle = !m_pBackend->isBusy() || m_pBackend->isRefreshing();
     const bool fConfigured = m_pBackend->isConfigured(strError);
     const bool fApplied = m_pSdkPath->text() == m_pBackend->sdkRoot()
                        && m_pJavaHome->text() == m_pBackend->javaHome();
@@ -694,9 +732,10 @@ void UIPhoneManager::updateControls()
     foreach (QWidget *pWidget, QList<QWidget*>() << m_pSdkPath << m_pJavaHome << m_pBrowseSdk << m_pBrowseJava << m_pApply)
         pWidget->setEnabled(fIdle);
     m_pCheck->setEnabled(fIdle && fConfigured && fApplied);
-    m_pRefresh->setEnabled(fIdle && fConfigured);
+    m_pRefresh->setEnabled(!m_pBackend->isBusy() && fConfigured);
     m_pStart->setEnabled(fIdle && fConfigured && fApplied && fStopped);
     m_pColdBoot->setEnabled(m_pStart->isEnabled());
+    m_pSoftwareBoot->setEnabled(m_pStart->isEnabled());
     m_pStop->setEnabled(fIdle && fConfigured && !selected.m_strSerial.isEmpty());
     m_pInstall->setEnabled(fIdle && fConfigured && selected.m_fBooted);
     for (QAction *pAction : {m_pBack, m_pHome, m_pRecent})
@@ -737,8 +776,14 @@ void UIPhoneManager::createPhone()
     options.m_cCpus = m_pCpus->value();
     options.m_iStorageGB = m_pStorage->currentData().toInt();
     const QSize size = m_pDisplay->currentData().toSize();
-    options.m_iWidth = size.width();
-    options.m_iHeight = size.height();
-    options.m_iDensity = size.width() == 720 ? 320 : 420;
+    options.m_fVaryProfile = !size.isValid();
+    for (const UIPhoneProfile &profile : UIPhoneBackend::profiles())
+        if (size == QSize(profile.m_iWidth, profile.m_iHeight))
+        {
+            options.m_iWidth = profile.m_iWidth;
+            options.m_iHeight = profile.m_iHeight;
+            options.m_iDensity = profile.m_iDensity;
+            break;
+        }
     m_pBackend->createPhone(options);
 }

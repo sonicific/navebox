@@ -38,6 +38,7 @@
 #include <QPointer>
 #include <QPixmap>
 #include <QPushButton>
+#include <QScrollArea>
 #include <QSpinBox>
 #include <QStyle>
 #include <QStyleOptionSpinBox>
@@ -159,17 +160,17 @@ static QLabel *tstFindLabel(QWidget &widget, const QString &strText)
     return 0;
 }
 
-/** Checks translation events, tab state, link recoloring and build-info copying. */
+/** Checks the unified page, translation events, link recoloring and build-info copying. */
 static void tstAbout()
 {
     RTTestISub("About language changes");
     VBoxAboutDlg dialog(0, QStringLiteral("7.2.97-test"));
-    QTabWidget *pTabs = dialog.findChild<QTabWidget*>(QStringLiteral("aboutTabs"));
+    QScrollArea *pScroll = dialog.findChild<QScrollArea*>(QStringLiteral("aboutScroll"));
     QPushButton *pCopy = dialog.findChild<QPushButton*>(QStringLiteral("copyBuildInformationButton"));
-    RTTESTI_CHECK(pTabs && pCopy);
-    if (!pTabs || !pCopy)
+    RTTESTI_CHECK(pScroll && pCopy);
+    RTTESTI_CHECK(dialog.findChildren<QTabWidget*>().isEmpty());
+    if (!pScroll || !pCopy)
         return;
-    pTabs->setCurrentIndex(1);
 
     const QStringList messages = QStringList()
         << QStringLiteral("NAVE - The Virtualization Architecture")
@@ -180,12 +181,15 @@ static void tstAbout()
         << QStringLiteral("A flexible, modular foundation for virtual environments.")
         << QStringLiteral("Create, run and manage multiple systems on one computer.")
         << QStringLiteral("Stay in control of compute, memory and storage resources.")
-        << QStringLiteral("Contact");
+        << QStringLiteral("Contact")
+        << QStringLiteral("Version 7.2.97-test | Qt %1 (%2)")
+            .arg(QString::fromLatin1(qVersion()), QGuiApplication::platformName());
     QList<QPointer<QLabel> > labels;
     foreach (const QString &strMessage, messages)
     {
         QLabel *pLabel = tstFindLabel(dialog, strMessage);
         RTTESTI_CHECK(pLabel);
+        RTTESTI_CHECK(pLabel && pScroll->widget()->isAncestorOf(pLabel));
         labels.append(pLabel);
     }
     QITestAboutTranslator translator;
@@ -193,10 +197,7 @@ static void tstAbout()
     QApplication::processEvents();
     QApplication::processEvents();
     RTTESTI_CHECK(dialog.windowTitle() == QStringLiteral("Translated: About"));
-    RTTESTI_CHECK(pTabs->tabText(0) == QStringLiteral("Translated: Overview"));
-    RTTESTI_CHECK(pTabs->tabText(1) == QStringLiteral("Translated: Contact && Credits"));
     RTTESTI_CHECK(pCopy->text() == QStringLiteral("Translated: Copy Build Information"));
-    RTTESTI_CHECK(pTabs->currentIndex() == 1);
     for (int i = 0; i < labels.size(); ++i)
     {
         RTTESTI_CHECK(!labels.at(i).isNull());
@@ -207,8 +208,6 @@ static void tstAbout()
     QApplication::processEvents();
     QApplication::processEvents();
     RTTESTI_CHECK(dialog.windowTitle() == QStringLiteral("About"));
-    RTTESTI_CHECK(pTabs->tabText(0) == QStringLiteral("Overview"));
-    RTTESTI_CHECK(pTabs->currentIndex() == 1);
 
     RTTestISub("About link palette changes");
     QLabel *pEmail = 0;
@@ -222,7 +221,6 @@ static void tstAbout()
     dialog.setPalette(palette);
     if (pEmail)
         RTTESTI_CHECK(pEmail->text().contains(QStringLiteral("#d200d2")));
-    RTTESTI_CHECK(pTabs->currentIndex() == 1);
 
     RTTestISub("Copy build information");
     if (QGuiApplication::platformName() == QLatin1String("offscreen"))
@@ -350,6 +348,14 @@ static void tstDialogCentering()
         QApplication::processEvents();
         tstCheckCentered(about, fParent ? &parent : 0);
     }
+    /* A native title bar on the owner must not count towards the modal frame. */
+    {
+        QIDialog dialog(&parent, Qt::Dialog | Qt::FramelessWindowHint);
+        dialog.setFixedSize(320, 160);
+        dialog.show();
+        QApplication::processEvents();
+        tstCheckCentered(dialog, &parent);
+    }
     /* A restored owner can be taller than the current monitor after a display change. */
     parent.setGeometry(available.adjusted(0, 0, 0, 400));
     QApplication::processEvents();
@@ -430,20 +436,9 @@ static void tstAboutSnapshots()
         VBoxAboutDlg dialog;
         RTTESTI_CHECK(QFontMetrics(dialog.font()).inFont(QChar('N')));
         dialog.show();
-        QTabWidget *pTabs = dialog.findChild<QTabWidget*>(QStringLiteral("aboutTabs"));
-        if (!pTabs)
-        {
-            RTTestIFailed("About tabs are missing");
-            return;
-        }
-        for (int iPage = 0; iPage < pTabs->count(); ++iPage)
-        {
-            pTabs->setCurrentIndex(iPage);
-            QApplication::processEvents();
-            const QString strName = QStringLiteral("about-%1-%2.png")
-                                    .arg(fDark ? QStringLiteral("dark") : QStringLiteral("light")).arg(iPage);
-            RTTESTI_CHECK(dialog.grab().save(directory.filePath(strName)));
-        }
+        QApplication::processEvents();
+        const QString strName = fDark ? QStringLiteral("about-dark.png") : QStringLiteral("about-light.png");
+        RTTESTI_CHECK(dialog.grab().save(directory.filePath(strName)));
     }
 }
 
