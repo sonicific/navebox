@@ -287,7 +287,7 @@ for %%i in (VBoxMerge*msm) do (
     copy /y "%%i" "%_MY_OPT_OUTDIR%" || goto end_failed
     call set _MY_OUT_FILES=%%_MY_OUT_FILES%% %%~nxi
 )
-for %%i in (VirtualBox-*MultiArch*exe) do (
+for %%i in (Navebox-*MultiArch*.exe) do (
     copy /y "%%i" "%_MY_OPT_OUTDIR%" || goto end_failed
     call set _MY_OUT_FILES=%%_MY_OUT_FILES%% %%~nxi
 )

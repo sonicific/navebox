@@ -176,11 +176,11 @@ tstVBoxAPIWin_TEMPLATE = VBoxR3Exe
 tstVBoxAPIWin_INST = $(INST_TESTCASE)
 tstVBoxAPIWin_SOURCES  = \
 	tstVBoxAPIWin.cpp \
-	$(VBOX_PATH_SDK)/bindings/mscom/lib/VirtualBox_i.c
+	$(VBOX_PATH_SDK)/bindings/mscom/lib/Navebox_i.c
 tstVBoxAPIWin_INCS = \
 	$(VBOX_PATH_SDK)/bindings/mscom/include
 tstVBoxAPIWin_INTERMEDIATES = \
-	$(VBOX_PATH_SDK)/bindings/mscom/include/VirtualBox.h
+	$(VBOX_PATH_SDK)/bindings/mscom/include/Navebox.h
 
 
 #
@@ -201,7 +201,7 @@ msiDarwinDescriptorDecoder_SOURCES  = \
 # Note! VBOX_MAIN_APIWRAPPER_GEN_HDRS is only defined if kmk is executed a
 #       parent directory.  Since the rules for generating the files listed by
 #       the variable lives in the parent makefile, as does the rules for making
-#       VirtualBox.h, so it's not really a problem.
+#       Navebox.h, so it's not really a problem.
 #
 tstCollector_TEMPLATE = VBoxMainClientTstExe
 tstCollector_SOURCES  = \

@@ -7831,7 +7831,7 @@ else  # COM
  TEMPLATE_VBoxMainExe_INCS              += \
  	$(VBOX_PATH_SDK)/bindings/mscom/include
  TEMPLATE_VBoxMainExe_INTERMEDIATES     += \
- 	$(VBOX_PATH_SDK)/bindings/mscom/include/VirtualBox.h
+ 	$(VBOX_PATH_SDK)/bindings/mscom/include/Navebox.h
 endif # COM
 
 #
@@ -7940,7 +7940,7 @@ endif
 TEMPLATE_VBoxMainClientExe                 = VBox Main Client (executable)
 TEMPLATE_VBoxMainClientExe_EXTENDS         = VBoxMainExe
 ifeq ($(KBUILD_TARGET),win)
- TEMPLATE_VBoxMainClientExe_DEPS            = $(VBOX_PATH_SDK)/bindings/mscom/include/VirtualBox.h
+ TEMPLATE_VBoxMainClientExe_DEPS            = $(VBOX_PATH_SDK)/bindings/mscom/include/Navebox.h
  TEMPLATE_VBoxMainClientExe_LATE_LIBS.win   = $(TEMPLATE_VBoxMainExe_LATE_LIBS.win) \
  	$(PATH_SDK_$(VBOX_WINPSDK)_LIB)/User32.Lib \
  	$(PATH_SDK_$(VBOX_WINPSDK)_LIB)/Shell32.Lib \
@@ -8535,7 +8535,7 @@ ifdef VBOX_WITH_QTGUI
   TEMPLATE_VBoxQtGuiExe_INCS += \
   	$(VBOX_PATH_SDK)/bindings/mscom/include
   TEMPLATE_VBoxQtGuiExe_INTERMEDIATES += \
-  	$(VBOX_PATH_SDK)/bindings/mscom/include/VirtualBox.h
+  	$(VBOX_PATH_SDK)/bindings/mscom/include/Navebox.h
  endif # COM
 
  ifn1of ($(KBUILD_TARGET), darwin os2 win)

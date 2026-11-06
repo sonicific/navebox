@@ -252,7 +252,11 @@ QString UITranslator::vboxLanguageSubDirectory()
 /* static */
 QString UITranslator::vboxLanguageFileBase()
 {
+#ifdef RT_OS_WINDOWS
+    return "Navebox_";
+#else
     return "VirtualBox_";
+#endif
 }
 
 /* static */

@@ -27,6 +27,7 @@
 
 /* Qt includes: */
 #include <QAction>
+#include <QApplication>
 #include <QComboBox>
 #include <QDesktopServices>
 #include <QEvent>
@@ -55,6 +56,7 @@
 #include "QIDialog.h"
 #include "UIDesktopWidgetWatchdog.h"
 #include "UIIconPool.h"
+#include "UIAppearance.h"
 #include "UIManagerStyle.h"
 #include "UIPhoneBackend.h"
 #include "UIPhoneManager.h"
@@ -146,6 +148,7 @@ UIPhoneManager::UIPhoneManager(QWidget *pParent, const QString &strDataRoot)
     prepareConnections();
     retranslateUi();
     updateImages();
+    m_fPrepared = true;
 }
 
 QList<QAction*> UIPhoneManager::toolbarActions() const
@@ -187,14 +190,15 @@ void UIPhoneManager::prepareAppearance()
 {
     /* Scope the complete control styling to this page so secondary buttons
      * use the same frame and spacing as primary actions on native Windows. */
-    setStyleSheet(QStringLiteral(
-        "QFrame[phoneCard=\"true\"] { background: palette(base); border: 1px solid palette(midlight); border-radius: 10px; }"
+    const UIAppearance::PaneColors colors(QApplication::palette());
+    const QString strStyle = QStringLiteral(
+        "QFrame[phoneCard=\"true\"] { background: %2; border: 1px solid %1; border-radius: 12px; }"
         "QLabel[phoneSection=\"true\"] { font-size: 15px; font-weight: 600; }"
-        "QFrame[phoneDetailsCard=\"true\"] { background: palette(base); border: 1px solid %1; border-radius: 8px; }"
+        "QFrame[phoneDetailsCard=\"true\"] { background: %2; border: 1px solid %1; border-radius: 10px; }"
         "QWidget[phoneDetailsTitle=\"true\"] { border-bottom: 1px solid %1; }"
         "QPushButton { background: palette(base); color: palette(button-text);"
         " border: 1px solid palette(midlight); border-radius: 6px; padding: 4px 12px; }"
-        "QPushButton:hover { background: palette(alternate-base); border-color: palette(mid); }"
+        "QPushButton:hover { background: %3; }"
         "QPushButton:pressed { background: palette(button); }"
         "QPushButton:focus { border-color: palette(highlight); }"
         "QPushButton:disabled { background: palette(window); color: palette(mid); }"
@@ -205,16 +209,17 @@ void UIPhoneManager::prepareAppearance()
         "QComboBox::drop-down { border: none; background: transparent; width: 22px; }"
         "QSpinBox::up-button, QSpinBox::down-button { border: none; background: transparent; width: 20px; }"
         "QSplitter::handle { background: %1; }"
-        "QListWidget#phoneList { background: palette(window); border: none; }"
+        "QListWidget#phoneList { background: %2; border: none; }"
         "QFrame#phonePreviewDevice { border: 2px solid palette(highlight); border-radius: 18px; }"
         "QLabel#phonePreviewScreen { color: palette(highlight); font-weight: 600; }"
         "QPushButton[phonePrimary=\"true\"] { background: palette(highlight); color: palette(highlighted-text);"
         " border: 1px solid palette(highlight); font-weight: 600; }"
         "QPushButton[phonePrimary=\"true\"]:focus { border-color: palette(window-text); }"
         "QPushButton[phonePrimary=\"true\"]:disabled { background: palette(button); color: palette(button-text);"
-        " border-color: palette(midlight); }"
-        "QPushButton[phonePrimary=\"true\"]:hover { border-color: palette(window-text); }")
-        .arg(UIManagerStyle::borderColor(palette()).name(QColor::HexArgb)));
+        " border-color: palette(midlight); }")
+        .arg(colors.border.name(), colors.surface.name(), colors.hover.name());
+    if (styleSheet() != strStyle)
+        setStyleSheet(strStyle);
 }
 
 void UIPhoneManager::prepareSdk()
@@ -291,7 +296,7 @@ void UIPhoneManager::preparePhones(QVBoxLayout *pLayout)
     pEmptyLayout->setSpacing(10);
     pEmptyLayout->addStretch();
     QLabel *pSymbol = new QLabel(pEmptyCard);
-    pSymbol->setPixmap(UIIconPool::iconSet(":/navebox-phone.svg").pixmap(56, 56));
+    pSymbol->setPixmap(UIIconPool::iconSet(":/navebox_phone_32px.png").pixmap(56, 56));
     pEmptyLayout->addWidget(pSymbol, 0, Qt::AlignHCenter);
     m_pEmptyTitle = new QLabel(pEmptyCard);
     m_pEmptyTitle->setProperty("phoneSection", true);
@@ -334,8 +339,11 @@ void UIPhoneManager::preparePhones(QVBoxLayout *pLayout)
     pSections->setContentsMargins(0, 0, 0, 0);
     pSections->setSpacing(8);
     preparePhoneDetails(pSections);
-    pDetailLayout->addWidget(m_pSelectedDetails, 1, Qt::AlignTop);
+    pSections->addStretch();
+    pDetailLayout->addWidget(m_pSelectedDetails, 1);
     pScroll->setWidget(pDetails);
+    pScroll->viewport()->setAutoFillBackground(false);
+    pDetails->setAutoFillBackground(false);
     pSplitter->addWidget(pScroll);
     pSplitter->setSizes({250, 750});
     pLayout->addWidget(pSplitter, 1);
@@ -615,10 +623,16 @@ void UIPhoneManager::prepareConnections()
 void UIPhoneManager::changeEvent(QEvent *pEvent)
 {
     QWidget::changeEvent(pEvent);
+    if (!m_fPrepared)
+        return;
+
     if (pEvent->type() == QEvent::LanguageChange)
         retranslateUi();
-    else if (pEvent->type() == QEvent::PaletteChange)
-        prepareAppearance();
+    else if (pEvent->type() == QEvent::PaletteChange || pEvent->type() == QEvent::ApplicationPaletteChange)
+    {
+        /* An inherited stylesheet can emit PaletteChange while Qt is still polishing this page. */
+        QMetaObject::invokeMethod(this, &UIPhoneManager::prepareAppearance, Qt::QueuedConnection);
+    }
     else if (pEvent->type() == QEvent::FontChange || pEvent->type() == QEvent::StyleChange)
         updateControlGeometry();
 }
@@ -882,7 +896,7 @@ void UIPhoneManager::updateDevices()
         const UIPhoneDevice &device = devices.at(i);
         QListWidgetItem *pItem = m_pList->item(i);
         if (!pItem)
-            pItem = new QListWidgetItem(UIIconPool::iconSet(":/navebox-phone.svg"), QString(), m_pList);
+            pItem = new QListWidgetItem(UIIconPool::iconSet(":/navebox_phone_32px.png"), QString(), m_pList);
         const QString strStatus = deviceStatus(device);
         pItem->setText(device.m_strName);
         pItem->setData(PhoneItemIdRole, device.m_strId);

@@ -139,7 +139,7 @@ an iOS device, a real cellular subscription, or real SMS/calling service.
 
 ## Validation and release gate
 
-Build `UICommon`, `VirtualBox`, `NaveboxLauncher` (Windows), `tstNaveboxPhone`
+Build `UICommon`, `Navebox`, `NaveboxManifest` on Windows, `tstNaveboxPhone`
 and `tstNaveboxGui` in the configured developer environment with
 `VBOX_WITH_TESTCASES=1`. Explicitly install all frontend targets in a narrow
 build: an executable combined with an older `UICommon` can fail at startup.
@@ -174,7 +174,7 @@ Do not label a build runtime-qualified until these real Android checks pass.
 ## Checks performed in this checkout (2026-11-03)
 
 The Windows x64 release build completed for `UICommon`, `VirtualBox`,
-`NaveboxLauncher`, `tstNaveboxPhone` and `tstNaveboxGui`. The installed
+`NaveboxManifest`, `tstNaveboxPhone` and `tstNaveboxGui`. The installed
 `UICommon.dll` and both executable entry points were checked against the
 new build by SHA-256. The main manager reached `showEvent` under an
 offscreen debugger smoke check after all frontend binaries were synchronized.

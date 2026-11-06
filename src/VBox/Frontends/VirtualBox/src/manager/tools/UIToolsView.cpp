@@ -30,6 +30,7 @@
 
 /* GUI includes: */
 #include "UICommon.h"
+#include "UIManagerStyle.h"
 #include "UIToolsItem.h"
 #include "UIToolsModel.h"
 #include "UIToolsView.h"
@@ -336,34 +337,11 @@ void UIToolsView::prepareThis()
 
 void UIToolsView::preparePalette()
 {
-    /* Setup palette: */
-    QPalette pal = qApp->palette();
-
-    /* We are just taking the [in]active Window colors and
-     * making them a bit darker/lighter according to theme: */
-    QColor backgroundColorActive = pal.color(QPalette::Active, QPalette::Window);
-    QColor backgroundColorInactive = pal.color(QPalette::Inactive, QPalette::Window);
-    if (m_enmClass == UIToolClass_Global)
-    {
-        backgroundColorActive = uiCommon().isInDarkMode()
-                              ? backgroundColorActive.lighter(120)
-                              : backgroundColorActive.darker(107);
-        backgroundColorInactive = uiCommon().isInDarkMode()
-                                ? backgroundColorInactive.lighter(120)
-                                : backgroundColorInactive.darker(107);
-    }
-    pal.setColor(QPalette::Active, QPalette::Base, backgroundColorActive);
-    pal.setColor(QPalette::Inactive, QPalette::Base, backgroundColorInactive);
-
-    /* Assing changed palette: */
-    setPalette(pal);
-#ifdef VBOX_WS_WIN
-    // WORKAROUND:
-    // New Windows Modern look&feel style have different palettes for view
-    // and viewport, so we are assigning viewport palette as well.
-    AssertPtrReturnVoid(viewport());
-    viewport()->setPalette(pal);
-#endif
+    /* Paint the viewport directly so repolishing and tool selection cannot change the backdrop. */
+    const QPalette palette = qApp->palette();
+    setBackgroundBrush(m_enmClass == UIToolClass_Global
+                       ? UIManagerStyle::backdropColor(palette)
+                       : UIManagerStyle::surfaceColor(palette));
 }
 
 void UIToolsView::prepareConnections()

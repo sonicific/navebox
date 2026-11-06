@@ -1,90 +1,94 @@
-<div align="center">
-  <h1>
-    <img src="src/VBox/Frontends/VirtualBox/images/Navebox/navebox.svg" alt="Navebox icon" title="Navebox" width="48" valign="middle">
-    Navebox
-  </h1>
-  <p><strong>Command Your Virtual World</strong></p>
-  <p>A branded desktop frontend for VirtualBox.</p>
+<p align="center">
+  <img src="docs/navebox-readme-banner.svg" alt="Navebox - Command Your Virtual World" width="100%">
+</p>
 
+<p align="center">
+  <strong>A focused desktop experience for managing virtual machines and Android virtual phones.</strong>
+</p>
+
+<p align="center">
   <a href="https://github.com/sonicific/navebox/actions/workflows/navebox-checks.yml">
     <img src="https://github.com/sonicific/navebox/actions/workflows/navebox-checks.yml/badge.svg" alt="Navebox integration checks">
   </a>
-  <a href="https://github.com/sonicific/navebox/blob/main/COPYING">
-    <img src="https://img.shields.io/badge/license-GPL--3.0-blue.svg" alt="GPL-3.0 license">
+  <a href="https://github.com/sonicific/navebox">
+    <img src="https://img.shields.io/github/license/sonicific/navebox" alt="License">
   </a>
   <a href="https://www.virtualbox.org/">
     <img src="https://img.shields.io/badge/based%20on-Oracle%20VirtualBox-183A61.svg" alt="Based on Oracle VirtualBox">
   </a>
-</div>
+</p>
 
-## 📖 About
+## Overview
 
-Navebox is a desktop frontend built from the VirtualBox source tree. It gives
-the graphical manager a distinct Navebox identity while retaining the
-underlying VirtualBox API, service and VM-file identifiers for compatibility.
-It is intended for development, experimentation and controlled distribution;
-a local development build is not automatically a qualified release.
+Navebox is a branded desktop frontend built from the VirtualBox source tree. It
+provides a polished Navebox identity while preserving the underlying VirtualBox
+API, service and VM-file identifiers needed for compatibility.
 
-The project is currently focused on the Windows desktop frontend. The
-underlying VirtualBox tree supports additional host platforms, but Navebox
-branding and packaging should be considered supported only where they have
-been built and tested.
+The project combines two workflows in one manager:
 
-## ✨ Features
+- **Machines** - create, configure, start, pause and manage VirtualBox virtual
+  machines.
+- **Phones** - create and manage Android virtual phones backed by an installed
+  Android SDK and Android Emulator.
 
-- 🧭 Navebox desktop identity, logo, icons and taskbar grouping.
-- 🖥️ Create, configure, start, pause and manage virtual machines through the
-  familiar VirtualBox manager.
-- 📱 Create and manage Android virtual phones through **File > Android
-  Phones**, using a separately installed Android SDK. See the
-  [phone setup and validation guide](doc/navebox-phones.md).
-- 💾 Support for VirtualBox VM files and internal service/API compatibility.
-- 🎨 Light, dark and high-DPI-aware interface behavior.
-- 🌍 Existing VirtualBox translation and accessibility infrastructure.
-- 🔧 A focused regression suite for branding, packaging, dialogs and GUI state.
+Navebox is currently focused on the Windows desktop frontend. Other host
+platforms supported by the underlying VirtualBox tree require their own build,
+packaging and runtime qualification.
 
-## 📊 Project status
+> **Development status:** this repository is a development checkout, not a
+> prebuilt binary download or a qualified production release. See the
+> [release and validation guide](doc/navebox-release.md) before distributing
+> artifacts.
 
-This repository is a development checkout, not a prebuilt binary download.
-Build provenance, supported backends, packaging requirements and release gates
-are documented in the [Navebox release and validation guide](doc/navebox-release.md).
+## Highlights
 
-Do not copy `Navebox.exe` by itself and treat it as a portable application.
-Normal deployment requires the matching VirtualBox frontend/backend binaries,
-COM registration, VBoxSDS service, Qt runtime/plugins and the feature payloads
-used by the selected installation. Prefer a complete, tested installer for
-end-user deployment.
+- Distinct Navebox branding, icons, artwork and Windows taskbar identity.
+- Familiar VirtualBox machine management and compatibility behavior.
+- Android phone management from **File > Android Phones**.
+- Light, dark and high-DPI-aware interface behavior.
+- Existing VirtualBox translation and accessibility infrastructure.
+- Automated checks for branding, packaging, dialogs and GUI state.
+- Structured Windows release stages with manifests and SHA256 checksums.
 
-## 🚀 Getting started
+## Contents
 
-### 🧰 Requirements
+- [Quick start](#quick-start)
+- [Build the tree](#build-the-tree)
+- [Test](#test)
+- [Android virtual phones](#android-virtual-phones)
+- [Branding and icons](#branding-and-icons)
+- [Project documentation](#project-documentation)
+- [Contributing](#contributing)
+- [Security](#security)
+- [License](#license)
 
-Building VirtualBox requires a platform-specific compiler, SDKs, Qt and other
-dependencies. Follow the official [VirtualBox build
-instructions](https://www.virtualbox.org/wiki/Build_instructions) before
-configuring the tree.
+## Quick start
 
-Use the repository's external developer setup:
+### Prerequisites
+
+VirtualBox requires a platform-specific compiler, SDKs, Qt and additional
+dependencies. Start with the official
+[VirtualBox build instructions](https://www.virtualbox.org/wiki/Build_instructions),
+then use this repository's external developer setup:
 
 ```text
 configure.py
 ```
 
-Review the generated configuration and keep machine-local settings in
-`LocalConfig.kmk`. Internal developers should use the environment scripts
-described in the [release and validation guide](doc/navebox-release.md).
-Prefer `KBUILD_*` variables and keep release builds in a separate output tree.
+Keep machine-local settings in `LocalConfig.kmk`. Internal developers should
+use the environment scripts described in the
+[release and validation guide](doc/navebox-release.md). Prefer `KBUILD_*`
+variables and keep release builds in a separate output tree.
 
-### 🔨 Build
+### Build the tree
 
-In a prepared developer shell, build the tree with:
+In a prepared developer shell:
 
 ```text
 kmk
 ```
 
-For Windows x64, the repository includes a build entry point. After preparing
-the local configuration, run:
+For the supported Windows x64 workflow, use the repository entry point:
 
 ```text
 .\build.cmd doctor
@@ -92,21 +96,25 @@ the local configuration, run:
 .\build.cmd release
 ```
 
-`release` compiles, stages Qt, builds MSI/EXE, verifies the embedded artwork and
-payload, then writes installers, a manifest and SHA256 hashes to
-`out/win.amd64/release/delivery`. Run `build.cmd --help` for individual stages.
-It does not install the application or change Windows security settings.
+Run `.\build.cmd --help` for the available stages. The `release` pipeline
+compiles the required components, stages Qt, creates and verifies MSI/EXE
+artifacts, and writes delivery files to:
+
+```text
+out/win.amd64/release/delivery
+```
 
 For a new checkout, copy `navebox-build.example.json` to
-`navebox-build.local.json`, prepare `LocalConfig.release.kmk` using
-`tools/navebox/LocalConfig.release.example.kmk`, and configure the actual SDK
-paths and signing inputs. Both local files are ignored. The example is a
-host-only profile; compiler/SDK compatibility fixes remain machine-local.
-See the [build guide](doc/navebox-release.md#windows-build-entry-point) for
-requirements and commands. These builds still need signing, clean-host
-installation tests and hypervisor qualification before public release.
+`navebox-build.local.json`, then prepare
+`LocalConfig.release.kmk` from
+`tools/navebox/LocalConfig.release.example.kmk`. Configure actual SDK, Qt,
+WiX, compiler and signing paths locally. These files are ignored and must not
+contain credentials committed to the repository.
 
-## 🧪 Testing
+> `build.cmd` does not install Navebox, register COM/services/drivers, download
+> dependencies, create certificates or change Windows security settings.
+
+## Test
 
 Run the dependency-free packaging and catalog checks from the repository root:
 
@@ -114,35 +122,72 @@ Run the dependency-free packaging and catalog checks from the repository root:
 python src/VBox/Frontends/VirtualBox/testcase/tstNaveboxPackaging.py
 ```
 
-Build and run the GUI regression executable in a configured environment:
+In a configured build environment, compile and run the GUI regression test:
 
 ```text
 kmk -C src/VBox/Frontends/VirtualBox VBOX_WITH_TESTCASES=1 tstNaveboxGui
 out/<host>.<arch>/<build-type>/bin/testcase/tstNaveboxGui
 ```
 
-On Windows, append `.exe` to the test executable. The test documentation
-describes Qt offscreen execution, snapshot export and native-platform checks:
+Append `.exe` to the test executable on Windows. The test documentation covers
+Qt offscreen execution, snapshot export and native-platform checks:
 [frontend regression checks](src/VBox/Frontends/VirtualBox/testcase/README.md).
-These tests do not replace native Windows accessibility, installer,
-driver-signing or VM compatibility validation.
 
-## 🎨 Branding and icons
+Automated tests do not replace native Windows accessibility and DPI checks,
+installer testing, driver-signing validation or VM compatibility testing.
 
-The editable Navebox artwork is
+## Android virtual phones
+
+The **Phones** page is available beside **Machines** in the main navigation.
+Phones use Android Emulator independently of VirtualBox VMs; emulator windows
+provide their own touch, rotation, volume, camera and device controls.
+
+Install a standalone Android SDK or Android Studio's SDK components, including:
+
+- Android Emulator
+- Android SDK Platform-Tools
+- Android SDK Command-Line Tools (latest)
+- A stable phone system image for API 26 or newer
+
+In Navebox, open **SDK Settings**, select the SDK directory and a compatible
+Java home, then click **Apply SDK** and **Check Acceleration**. Navebox uses
+installed SDK components; it does not download packages, accept licenses,
+enable Windows features or change firmware/security settings.
+
+For complete setup, creation, lifecycle, troubleshooting and data-location
+details, read the [Android virtual phones guide](doc/navebox-phones.md).
+
+## Branding and icons
+
+The editable source artwork is
 [`navebox.svg`](src/VBox/Frontends/VirtualBox/images/Navebox/navebox.svg).
-The repository also contains generated PNG and ICO sizes used by the
-application and installer. Do not edit individual exported resolutions.
+Generated PNG and ICO sizes are consumed by the application and installer; do
+not edit individual exported resolutions.
 
-Branding assets can be regenerated with the Qt-based
+Regenerate branding with the Qt-based
 [`render-navebox-branding.cpp`](src/VBox/Frontends/VirtualBox/scripts/render-navebox-branding.cpp)
-utility. See the [asset instructions](src/VBox/Frontends/VirtualBox/images/Navebox/README.md)
-for the required Qt libraries and command.
+utility. Follow the [asset instructions](src/VBox/Frontends/VirtualBox/images/Navebox/README.md)
+for required Qt libraries and commands.
 
-## 📚 Documentation
+## Deployment and compatibility
+
+Navebox is not a portable single executable. Do not copy `Navebox.exe` by
+itself and treat it as a complete installation. Normal deployment requires the
+matching frontend and backend binaries, COM registration, VBoxSDS service, Qt
+runtime/plugins and the feature payloads selected by the installer.
+
+Use a complete, tested installer and qualify it on a clean host. Record the
+source revision, toolchain, configuration, artifact checksums and test evidence
+for every release candidate. Build provenance, supported execution backends,
+packaging requirements and acceptance gates are documented in the
+[release and validation guide](doc/navebox-release.md).
+
+## Project documentation
 
 - [Release and validation guide](doc/navebox-release.md) - build provenance,
-  Windows deployment, execution backends and acceptance gates.
+  Windows packaging, deployment and acceptance gates.
+- [Android virtual phones](doc/navebox-phones.md) - SDK setup and phone
+  lifecycle.
 - [Frontend regression checks](src/VBox/Frontends/VirtualBox/testcase/README.md)
   - automated packaging and GUI test instructions.
 - [VirtualBox User Guide](https://docs.oracle.com/en/virtualization/virtualbox/index.html)
@@ -150,26 +195,26 @@ for the required Qt libraries and command.
 - [VirtualBox technical documentation](https://www.virtualbox.org/wiki/Technical_documentation)
   - architecture and developer references.
 
-## 🤝 Contributing
+## Contributing
 
 Bug reports and feature requests are welcome through the
 [issue tracker](https://github.com/sonicific/navebox/issues). Before opening an
-issue, check whether it is a security vulnerability; security issues must
-follow the [security policy](SECURITY.md) and must not be reported publicly.
+issue, check whether it may be a security vulnerability.
 
-For code contributions, read [CONTRIBUTING.md](CONTRIBUTING.md), keep changes
+For code contributions, read [CONTRIBUTING.md](CONTRIBUTING.md). Keep changes
 focused, update related documentation and include the narrowest useful
 validation evidence. Do not commit generated build outputs, local
-`LocalConfig.kmk` settings, VM images, logs or credentials.
+configuration files, VM images, logs or credentials.
 
-## 🔒 Security
+## Security
 
 Treat guest-controlled, network-controlled, disk-controlled and user-supplied
-input as untrusted. Report suspected vulnerabilities privately according to
-the [security policy](SECURITY.md) and the upstream
-[vulnerability reporting guide](https://www.oracle.com/corporate/security-practices/assurance/vulnerability/reporting.html).
+input as untrusted. Report suspected vulnerabilities privately according to the
+[security policy](SECURITY.md) and the
+[upstream vulnerability reporting guide](https://www.oracle.com/corporate/security-practices/assurance/vulnerability/reporting.html).
+Do not disclose suspected vulnerabilities through public issues.
 
-## ⚖️ License
+## License
 
 Navebox follows the licensing terms of the VirtualBox source tree. The main
 program is released under the [GNU General Public License v3.0](COPYING).

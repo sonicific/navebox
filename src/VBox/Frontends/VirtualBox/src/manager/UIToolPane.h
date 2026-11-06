@@ -154,6 +154,11 @@ public:
         QUuid currentSnapshotId();
     /** @} */
 
+protected:
+
+    /** Updates the embedded page style on palette changes. */
+    virtual void changeEvent(QEvent *pEvent) RT_OVERRIDE;
+
 private slots:
 
     /** @name Global tool stuff.
@@ -168,6 +173,10 @@ private:
     void prepare();
     /** Prepares stacked-layout. */
     void prepareStackedLayout();
+    /** Adds and activates @a pWidget, applying the Manager card to global tools. */
+    void addToolWidget(QWidget *pWidget);
+    /** Wraps @a pTool in a card with the header for @a enmType. */
+    QWidget *createToolCard(QWidget *pTool, UIToolType enmType);
     /** Cleanups all. */
     void cleanup();
 

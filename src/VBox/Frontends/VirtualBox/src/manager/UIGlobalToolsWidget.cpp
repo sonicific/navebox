@@ -27,14 +27,15 @@
 
 /* Qt includes: */
 #include <QGridLayout>
+#include <QHBoxLayout>
 
 /* GUI includes: */
-#include "QIToolBar.h"
 #include "UIChooser.h"
 #include "UICommon.h"
 #include "UIExtraDataManager.h"
 #include "UIGlobalToolsWidget.h"
 #include "UIMachineToolsWidget.h"
+#include "UIManagerStyle.h"
 #include "UIToolPane.h"
 #include "UITools.h"
 #include "UIVirtualBoxEventHandler.h"
@@ -53,10 +54,14 @@ UIGlobalToolsWidget::UIGlobalToolsWidget(QWidget *pParent, UIActionPool *pAction
     prepare();
 }
 
-void UIGlobalToolsWidget::addToolBar(QIToolBar *pToolBar)
+void UIGlobalToolsWidget::addToolBar(QWidget *pToolBar)
 {
     AssertPtrReturnVoid(m_pLayout);
-    m_pLayout->addWidget(pToolBar, 0, 1);
+    QHBoxLayout *pLayout = new QHBoxLayout;
+    const int iInset = UIManagerStyle::pageInset();
+    pLayout->setContentsMargins(iInset, 0, iInset, 0);
+    pLayout->addWidget(pToolBar);
+    m_pLayout->addLayout(pLayout, 0, 1);
 }
 
 UIToolPane *UIGlobalToolsWidget::toolPane() const

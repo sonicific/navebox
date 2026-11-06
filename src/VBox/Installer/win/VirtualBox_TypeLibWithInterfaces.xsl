@@ -224,7 +224,7 @@ Applications.
 
 <!--
   Count the number of methods.  This must match what midl.exe initializes
-  CInterfaceStubVtbl::header::DispatchTableCount with in VirtualBox_p.c!
+  CInterfaceStubVtbl::header::DispatchTableCount with in Navebox_p.c!
   -->
 <xsl:template name="fnCountMethods">
   <xsl:variable name="sParent" select="@extends"/>

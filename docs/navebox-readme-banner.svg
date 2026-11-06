@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320" role="img" aria-labelledby="title desc">
+  <title id="title">Navebox - Command Your Virtual World</title>
+  <desc id="desc">Navebox logo and wordmark on a blue background with a virtual machine window.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#061631"/>
+      <stop offset=".58" stop-color="#0b3474"/>
+      <stop offset="1" stop-color="#087fc3"/>
+    </linearGradient>
+    <linearGradient id="window" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#f8fcff"/>
+      <stop offset="1" stop-color="#c5e1ff"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="320" rx="28" fill="url(#background)"/>
+  <path d="M0 265c155-91 286-29 424-88 151-65 266-153 414-125 143 27 214 104 362 70v198H0Z"
+        fill="#39c9f4" opacity=".13"/>
+  <path d="M0 286c160-70 286-31 425-88 161-66 288-127 435-98 143 28 204 79 340 51"
+        fill="none" stroke="#8be7ff" stroke-opacity=".2" stroke-width="2"/>
+
+  <!-- Use the canonical artwork so the logo geometry stays aligned with the application. -->
+  <image href="../src/VBox/Frontends/VirtualBox/images/Navebox/navebox.svg"
+         x="78" y="72" width="136" height="136"
+         preserveAspectRatio="xMidYMid meet"/>
+
+  <!-- Text block: its fixed width ends before the illustration begins. -->
+  <g transform="translate(270 76)">
+    <text x="0" y="70" fill="#fff" font-family="Segoe UI, Arial, sans-serif" font-size="68" font-weight="700" letter-spacing="1">NAVEBOX</text>
+    <rect x="2" y="91" width="308" height="3" rx="1.5" fill="#36d5f1"/>
+    <text x="2" y="132" fill="#c7efff" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="600" letter-spacing="3">COMMAND YOUR VIRTUAL WORLD</text>
+    <text x="2" y="171" fill="#a9c8e8" font-family="Segoe UI, Arial, sans-serif" font-size="16" letter-spacing=".5">A branded desktop frontend for VirtualBox.</text>
+  </g>
+
+  <!-- Illustration block: aligned to its own grid and not rotated, so controls stay crisp. -->
+  <g transform="translate(872 58)">
+    <rect x="10" y="12" width="250" height="190" rx="16" fill="#001b48" opacity=".55" filter="url(#shadow)"/>
+    <rect width="250" height="190" rx="16" fill="url(#window)" stroke="#bce3ff" stroke-width="2"/>
+    <path d="M16 0h218a16 16 0 0 1 16 16v18H0V16A16 16 0 0 1 16 0Z" fill="#147ee2"/>
+    <circle cx="20" cy="17" r="4" fill="#d9f6ff"/>
+    <circle cx="35" cy="17" r="4" fill="#d9f6ff"/>
+    <circle cx="50" cy="17" r="4" fill="#d9f6ff"/>
+    <rect x="22" y="59" width="128" height="10" rx="5" fill="#6ba6de"/>
+    <rect x="22" y="84" width="190" height="9" rx="4.5" fill="#9cc5ed"/>
+    <rect x="22" y="105" width="160" height="9" rx="4.5" fill="#9cc5ed"/>
+    <rect x="22" y="137" width="72" height="25" rx="12.5" fill="#1689ff"/>
+    <circle cx="207" cy="149" r="24" fill="#d7ecff"/>
+    <path d="M199 149h16M207 141v16" stroke="#1689ff" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>

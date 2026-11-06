@@ -40,7 +40,7 @@
             <Directory Id="dir_VBoxPythonSDKVBoxAPISrcRoot" Name="vboxapi">
                 <Component Id="cp_VBoxPyMod" Guid="DF19CB76-5102-11DE-943B-13C755D89593" Bitness="$(var.Property_Bitness)">
                     <File Id="file___init__.py" Name="__init__.py" Source="$(env.PATH_OUT)\bin\sdk\installer\python\vboxapi\src\vboxapi\__init__.py" DiskId="$(var.Property_DiskIdCommon)" />
-                    <File Id="file_VirtualBox_constants.py" Name="VirtualBox_constants.py" Source="$(env.PATH_OUT)\bin\sdk\installer\python\vboxapi\src\vboxapi\VirtualBox_constants.py" DiskId="$(var.Property_DiskIdCommon)" />
+                    <File Id="file_Navebox_constants.py" Name="Navebox_constants.py" Source="$(env.PATH_OUT)\bin\sdk\installer\python\vboxapi\src\vboxapi\Navebox_constants.py" DiskId="$(var.Property_DiskIdCommon)" />
                 </Component>
             </Directory>
         </Directory>

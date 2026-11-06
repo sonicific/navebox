@@ -41,6 +41,7 @@
 
 /* GUI includes: */
 #include "QIDialogButtonBox.h"
+#include "UIAppearance.h"
 #include "QIRichTextLabel.h"
 #include "QIToolButton.h"
 #include "UIHelpBrowserDialog.h"
@@ -82,9 +83,6 @@ bool UINotificationObjectItem::isCritical() const
 
 void UINotificationObjectItem::prepare()
 {
-    /* Make sure item is opaque. */
-    setAutoFillBackground(true);
-
     /* Prepare everything: */
     prepareWidgets();
     prepareConnections();
@@ -128,6 +126,9 @@ void UINotificationObjectItem::prepareWidgets()
     m_pLayoutMain = new QVBoxLayout(this);
     if (m_pLayoutMain)
     {
+        m_pLayoutMain->setContentsMargins(10, 7, 10, 7);
+        m_pLayoutMain->setSpacing(6);
+
         /* Prepare upper layout: */
         m_pLayoutUpper = new QHBoxLayout;
         if (m_pLayoutUpper)
@@ -150,7 +151,11 @@ void UINotificationObjectItem::prepareWidgets()
             if (m_pLabelName)
             {
                 m_pLabelName->setText(m_pObject->name());
-                m_pLayoutUpper->addWidget(m_pLabelName);
+                m_pLabelName->setWordWrap(true);
+                QFont fontTitle = m_pLabelName->font();
+                fontTitle.setWeight(QFont::DemiBold);
+                m_pLabelName->setFont(fontTitle);
+                m_pLayoutUpper->addWidget(m_pLabelName, 1);
             }
 
             /* Prepare help button: */
@@ -258,57 +263,13 @@ bool UINotificationObjectItem::event(QEvent *pEvent)
 
 void UINotificationObjectItem::paintEvent(QPaintEvent *pPaintEvent)
 {
-    /* Prepare painter: */
+    const UIAppearance::PaneColors colors(QApplication::palette());
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setClipRect(pPaintEvent->rect());
-    /* Acquire palette: */
-    const bool fActive = isActiveWindow();
-    QPalette pal = QApplication::palette();
-
-    /* Prepare effective frame rectangle: */
-#ifdef VBOX_WS_WIN
-    // WORKAROUND:
-    // Fixing off-by-one problem on Windows:
-    QRectF adjustedRect = rect().adjusted(0, 0, -1, -1);
-    QRectF effectiveRect = adjustedRect.translated(0.5, 0.5);
-#else
-    QRectF effectiveRect = rect();
-#endif
-
-    /* Gather suitable colors: */
-    QColor color = pal.color(fActive ? QPalette::Active : QPalette::Inactive, QPalette::Window);
-    QColor color1;
-    QColor color2;
-    if (color.black() > 128)
-    {
-        color1 = color.lighter(110);
-        color2 = color.lighter(105);
-    }
-    else
-    {
-        color1 = color.darker(105);
-        color2 = color.darker(110);
-    }
-    /* Prepare background gradient: */
-    QLinearGradient grad(QPointF(0, 0), QPointF(width(), height()));
-    {
-        grad.setColorAt(0, color1);
-        grad.setColorAt(1, color2);
-    }
-    /* Fill background: */
-    painter.fillRect(effectiveRect, grad);
-
-    /* If item is hovered: */
-    if (m_fHovered)
-    {
-        /* Gather suitable color: */
-        QColor color3 = pal.color(fActive ? QPalette::Active : QPalette::Inactive, QPalette::Highlight);
-        /* Override painter pen: */
-        painter.setPen(color3);
-        /* Draw frame: */
-        painter.drawRect(effectiveRect);
-    }
+    painter.setPen(colors.border);
+    painter.setBrush(m_fHovered ? colors.hover : colors.row);
+    painter.drawRoundedRect(QRectF(rect()).adjusted(0.5, 0.5, -0.5, -0.5), 10, 10);
 }
 
 /* static */

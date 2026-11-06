@@ -2657,8 +2657,8 @@ void MainConfigFile::write(const com::Utf8Str strFilename)
 {
     bumpSettingsVersionIfNeeded();
 
-    m->strFilename = strFilename;
     specialBackupIfFirstBump();
+    m->strFilename = strFilename;
     createStubDocument();
 
     xml::ElementNode *pelmGlobal = m->pelmRoot->createChild("Global");

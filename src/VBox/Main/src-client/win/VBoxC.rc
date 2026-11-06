@@ -69,4 +69,4 @@ END
 
 //IDR_VIRTUALBOX REGISTRY "VBoxC.rgs"
 
-1 TYPELIB "VirtualBox.tlb"
+1 TYPELIB "Navebox.tlb"

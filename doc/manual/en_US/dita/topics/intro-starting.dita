@@ -29,12 +29,18 @@
       </li>
     </ul>
     <p>When you start <ph conkeyref="vbox-conkeyref-phrases/product-name"/>, the <ph conkeyref="vbox-conkeyref-phrases/vbox-mgr"/> interface is shown. See <xref href="configuring-virtualbox.dita"/>. </p>
-    <p>The main toolbar, machine selection, and rounded details cards use
-      the application color theme. Selected machines use the theme's highlight
-      and matching text colors in both light and dark modes.</p>
+    <p>The Manager uses the same toolbar, page spacing, and rounded cards
+      across its tools. Both the Manager and the slide-out
+      <b>Notifications</b> panel follow the light or dark application theme.
+      Select a notification to expand its details. The panel also includes
+      controls for sorting and clearing finished notifications.</p>
     <p>Navebox opens with the navigation expanded and <b>Machines</b> selected
       when machines are available. With an empty machine list, it opens
       <b>Home</b>.</p>
+    <p>Use the action rows in <b>Home</b> to open global preferences, create
+      a virtual machine, add a saved machine, import an appliance, or open
+      the VirtualBox documentation and community website. Click a row or use
+      <b>Tab</b> and <b>Space</b> to activate it with the keyboard.</p>
     <p>The About dialog shows the product version, contact details, build
       information, and credits on one scrollable page. Use <b>Copy Build
         Information</b> to copy the product and platform versions, build type,

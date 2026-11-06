@@ -561,30 +561,38 @@ void UIToolsItem::paint(QPainter *pPainter, const QStyleOptionGraphicsItem *pOpt
     paintToolInfo(pPainter, rectangle);
 }
 
+/* static */
+QString UIToolsItem::typeToName(UIToolType enmType)
+{
+    switch (enmType)
+    {
+        // Aux
+        case UIToolType_Toggle:      return tr("Show text");
+        // Global
+        case UIToolType_Home:        return tr("Home");
+        case UIToolType_Machines:    return tr("Machines");
+        case UIToolType_Phones:      return tr("Phones");
+        case UIToolType_Extensions:  return tr("Extensions");
+        case UIToolType_Media:       return tr("Media");
+        case UIToolType_Network:     return tr("Network");
+        case UIToolType_Cloud:       return tr("Cloud");
+        case UIToolType_Resources:   return tr("Resources");
+        // Machine
+        case UIToolType_Details:     return tr("Details");
+        case UIToolType_Snapshots:   return tr("Snapshots");
+        case UIToolType_Logs:        return tr("Logs");
+        case UIToolType_ResourceUse: return tr("Resource Use");
+        case UIToolType_FileManager: return tr("File Manager");
+        default:                     return QString();
+    }
+}
+
 void UIToolsItem::sltRetranslateUI()
 {
     /* Translate item name: */
-    switch (itemType())
-    {
-        // Aux
-        case UIToolType_Toggle:      setName(tr("Show text")); break;
-        // Global
-        case UIToolType_Home:        setName(tr("Home")); break;
-        case UIToolType_Machines:    setName(tr("Machines")); break;
-        case UIToolType_Phones:      setName(tr("Phones")); break;
-        case UIToolType_Extensions:  setName(tr("Extensions")); break;
-        case UIToolType_Media:       setName(tr("Media")); break;
-        case UIToolType_Network:     setName(tr("Network")); break;
-        case UIToolType_Cloud:       setName(tr("Cloud")); break;
-        case UIToolType_Resources:   setName(tr("Resources")); break;
-        // Machine
-        case UIToolType_Details:     setName(tr("Details")); break;
-        case UIToolType_Snapshots:   setName(tr("Snapshots")); break;
-        case UIToolType_Logs:        setName(tr("Logs")); break;
-        case UIToolType_ResourceUse: setName(tr("Resource Use")); break;
-        case UIToolType_FileManager: setName(tr("File Manager")); break;
-        default: break;
-    }
+    const QString strName = typeToName(itemType());
+    if (!strName.isNull())
+        setName(strName);
 
     /* Translate item description: */
     m_strDescription = tr("Tool item");
@@ -653,7 +661,7 @@ QIcon UIToolsItem::typeToIcon(UIToolType enmType)
         case UIToolType_Machines:
             return UIIconPool::iconSet(":/machine_24px.png");
         case UIToolType_Phones:
-            return QIcon(":/navebox-phone.svg");
+            return UIIconPool::iconSet(":/navebox_phone_32px.png");
         case UIToolType_Extensions:
             return UIIconPool::iconSet(":/extension_pack_manager_24px.png", ":/extension_pack_manager_disabled_24px.png");
         case UIToolType_Media:

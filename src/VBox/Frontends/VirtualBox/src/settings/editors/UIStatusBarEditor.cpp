@@ -43,6 +43,7 @@
 
 /* GUI includes: */
 #include "QIToolButton.h"
+#include "UIAppearance.h"
 #include "UICommon.h"
 #include "UIConverter.h"
 #include "UIExtraDataManager.h"
@@ -517,75 +518,9 @@ void UIStatusBarEditorWidget::sltRetranslateUI()
 
 void UIStatusBarEditorWidget::paintEvent(QPaintEvent *)
 {
-    /* Prepare painter: */
     QPainter painter(this);
-
-    /* Prepare palette colors: */
-    const QPalette pal = QApplication::palette();
-    QColor color0 = pal.color(QPalette::Window);
-    QColor color1 = pal.color(QPalette::Window).lighter(110);
-    color1.setAlpha(0);
-    QColor color2 = pal.color(QPalette::Window).darker(200);
-#if defined(VBOX_WS_WIN) || defined(VBOX_WS_NIX)
-    QColor color3 = pal.color(QPalette::Window).darker(120);
-#endif /* VBOX_WS_WIN || VBOX_WS_NIX */
-
-    /* Acquire metric: */
-    const int iMetric = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) / 4;
-
-    /* Left corner: */
-    QRadialGradient grad1(QPointF(iMetric, iMetric), iMetric);
-    {
-        grad1.setColorAt(0, color2);
-        grad1.setColorAt(1, color1);
-    }
-    /* Right corner: */
-    QRadialGradient grad2(QPointF(width() - iMetric, iMetric), iMetric);
-    {
-        grad2.setColorAt(0, color2);
-        grad2.setColorAt(1, color1);
-    }
-    /* Top line: */
-    QLinearGradient grad3(QPointF(iMetric, 0), QPointF(iMetric, iMetric));
-    {
-        grad3.setColorAt(0, color1);
-        grad3.setColorAt(1, color2);
-    }
-    /* Left line: */
-    QLinearGradient grad4(QPointF(0, iMetric), QPointF(iMetric, iMetric));
-    {
-        grad4.setColorAt(0, color1);
-        grad4.setColorAt(1, color2);
-    }
-    /* Right line: */
-    QLinearGradient grad5(QPointF(width(), iMetric), QPointF(width() - iMetric, iMetric));
-    {
-        grad5.setColorAt(0, color1);
-        grad5.setColorAt(1, color2);
-    }
-
-    /* Paint shape/shadow: */
-    painter.fillRect(QRect(iMetric, iMetric, width() - iMetric * 2, height() - iMetric), color0); // background
-    painter.fillRect(QRect(0,                 0, iMetric, iMetric), grad1); // left corner
-    painter.fillRect(QRect(width() - iMetric, 0, iMetric, iMetric), grad2); // right corner
-    painter.fillRect(QRect(iMetric,           0, width() - iMetric * 2, iMetric), grad3); // bottom line
-    painter.fillRect(QRect(0,                 iMetric, iMetric, height() - iMetric), grad4); // left line
-    painter.fillRect(QRect(width() - iMetric, iMetric, iMetric, height() - iMetric), grad5); // right line
-
-#if defined(VBOX_WS_WIN) || defined(VBOX_WS_NIX)
-    /* Paint frames: */
-    painter.save();
-    painter.setPen(color3);
-    painter.drawLine(QLine(QPoint(iMetric + 1,               iMetric + 1),
-                           QPoint(width() - 1 - iMetric - 1, iMetric + 1)));
-    painter.drawLine(QLine(QPoint(width() - 1 - iMetric - 1, iMetric + 1),
-                           QPoint(width() - 1 - iMetric - 1, height() - 1)));
-    painter.drawLine(QLine(QPoint(width() - 1 - iMetric - 1, height() - 1),
-                           QPoint(iMetric + 1,               height() - 1)));
-    painter.drawLine(QLine(QPoint(iMetric + 1,               height() - 1),
-                           QPoint(iMetric + 1,               iMetric + 1)));
-    painter.restore();
-#endif /* VBOX_WS_WIN || VBOX_WS_NIX */
+    const int iMetric = style()->pixelMetric(QStyle::PM_SmallIconSize, 0, this) / 4;
+    UIAppearance::paintSheet(painter, QRectF(rect()).adjusted(iMetric, iMetric, -iMetric, 0), palette());
 
     /* Paint drop token: */
     if (m_pButtonDropToken)

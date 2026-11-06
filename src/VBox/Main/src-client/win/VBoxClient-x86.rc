@@ -69,5 +69,5 @@ END
 
 IDR_VIRTUALBOX REGISTRY "VBoxClient-x86.rgs"
 
-1 TYPELIB "VirtualBox-x86.tlb"
+1 TYPELIB "Navebox-x86.tlb"
 

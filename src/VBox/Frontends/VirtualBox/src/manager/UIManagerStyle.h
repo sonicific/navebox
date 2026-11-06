@@ -53,7 +53,15 @@ public:
 
     /** Insets details cards from the edges of the machine and phone panes. */
     static constexpr int detailsPaneInset() { return 5; }
+    /** Insets the toolbar and content from the navigation edge. */
+    static constexpr int pageInset() { return 14; }
 
+    /** Returns the shared background for the pane, navigation and toolbar gutter. */
+    static QColor backdropColor(const QPalette &palette);
+    /** Returns the style sheet for the Home content. */
+    static QString homePaneStyleSheet(const QPalette &palette);
+    /** Returns the style sheet for the stacked Manager tool pages. */
+    static QString toolPageStyleSheet(const QPalette &palette);
     /** Returns the style sheet for the Manager's main toolbar. */
     static QString toolBarStyleSheet(const QPalette &palette);
 };

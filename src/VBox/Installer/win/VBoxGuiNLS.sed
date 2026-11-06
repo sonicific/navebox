@@ -29,6 +29,6 @@
 1 i <Include>
 s/^\(.*\)$/    <File Id="nlsqt\1" Name="qt_\1.qm" LongName="qt_\1.qm" DiskId="1" Vital="yes"\
           src="\$(env.PATH_OUT)\\bin\\nls\\qt_\1.qm" \/>\
-    <File Id="nlsgui\1" LongName="VirtualBox_\1.qm" DiskId="1" Vital="yes"\
-          src="\$(env.PATH_OUT)\\bin\\nls\\VirtualBox_\1.qm" \/>/
+    <File Id="nlsgui\1" LongName="Navebox_\1.qm" DiskId="1" Vital="yes"\
+          src="\$(env.PATH_OUT)\\bin\\nls\\Navebox_\1.qm" \/>/
 $ a </Include>

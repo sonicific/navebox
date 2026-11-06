@@ -35,6 +35,7 @@
 #include "UIChooserModel.h"
 #include "UIChooserSearchWidget.h"
 #include "UIChooserView.h"
+#include "UIManagerStyle.h"
 #include "UICommon.h"
 #include "UITranslationEventListener.h"
 
@@ -404,10 +405,7 @@ void UIChooserView::prepareThis()
 
 void UIChooserView::preparePalette()
 {
-    QPalette pal = QApplication::palette();
-    pal.setColor(QPalette::Active, QPalette::Base, pal.color(QPalette::Active, QPalette::Window));
-    pal.setColor(QPalette::Inactive, QPalette::Base, pal.color(QPalette::Inactive, QPalette::Window));
-    setPalette(pal);
+    setBackgroundBrush(UIManagerStyle::surfaceColor(QApplication::palette()));
 }
 
 void UIChooserView::prepareWidget()

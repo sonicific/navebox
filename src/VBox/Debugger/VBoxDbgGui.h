@@ -35,8 +35,8 @@
 #ifdef VBOX_WITH_XPCOM
 # include <VirtualBox_XPCOM.h>
 #else
-# include <iprt/win/windows.h> /* Include via cleanup wrapper before VirtualBox.h includes it via rpc.h. */
-# include <VirtualBox.h>
+# include <iprt/win/windows.h> /* Include via cleanup wrapper before Navebox.h includes it via rpc.h. */
+# include <Navebox.h>
 #endif
 
 #include "VBoxDbgStatsQt.h"

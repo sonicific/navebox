@@ -25,6 +25,9 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+/* Qt includes: */
+#include <QPainter>
+
 /* GUI includes: */
 #include "UIAppearance.h"
 
@@ -68,4 +71,16 @@ QString UIAppearance::styleSheet(const QPalette &palette)
         " left: 10px; padding: 0 4px; }"
         "QToolTip { color: palette(tool-tip-text); background: palette(tool-tip-base);"
         " border: 1px solid %1; padding: 4px 6px; }").arg(strBorder, strDisabledBorder, strArrowTheme);
+}
+
+/* static */
+void UIAppearance::paintSheet(QPainter &painter, const QRectF &bounds, const QPalette &palette)
+{
+    const PaneColors colors(palette);
+    painter.save();
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(colors.border);
+    painter.setBrush(colors.surface);
+    painter.drawRoundedRect(bounds.adjusted(0.5, 0.5, -0.5, -0.5), 14, 14);
+    painter.restore();
 }

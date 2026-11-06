@@ -138,15 +138,22 @@ upstream meanings. An upgrade may reuse an existing installation directory.
 The EXE and MSI therefore still require upgrade/coexistence qualification.
 
 Build the normal installer targets in a release environment with the required
-WiX tools and signing credentials. `NaveboxLauncher` and `VirtualBoxManifest`
-are installation targets in the frontend makefile. A standalone developer
-build of only selected executables must also build these targets before
-packaging. Retain `VirtualBox.exe` and its file associations for compatibility;
-the desktop/Start-menu entries and post-install launch use `Navebox.exe`.
+WiX tools and signing credentials. The frontend targets produce `Navebox.exe`
+and `NaveboxVM.exe`, plus `NaveboxVM.dll` for hardened builds.
+`NaveboxManifest` stages the Windows visual manifest and its icons. File
+associations, shortcuts and post-install launch all use `Navebox.exe`.
+The verifier rejects any installed filename containing `VirtualBox`.
+
+Windows builds use `Navebox.xml` for global settings. Existing profiles can
+read `VirtualBox.xml` until Navebox saves the settings under the new name.
+New profiles use `.Navebox` under the user's home directory unless
+`VBOX_USER_HOME` specifies a different path. Windows SDK consumers must use
+`Navebox.h`, `Navebox.idl`, `Navebox_i.c` and `Navebox.tlb` with the existing
+COM interfaces and identifiers.
 
 ### Moving the application to another computer
 
-`Navebox.exe` is an entry point into a complete VirtualBox installation. Copying
+`Navebox.exe` is an entry point into a complete Navebox installation. Copying
 that executable alone does not produce a portable application. The destination
 needs the matching frontend/backend DLLs, COM registration and VBoxSDS service,
 plus the Qt libraries/plugins and firmware payloads required by the selected
@@ -179,7 +186,7 @@ sequence in the prepared developer shell is:
 
 ```text
 kmk KBUILD_TYPE=release
-kmk KBUILD_TYPE=release NaveboxLauncher VirtualBoxManifest
+kmk KBUILD_TYPE=release NaveboxManifest
 kmk KBUILD_TYPE=release packing
 ```
 

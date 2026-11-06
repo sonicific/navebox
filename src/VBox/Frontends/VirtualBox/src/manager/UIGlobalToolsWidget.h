@@ -39,7 +39,6 @@
 
 /* Forward declarations: */
 class QGridLayout;
-class QIToolBar;
 class UIActionPool;
 class UIChooser;
 class UIMachineToolsWidget;
@@ -71,7 +70,7 @@ public:
     /** @name Tool-bar stuff.
       * @{ */
         /** Adds tool-bar into grid layout. */
-        void addToolBar(QIToolBar *pToolBar);
+        void addToolBar(QWidget *pToolBar);
     /** @} */
 
     /** @name Tools pane stuff.

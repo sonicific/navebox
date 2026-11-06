@@ -3635,7 +3635,7 @@ def main(_argv):
         if sPath is None:
             for sCurLoc in asLocations:
                 if   os.path.isfile(os.path.join(sCurLoc, "VirtualBox")) \
-                  or os.path.isfile(os.path.join(sCurLoc, "VirtualBox.exe")):
+                  or os.path.isfile(os.path.join(sCurLoc, "Navebox.exe")):
                     print("Autodetected VBOX_PROGRAM_PATH as", sCurLoc)
                     os.environ["VBOX_PROGRAM_PATH"] = sCurLoc
                     sPath = sCurLoc

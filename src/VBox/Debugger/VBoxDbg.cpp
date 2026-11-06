@@ -32,8 +32,8 @@
 #define LOG_GROUP LOG_GROUP_DBGG
 #define VBOX_COM_NO_ATL
 #ifdef RT_OS_WINDOWS
-# include <iprt/win/windows.h> /* Include via cleanup wrapper before VirtualBox.h includes it via rpc.h. */
-# include <VirtualBox.h>
+# include <iprt/win/windows.h> /* Include via cleanup wrapper before Navebox.h includes it via rpc.h. */
+# include <Navebox.h>
 #else /* !RT_OS_WINDOWS */
 # include <VirtualBox_XPCOM.h>
 #endif /* !RT_OS_WINDOWS */

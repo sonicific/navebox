@@ -35,6 +35,7 @@
 #include "UIDetailsElements.h"
 #include "UIDetailsModel.h"
 #include "UIDetailsSet.h"
+#include "UIManagerStyle.h"
 #include "UIMedium.h"
 #include "UIMediumEnumerator.h"
 #include "UIVirtualBoxEventHandler.h"
@@ -750,7 +751,7 @@ void UIDetailsSet::paintBackground(QPainter *pPainter, const QStyleOptionGraphic
     const QRect optionRect = pOptions->rect;
 
     /* Acquire background color: */
-    const QColor backgroundColor = QApplication::palette().color(QPalette::Active, QPalette::Window);
+    const QColor backgroundColor = UIManagerStyle::surfaceColor(QApplication::palette());
 
     /* Leave the space between cards quiet, including in dark themes. */
     pPainter->fillRect(optionRect, backgroundColor);

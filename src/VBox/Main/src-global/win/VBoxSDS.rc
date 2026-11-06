@@ -85,4 +85,4 @@ BEGIN
   -101 "Workaround..."
 END
 
-1 TYPELIB "VirtualBox.tlb"
+1 TYPELIB "Navebox.tlb"

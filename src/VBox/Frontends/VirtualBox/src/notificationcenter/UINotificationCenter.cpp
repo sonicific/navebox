@@ -28,6 +28,7 @@
 /* Qt includes: */
 #include <QApplication>
 #include <QHBoxLayout>
+#include <QLabel>
 #include <QMenu>
 #include <QPainter>
 #include <QPaintEvent>
@@ -44,6 +45,7 @@
 
 /* GUI includes: */
 #include "QIToolButton.h"
+#include "UIAppearance.h"
 #include "UIBranding.h"
 #include "UIDesktopWidgetWatchdog.h"
 #include "UIExtraDataManager.h"
@@ -56,6 +58,22 @@
 /* Other VBox includes: */
 #include "iprt/assert.h"
 
+
+/** Applies the current sheet colors to the notification header and buttons. */
+static void uiNotificationUpdateAppearance(QWidget *pCenter)
+{
+    /* Keep hover and checked states flat while retaining a visible keyboard focus. */
+    const UIAppearance::PaneColors colors(QApplication::palette());
+    const QString strStyle = QStringLiteral(
+        "QLabel#notificationTitle { color: %1; }"
+        "QToolButton { background: transparent; border: 1px solid transparent; border-radius: 6px; padding: 3px; }"
+        "QToolButton:hover, QToolButton:checked { background: %2; }"
+        "QToolButton:pressed { background: %3; }"
+        "QToolButton:focus { border-color: palette(highlight); }")
+        .arg(colors.text.name(), colors.hover.name(), colors.pressed.name());
+    if (pCenter->styleSheet() != strStyle)
+        pCenter->setStyleSheet(strStyle);
+}
 
 /** Neutral owner for notifications shown before the Manager or VM window exists. */
 class UIStartupNotificationWindow : public QWidget
@@ -253,6 +271,7 @@ UINotificationCenter::UINotificationCenter(QWidget *pParent)
     , m_pLayoutMain(0)
     , m_pLayoutButtons(0)
     , m_pButtonOpen(0)
+    , m_pLabelTitle(0)
     , m_pButtonToggleSorting(0)
 #ifdef VBOX_NOTIFICATION_CENTER_WITH_KEEP_BUTTON
     , m_pButtonKeepFinished(0)
@@ -587,6 +606,8 @@ int UINotificationCenter::createBlockingQuestionInt(const NotificationType enmTy
 
 void UINotificationCenter::sltRetranslateUI()
 {
+    if (m_pLabelTitle)
+        m_pLabelTitle->setText(tr("Notifications"));
     if (m_pButtonOpen)
         m_pButtonOpen->setToolTip(tr("Open notification center"));
     if (m_pButtonToggleSorting)
@@ -634,11 +655,19 @@ bool UINotificationCenter::event(QEvent *pEvent)
     /* Handle required event types: */
     switch (pEvent->type())
     {
+        case QEvent::PaletteChange:
+        case QEvent::ApplicationPaletteChange:
+            uiNotificationUpdateAppearance(this);
+            break;
         /* When we are being asked to update layout
          * we want to adjust overlay accordingly. */
         case QEvent::LayoutRequest:
+        case QEvent::LayoutDirectionChange:
         {
             adjustGeometry();
+            if (m_pLayoutMain)
+                m_pLayoutMain->activate();
+            adjustMask();
             break;
         }
         /* When we are being resized or moved we want
@@ -661,6 +690,8 @@ void UINotificationCenter::paintEvent(QPaintEvent *pEvent)
 {
     /* Sanity check: */
     AssertPtrReturnVoid(pEvent);
+    if (!animatedValue())
+        return;
 
     /* Prepare painter: */
     QPainter painter(this);
@@ -668,9 +699,17 @@ void UINotificationCenter::paintEvent(QPaintEvent *pEvent)
     /* Limit painting with incoming rectangle: */
     painter.setClipRect(pEvent->rect());
 
-    /* Paint background: */
-    paintBackground(&painter);
-    paintFrame(&painter);
+    /* An opaque sheet keeps the underlying page from bleeding through while sliding. */
+    const QPalette appPalette = QApplication::palette();
+    UIAppearance::paintSheet(painter, QRectF(rect()).adjusted(4, 4, -4, -4), appPalette);
+
+    if (!isExtendedMode())
+    {
+        const QRect buttons = m_pLayoutButtons->geometry();
+        const int iDividerY = m_enmAlignment == Qt::AlignTop ? buttons.bottom() + 5 : buttons.top() - 5;
+        painter.setPen(UIAppearance::PaneColors(appPalette).divider);
+        painter.drawLine(buttons.left(), iDividerY, buttons.right(), iDividerY);
+    }
 }
 
 void UINotificationCenter::sltHandleAlignmentChange()
@@ -942,6 +981,7 @@ void UINotificationCenter::prepareWidgets()
     m_pLayoutMain = new QVBoxLayout(this);
     if (m_pLayoutMain)
     {
+        m_pLayoutMain->setSpacing(10);
         /* Create container scroll-area: */
         UINotificationScrollArea *pScrollAreaContainer = new UINotificationScrollArea(this);
         if (pScrollAreaContainer)
@@ -959,7 +999,10 @@ void UINotificationCenter::prepareWidgets()
                     /* Prepare items layout: */
                     m_pLayoutItems = new QVBoxLayout;
                     if (m_pLayoutItems)
+                    {
+                        m_pLayoutItems->setSpacing(8);
                         pLayoutContainer->addLayout(m_pLayoutItems);
+                    }
 
                     pLayoutContainer->addStretch();
                 }
@@ -971,6 +1014,7 @@ void UINotificationCenter::prepareWidgets()
             /* Configure container scroll-area: */
             pScrollAreaContainer->setWidgetResizable(true);
             pScrollAreaContainer->setFrameShape(QFrame::NoFrame);
+            pScrollAreaContainer->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
             pScrollAreaContainer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
             pScrollAreaContainer->viewport()->setAutoFillBackground(false);
             pScrollAreaContainer->widget()->setAutoFillBackground(false);
@@ -984,11 +1028,13 @@ void UINotificationCenter::prepareWidgets()
         if (m_pLayoutButtons)
         {
             m_pLayoutButtons->setContentsMargins(0, 0, 0, 0);
+            m_pLayoutButtons->setSpacing(6);
 
             /* Prepare open button: */
             m_pButtonOpen = new QIToolButton(this);
             if (m_pButtonOpen)
             {
+                m_pButtonOpen->setObjectName("notificationOpenButton");
                 m_pButtonOpen->setIcon(UIIconPool::iconSet(":/notification_center_16px.png"));
                 m_pButtonOpen->setCheckable(true);
                 m_pButtonOpen->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -999,8 +1045,15 @@ void UINotificationCenter::prepareWidgets()
                 m_pLayoutButtons->addWidget(m_pButtonOpen);
             }
 
-            /* Add stretch: */
-            m_pLayoutButtons->addStretch(1);
+            /* Prepare the heading between the bell and action buttons. */
+            m_pLabelTitle = new QLabel(this);
+            m_pLabelTitle->setObjectName("notificationTitle");
+            QFont fontTitle = m_pLabelTitle->font();
+            fontTitle.setWeight(QFont::DemiBold);
+            m_pLabelTitle->setFont(fontTitle);
+            m_pLabelTitle->setWordWrap(true);
+            m_pLabelTitle->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+            m_pLayoutButtons->addWidget(m_pLabelTitle, 1);
 
             /* Prepare toggle-sorting button: */
             m_pButtonToggleSorting = new QIToolButton(this);
@@ -1043,6 +1096,8 @@ void UINotificationCenter::prepareWidgets()
             m_pLayoutMain->insertLayout(m_enmAlignment == Qt::AlignTop ? 0 : -1, m_pLayoutButtons);
         }
     }
+
+    uiNotificationUpdateAppearance(this);
 }
 
 void UINotificationCenter::prepareStateMachineSliding()
@@ -1139,128 +1194,6 @@ void UINotificationCenter::cleanup()
     cleanupItems();
 }
 
-void UINotificationCenter::paintBackground(QPainter *pPainter)
-{
-    /* Acquire palette: */
-    const bool fActive = parentWidget() && parentWidget()->isActiveWindow();
-    const QPalette pal = QApplication::palette();
-
-    /* Gather suitable color: */
-    QColor backgroundColor = pal.color(fActive ? QPalette::Active : QPalette::Inactive, QPalette::Window).darker(120);
-    backgroundColor.setAlpha((double)animatedValue() / 100 * 220);
-
-    /* Acquire pixel metric: */
-    const int iMetric = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) / 4;
-
-    /* Adjust rectangle: */
-    QRect rectAdjusted = rect();
-    if (!isExtendedMode())
-        rectAdjusted.adjust(iMetric, iMetric, 0, -iMetric);
-    else
-        rectAdjusted.adjust(iMetric, 0, -iMetric, -iMetric);
-
-    /* Paint background: */
-    pPainter->fillRect(rectAdjusted, backgroundColor);
-}
-
-void UINotificationCenter::paintFrame(QPainter *pPainter)
-{
-    /* Acquire palette: */
-    const bool fActive = parentWidget() && parentWidget()->isActiveWindow();
-    QPalette pal = QApplication::palette();
-
-    /* Gather suitable colors: */
-    QColor color1 = pal.color(fActive ? QPalette::Active : QPalette::Inactive, QPalette::Window).lighter(110);
-    color1.setAlpha(0);
-    QColor color2 = pal.color(fActive ? QPalette::Active : QPalette::Inactive, QPalette::Window).darker(200);
-
-    /* Acquire pixel metric: */
-    const int iMetric = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) / 4;
-
-    if (!isExtendedMode())
-    {
-        /* Top-left corner: */
-        QRadialGradient grad1(QPointF(iMetric, iMetric), iMetric);
-        {
-            grad1.setColorAt(0, color2);
-            grad1.setColorAt(1, color1);
-        }
-        /* Bottom-left corner: */
-        QRadialGradient grad2(QPointF(iMetric, height() - iMetric), iMetric);
-        {
-            grad2.setColorAt(0, color2);
-            grad2.setColorAt(1, color1);
-        }
-
-        /* Top line: */
-        QLinearGradient grad3(QPointF(iMetric, 0), QPointF(iMetric, iMetric));
-        {
-            grad3.setColorAt(0, color1);
-            grad3.setColorAt(1, color2);
-        }
-        /* Bottom line: */
-        QLinearGradient grad4(QPointF(iMetric, height()), QPointF(iMetric, height() - iMetric));
-        {
-            grad4.setColorAt(0, color1);
-            grad4.setColorAt(1, color2);
-        }
-        /* Left line: */
-        QLinearGradient grad5(QPointF(0, height() - iMetric), QPointF(iMetric, height() - iMetric));
-        {
-            grad5.setColorAt(0, color1);
-            grad5.setColorAt(1, color2);
-        }
-
-        /* Paint shape/shadow: */
-        pPainter->fillRect(QRect(0,       0,                  iMetric,           iMetric),                grad1);
-        pPainter->fillRect(QRect(0,       height() - iMetric, iMetric,           iMetric),                grad2);
-        pPainter->fillRect(QRect(iMetric, 0,                  width() - iMetric, iMetric),                grad3);
-        pPainter->fillRect(QRect(iMetric, height() - iMetric, width() - iMetric, iMetric),                grad4);
-        pPainter->fillRect(QRect(0,       iMetric,            iMetric,           height() - iMetric * 2), grad5);
-    }
-    else
-    {
-        /* Bottom-left corner: */
-        QRadialGradient grad1(QPointF(iMetric, height() - iMetric), iMetric);
-        {
-            grad1.setColorAt(0, color2);
-            grad1.setColorAt(1, color1);
-        }
-        /* Bottom-right corner: */
-        QRadialGradient grad2(QPointF(width() - iMetric, height() - iMetric), iMetric);
-        {
-            grad2.setColorAt(0, color2);
-            grad2.setColorAt(1, color1);
-        }
-
-        /* Left line: */
-        QLinearGradient grad3(QPointF(0, height() - iMetric), QPointF(iMetric, height() - iMetric));
-        {
-            grad3.setColorAt(0, color1);
-            grad3.setColorAt(1, color2);
-        }
-        /* Right line: */
-        QLinearGradient grad4(QPointF(width(), 0), QPointF(width() - iMetric, 0));
-        {
-            grad4.setColorAt(0, color1);
-            grad4.setColorAt(1, color2);
-        }
-        /* Bottom line: */
-        QLinearGradient grad5(QPointF(iMetric, height()), QPointF(iMetric, height() - iMetric));
-        {
-            grad5.setColorAt(0, color1);
-            grad5.setColorAt(1, color2);
-        }
-
-        /* Paint shape/shadow: */
-        pPainter->fillRect(QRect(0,                 height() - iMetric, iMetric,               iMetric),            grad1);
-        pPainter->fillRect(QRect(width() - iMetric, height() - iMetric, iMetric,               iMetric),            grad2);
-        pPainter->fillRect(QRect(0,                 0,                  iMetric,               height() - iMetric), grad3);
-        pPainter->fillRect(QRect(width() - iMetric, 0,                  width(),               height() - iMetric), grad4);
-        pPainter->fillRect(QRect(iMetric,           height() - iMetric, width() - iMetric * 2, iMetric),            grad5);
-    }
-}
-
 void UINotificationCenter::setExtendedMode(bool fExtended)
 {
     /* Update extended mode: */
@@ -1268,6 +1201,7 @@ void UINotificationCenter::setExtendedMode(bool fExtended)
 
     /* Hide buttons for extended mode: */
     m_pButtonOpen->setVisible(!isExtendedMode());
+    m_pLabelTitle->setVisible(!isExtendedMode());
     m_pButtonToggleSorting->setVisible(!isExtendedMode());
 #ifdef VBOX_NOTIFICATION_CENTER_WITH_KEEP_BUTTON
     m_pButtonKeepFinished->setVisible(!isExtendedMode());
@@ -1293,6 +1227,8 @@ void UINotificationCenter::setAnimatedValue(int iValue)
 
     /* Adjust geometry: */
     adjustGeometry();
+    adjustMask();
+    update();
 }
 
 int UINotificationCenter::animatedValue() const
@@ -1304,37 +1240,34 @@ void UINotificationCenter::adjustGeometry()
 {
     /* Make sure parent exists: */
     QWidget *pParent = parentWidget();
-    if (!pParent)
+    if (!pParent || !m_pLayoutMain || !m_pLayoutItems || !m_pButtonOpen)
         return;
     /* Acquire parent width and height: */
     const int iParentWidth = pParent->width();
     const int iParentHeight = pParent->height();
 
     /* Update main layout margins: */
-    const int iMetric = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) / 4;
-    const int iL = isExtendedMode() ? iMetric : qApp->style()->pixelMetric(QStyle::PM_LayoutLeftMargin);
-    const int iT = isExtendedMode() ? 0       : qApp->style()->pixelMetric(QStyle::PM_LayoutTopMargin);
-    const int iR = isExtendedMode() ? iMetric : qApp->style()->pixelMetric(QStyle::PM_LayoutRightMargin);
-    const int iB = isExtendedMode() ? iMetric : qApp->style()->pixelMetric(QStyle::PM_LayoutBottomMargin);
+    const int iL = 14;
+    const int iT = 14;
+    const int iR = 14;
+    const int iB = 14;
     m_pLayoutMain->setContentsMargins(iL, iT, iR, iB);
 
     /* Gather suitable minumum and actual notification-center widths: */
     int iMinimumWidth = 0;
-    int iActualWidth = minimumSizeHint().width();
+    int iActualWidth = 0;
     if (!isExtendedMode())
     {
         /* Make sure minimum width is no less than Open button width hint: */
         const int iButtonWidthHint = m_pButtonOpen->minimumSizeHint().width() + iL + iR;
         iMinimumWidth = qMax(iMinimumWidth, iButtonWidthHint);
 
-        /* Make sure actual width is no less than minimum one: */
-        iActualWidth = qMax(iActualWidth, iMinimumWidth);
-
-        /* Make sure actual width is no less than sane minimum (200px): */
-        iActualWidth = qMax(iActualWidth, 200);
+        /* Prefer a readable width, keeping the open sheet inside the window. */
+        iActualWidth = qMin(qMax(iMinimumWidth, 320), iParentWidth);
     }
     else
     {
+        iActualWidth = minimumSizeHint().width();
         /* Make sure actual width is more or equal to items width hint: */
         int iItemsWidthHint = 0;
         foreach (UINotificationObjectItem *pItem, m_items.values())
@@ -1347,7 +1280,8 @@ void UINotificationCenter::adjustGeometry()
     }
 
     /* Propagate item width hint (which is actual width hint minus two margins): */
-    const int iItemWidthHint = iActualWidth - iL - iR;
+    const int iScrollBarWidth = style()->pixelMetric(QStyle::PM_ScrollBarExtent, 0, this);
+    const int iItemWidthHint = qMax(0, iActualWidth - iL - iR - iScrollBarWidth);
     foreach (UINotificationObjectItem *pItem, m_items.values())
         pItem->setItemWidthHint(iItemWidthHint);
 
@@ -1375,7 +1309,8 @@ void UINotificationCenter::adjustGeometry()
     if (!isExtendedMode())
     {
         /* Move and resize notification-center finally: */
-        move(iParentWidth - (iMinimumWidth + (double)animatedValue() / 100 * (iActualWidth - iMinimumWidth)), 0);
+        const int iVisibleWidth = iMinimumWidth + animatedValue() * (iActualWidth - iMinimumWidth) / 100;
+        move(isRightToLeft() ? iVisibleWidth - iActualWidth : iParentWidth - iVisibleWidth, 0);
         resize(iActualWidth, iActualHeight);
     }
     /* Extended mode: */
@@ -1390,6 +1325,9 @@ void UINotificationCenter::adjustGeometry()
 
 void UINotificationCenter::adjustMask()
 {
+    if (!m_pButtonOpen)
+        return;
+
     /* We do include open-button mask only if center is opened or animated to be: */
     QRegion region;
     if (!animatedValue())

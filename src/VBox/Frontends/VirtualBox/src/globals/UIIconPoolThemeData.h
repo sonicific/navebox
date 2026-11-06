@@ -273,6 +273,7 @@ static const QHash<QString, UIIconArtwork> &uiIconArtwork()
         { QStringLiteral("mouse_seamless"), { UIICONGLYPH_MOUSE, UIICONBADGE_CHECK } },
         { QStringLiteral("movie_reel"), { UIICONGLYPH_FILM, UIICONBADGE_NONE } },
         { QStringLiteral("name"), { UIICONGLYPH_FILE, UIICONBADGE_NONE } },
+        { QStringLiteral("navebox_phone"), { UIICONGLYPH_PHONE, UIICONBADGE_NONE } },
         { QStringLiteral("next"), { UIICONGLYPH_RIGHT, UIICONBADGE_NONE } },
         { QStringLiteral("notification_center"), { UIICONGLYPH_BELL, UIICONBADGE_NONE } },
         { QStringLiteral("notification_center_delete_progress"), { UIICONGLYPH_TRASH, UIICONBADGE_NONE } },

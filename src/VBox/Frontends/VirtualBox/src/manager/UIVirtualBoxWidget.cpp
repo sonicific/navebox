@@ -27,6 +27,8 @@
 
 /* Qt includes: */
 #include <QApplication>
+#include <QFrame>
+#include <QHBoxLayout>
 #include <QStyle>
 #include <QToolButton>
 #include <QVBoxLayout>
@@ -334,7 +336,19 @@ void UIVirtualBoxWidget::sltUpdateToolbar()
 void UIVirtualBoxWidget::sltUpdateToolbarStyle()
 {
     if (m_pToolBar)
-        m_pToolBar->setStyleSheet(UIManagerStyle::toolBarStyleSheet(m_pToolBar->palette()));
+    {
+        const QPalette appPalette = QApplication::palette();
+        const QString strStyle = UIManagerStyle::toolBarStyleSheet(appPalette);
+        QWidget *pSurface = m_pToolBar->parentWidget();
+        if (pSurface->styleSheet() != strStyle)
+            pSurface->setStyleSheet(strStyle);
+
+        /* Fill the exposed gutter around the toolbar and pages. */
+        QPalette backdrop;
+        backdrop.setColor(QPalette::Window, UIManagerStyle::backdropColor(appPalette));
+        globalToolsWidget()->setPalette(backdrop);
+        globalToolsWidget()->setAutoFillBackground(true);
+    }
 }
 
 void UIVirtualBoxWidget::prepare()
@@ -370,7 +384,12 @@ void UIVirtualBoxWidget::prepareWidgets()
         }
 
         /* Create Main toolbar: */
-        m_pToolBar = new QIToolBar(this);
+        QFrame *pToolBarSurface = new QFrame(this);
+        pToolBarSurface->setObjectName(QStringLiteral("managerToolBarSurface"));
+        pToolBarSurface->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+        QHBoxLayout *pToolBarLayout = new QHBoxLayout(pToolBarSurface);
+        pToolBarLayout->setContentsMargins(8, 4, 8, 5);
+        m_pToolBar = new QIToolBar(pToolBarSurface);
         if (m_pToolBar)
         {
             /* Configure toolbar: */
@@ -380,6 +399,7 @@ void UIVirtualBoxWidget::prepareWidgets()
             m_pToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
             m_pToolBar->setUseTextLabels(true);
             m_pToolBar->setObjectName("managerToolBar");
+            pToolBarLayout->addWidget(m_pToolBar);
             sltUpdateToolbarStyle();
 
             /* Check whether we should show Dev Preview tag: */
@@ -409,7 +429,7 @@ void UIVirtualBoxWidget::prepareWidgets()
             }
 
             /* Add toolbar into layout: */
-            m_pGlobalToolsWidget->addToolBar(m_pToolBar);
+            m_pGlobalToolsWidget->addToolBar(pToolBarSurface);
         }
     }
 

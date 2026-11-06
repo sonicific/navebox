@@ -93,6 +93,7 @@ private:
     void createPhone();
     QString selectedId() const;
 
+    bool m_fPrepared = false;  /**< Whether all controls can receive change events. */
     UIPhoneBackend *m_pBackend; /**< SDK adapter; remains alive when navigating away. */
     QAction *m_pCreateAction;   /**< Opens the creation dialog from the toolbar. */
     QAction *m_pSdkAction;      /**< Opens SDK settings from the toolbar. */

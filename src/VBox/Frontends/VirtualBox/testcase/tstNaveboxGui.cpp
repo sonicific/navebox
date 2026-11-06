@@ -31,6 +31,7 @@
 #include <QClipboard>
 #include <QDir>
 #include <QEvent>
+#include <QEventLoop>
 #include <QFile>
 #include <QFontDatabase>
 #include <QFontMetrics>
@@ -45,6 +46,7 @@
 #include <QTabWidget>
 #include <QTemporaryDir>
 #include <QTimer>
+#include <QToolButton>
 #include <QTranslator>
 #include <QVBoxLayout>
 
@@ -136,7 +138,10 @@ static void tstMouseStates()
         }
 
     RTTestISub("User-provided icon fallback");
-    QTemporaryDir directory;
+    const QString strSnapshots = qEnvironmentVariable("VBOX_GUI_TEST_SNAPSHOT_DIR");
+    const QDir scratch = strSnapshots.isEmpty() ? QDir::temp() : QDir(strSnapshots);
+    RTTESTI_CHECK(scratch.exists() || scratch.mkpath(QStringLiteral(".")));
+    QTemporaryDir directory(scratch.filePath(QStringLiteral("navebox-icon-XXXXXX")));
     RTTESTI_CHECK(directory.isValid());
     if (!directory.isValid())
         return;
@@ -408,6 +413,77 @@ static void tstStartupNotification()
     RTTESTI_CHECK(hostGuard.isNull());
 }
 
+/** Checks the open and collapsed drawer, including palette and layout-direction changes. */
+static void tstNotificationDrawer()
+{
+    RTTestISub("Notification drawer appearance and geometry");
+    QWidget host;
+    host.resize(680, 420);
+    host.show();
+    UINotificationCenter::create(&host);
+    UINotificationCenter *pCenter = UINotificationCenter::instance();
+    pCenter->append(new UINotificationMessage(
+        QStringLiteral("Can't find help file"), QStringLiteral("The local documentation is unavailable."),
+        QString(), QString()));
+
+    const auto waitForSlide = []()
+    {
+        QEventLoop loop;
+        QTimer::singleShot(600, &loop, &QEventLoop::quit);
+        loop.exec();
+    };
+    waitForSlide();
+    RTTESTI_CHECK(pCenter->property("animatedValue").toInt() == 100);
+    RTTESTI_CHECK(pCenter->geometry().right() == host.rect().right());
+    RTTESTI_CHECK(pCenter->width() == 320);
+    RTTESTI_CHECK(pCenter->mask().isEmpty());
+
+    const QPalette paletteOriginal = qApp->palette();
+    const QString strOriginalStyleSheet = qApp->styleSheet();
+    const QString strDirectory = QString::fromLocal8Bit(qgetenv("VBOX_GUI_TEST_SNAPSHOT_DIR"));
+    for (bool fDark : { false, true })
+    {
+        QPalette palette = qApp->style()->standardPalette();
+        if (fDark)
+        {
+            palette.setColor(QPalette::Window, QColor("#212837"));
+            palette.setColor(QPalette::Base, QColor("#161d29"));
+            palette.setColor(QPalette::WindowText, QColor("#f3f6ff"));
+            palette.setColor(QPalette::Text, QColor("#f3f6ff"));
+        }
+        qApp->setStyleSheet(QString());
+        qApp->setPalette(palette);
+        qApp->setStyleSheet(UIAppearance::styleSheet(palette));
+        QApplication::processEvents();
+        const QPixmap pixmap = pCenter->grab();
+        const QPoint sample = QPoint(pCenter->width() / 2, pCenter->height() - 24) * pixmap.devicePixelRatio();
+        RTTESTI_CHECK(pixmap.toImage().pixelColor(sample) == UIAppearance::PaneColors(palette).surface);
+        if (!strDirectory.isEmpty())
+        {
+            QDir directory(strDirectory);
+            RTTESTI_CHECK(directory.exists() || directory.mkpath(QStringLiteral(".")));
+            RTTESTI_CHECK(pixmap.save(directory.filePath(fDark ? "notifications-dark.png" : "notifications-light.png")));
+        }
+    }
+    qApp->setPalette(paletteOriginal);
+    qApp->setStyleSheet(strOriginalStyleSheet);
+
+    QToolButton *pBell = pCenter->findChild<QToolButton*>(QStringLiteral("notificationOpenButton"));
+    RTTESTI_CHECK(pBell);
+    if (pBell)
+    {
+        pBell->click();
+        waitForSlide();
+        pCenter->setLayoutDirection(Qt::RightToLeft);
+        QApplication::processEvents();
+        const QPoint bellCenter = pBell->mapTo(pCenter, pBell->rect().center());
+        RTTESTI_CHECK(pCenter->property("animatedValue").toInt() == 0);
+        RTTESTI_CHECK(pCenter->mask().contains(bellCenter));
+        RTTESTI_CHECK(host.rect().contains(pCenter->mapTo(&host, bellCenter)));
+    }
+    UINotificationCenter::destroy();
+}
+
 /** Optionally exports real-dialog renders for visual review. */
 static void tstAboutSnapshots()
 {
@@ -473,6 +549,7 @@ int main(int argc, char **argv)
     tstControls();
     tstDialogCentering();
     tstStartupNotification();
+    tstNotificationDrawer();
     tstAboutSnapshots();
 
     UITranslationEventListener::destroy();

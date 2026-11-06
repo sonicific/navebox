@@ -98,6 +98,39 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
+        <para>Navebox for Windows: Branded the installed executables, VM
+          library, translations, SDK files and global settings filename.
+          Updated file associations and retained access to existing settings</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox GUI: Unified the appearance of Manager pages and
+          refreshed the Notifications, menu bar, and status bar sheets</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox GUI: Fixed a crash when opening Phones and restored the
+          navigation colors used before the Manager page refresh</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox GUI: Added consistent page headers, refined tables and
+          tabs, and rounded scrollbars to the Manager</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox GUI: Keep the Home backdrop across Manager tabs, contain
+          toolbar hover fills, align menu chevrons, and soften scrollbar colors</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox GUI: Redesigned Home with an illustrated header and
+          keyboard-accessible rows for common VM actions and help resources.
+          Refined the light palette, softened dividers, and aligned the toolbar
+          with the Home card</para>
+      </listitem>
+
+      <listitem>
         <para>Navebox GUI: Combined About, contact details, build information,
           and credits in one scrollable dialog.</para>
       </listitem>

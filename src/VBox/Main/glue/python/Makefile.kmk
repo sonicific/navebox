@@ -48,14 +48,14 @@ if defined(VBOX_WITH_PYTHON) && !defined(VBOX_ONLY_EXTPACKS)
  VBox-python-vboxapi_MODE = a+r,u+w
  VBox-python-vboxapi_SOURCES = \
  	vboxapi.py=>__init__.py \
- 	$(VBox-python-vboxapi_0_OUTDIR)/VirtualBox_constants.py
+ 	$(VBox-python-vboxapi_0_OUTDIR)/Navebox_constants.py
  VBox-python-vboxapi_CLEAN = \
- 	$(VBox-python-vboxapi_0_OUTDIR)/VirtualBox_constants.py \
- 	$(VBox-python-vboxapi_0_OUTDIR)/VirtualBox_constants_err_h_1.txt
+ 	$(VBox-python-vboxapi_0_OUTDIR)/Navebox_constants.py \
+ 	$(VBox-python-vboxapi_0_OUTDIR)/Navebox_constants_err_h_1.txt
  $(call KB_FN_DO_PASS0_ON_TARGET,VBox-python-vboxapi)
- $(call KB_FN_AUTO_CMD_DEPS,$(VBox-python-vboxapi_0_OUTDIR)/VirtualBox_constants.py)
- $(VBox-python-vboxapi_0_OUTDIR)/VirtualBox_constants.py \
- + $(VBox-python-vboxapi_0_OUTDIR)/VirtualBox_constants_err_h_1.txt: \
+ $(call KB_FN_AUTO_CMD_DEPS,$(VBox-python-vboxapi_0_OUTDIR)/Navebox_constants.py)
+ $(VBox-python-vboxapi_0_OUTDIR)/Navebox_constants.py \
+ + $(VBox-python-vboxapi_0_OUTDIR)/Navebox_constants_err_h_1.txt: \
  		$(VBOX_PATH_PYTHON_GLUE_SRC)/constants-python.xsl \
  		$(VBOX_PATH_PYTHON_GLUE_SRC)/vbox-err-consts.sed \
  		$(PATH_ROOT)/include/iprt/err.h \
@@ -65,11 +65,11 @@ if defined(VBOX_WITH_PYTHON) && !defined(VBOX_ONLY_EXTPACKS)
 	$(call KB_FN_AUTO_CMD_DEPS_COMMANDS)
 	$(call MSG_TOOL,xsltproc,Python constants,$<,$@)
 	$(SED) -f $(VBOX_PATH_PYTHON_GLUE_SRC)/vbox-err-consts.sed \
-       	--output $(VBox-python-vboxapi_0_OUTDIR)/VirtualBox_constants_err_h_1.txt \
+       	--output $(VBox-python-vboxapi_0_OUTDIR)/Navebox_constants_err_h_1.txt \
 		$(PATH_ROOT)/include/iprt/err.h \
 		$(PATH_ROOT)/include/VBox/err.h
 	$(QUIET)$(VBOX_XSLTPROC) -o $@ \
-		--stringparam "g_sErrHFile" "$(VBox-python-vboxapi_0_OUTDIR)/VirtualBox_constants_err_h_1.txt" \
+		--stringparam "g_sErrHFile" "$(VBox-python-vboxapi_0_OUTDIR)/Navebox_constants_err_h_1.txt" \
 		--stringparam g_uVBoxCopyrightYear "$(VBOX_C_YEAR)" \
 		$(VBOX_PATH_PYTHON_GLUE_SRC)/constants-python.xsl $(VBOX_XIDL_FILE)
 

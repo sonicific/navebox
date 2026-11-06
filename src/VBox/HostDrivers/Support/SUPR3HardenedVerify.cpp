@@ -208,13 +208,19 @@ static SUPINSTFILE const    g_aSupInstallFiles[] =
 //#endif
 
 //#ifdef VBOX_WITH_QTGUI
-    {   kSupIFT_Exe,  kSupID_AppBin,             true, "VirtualBox" SUPLIB_EXE_SUFF },
-# ifdef RT_OS_DARWIN
-    {   kSupIFT_Exe,  kSupID_AppMacHelper,       true, "VirtualBoxVM" SUPLIB_EXE_SUFF },
+# ifdef RT_OS_WINDOWS
+    {   kSupIFT_Exe,  kSupID_AppBin,             true, "Navebox" SUPLIB_EXE_SUFF },
+    {   kSupIFT_Exe,  kSupID_AppBin,             true, "NaveboxVM" SUPLIB_EXE_SUFF },
+    {   kSupIFT_Dll,  kSupID_AppPrivArch,        true, "NaveboxVM" SUPLIB_DLL_SUFF },
 # else
+    {   kSupIFT_Exe,  kSupID_AppBin,             true, "VirtualBox" SUPLIB_EXE_SUFF },
+#  ifdef RT_OS_DARWIN
+    {   kSupIFT_Exe,  kSupID_AppMacHelper,       true, "VirtualBoxVM" SUPLIB_EXE_SUFF },
+#  else
     {   kSupIFT_Exe,  kSupID_AppBin,             true, "VirtualBoxVM" SUPLIB_EXE_SUFF },
-# endif
+#  endif
     {   kSupIFT_Dll,  kSupID_AppPrivArch,        true, "VirtualBoxVM" SUPLIB_DLL_SUFF },
+# endif
     {   kSupIFT_Dll,  kSupID_AppPrivArch,        true, "UICommon" SUPLIB_DLL_SUFF },
 # if !defined(RT_OS_DARWIN) && !defined(RT_OS_WINDOWS) && !defined(RT_OS_OS2)
     {   kSupIFT_Dll,  kSupID_AppSharedLib,       true, "VBoxKeyboard" SUPLIB_DLL_SUFF },

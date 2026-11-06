@@ -161,7 +161,7 @@ class UIActionSimpleManagerAndroidPhones : public UIActionSimple
 public:
     /** Constructs the phone manager action. */
     UIActionSimpleManagerAndroidPhones(UIActionPool *pParent)
-        : UIActionSimple(pParent, QIcon(":/navebox-phone.svg"))
+        : UIActionSimple(pParent, UIIconPool::iconSet(":/navebox_phone_32px.png"))
     {
         setProperty("UIToolType", QVariant::fromValue(UIToolType_Phones));
     }

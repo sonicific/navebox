@@ -35,22 +35,34 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QFontDatabase>
+#include <QFrame>
+#include <QHBoxLayout>
+#include <QImage>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
+#include <QMenu>
+#include <QMouseEvent>
+#include <QPainter>
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QSaveFile>
+#include <QScrollArea>
+#include <QScrollBar>
 #include <QSpinBox>
 #include <QStackedWidget>
+#include <QStyleOptionToolButton>
 #include <QSysInfo>
 #include <QTemporaryDir>
 #include <QThread>
 #include <QTimer>
+#include <QToolBar>
+#include <QToolButton>
 #include <QTranslator>
+#include <QVBoxLayout>
 
 /* Other includes: */
 #include <cstdio>
@@ -58,6 +70,7 @@
 /* GUI includes: */
 #include "UIAppearance.h"
 #include "UIDesktopWidgetWatchdog.h"
+#include "UIManagerStyle.h"
 #include "UIPhoneBackend.h"
 #include "UIPhoneManager.h"
 
@@ -491,20 +504,179 @@ public:
     }
 };
 
+/** Verifies that toolbar buttons and their hover paint fit the surface. */
+static void tstToolBar()
+{
+    RTTestISub("Manager toolbar hover bounds and menu chevrons");
+    QFrame surface;
+    surface.setObjectName(QStringLiteral("managerToolBarSurface"));
+    QHBoxLayout layout(&surface);
+    layout.setContentsMargins(8, 4, 8, 5);
+    QToolBar toolbar(&surface);
+    toolbar.setObjectName(QStringLiteral("managerToolBar"));
+    toolbar.setMovable(false);
+    layout.addWidget(&toolbar);
+
+    QAction *pFirstAction = toolbar.addAction(QStringLiteral("New"));
+    QAction *pMoreAction = toolbar.addAction(QStringLiteral("More"));
+    QMenu menu;
+    menu.addAction(QStringLiteral("Options"));
+    pMoreAction->setMenu(&menu);
+    QToolButton *pFirst = qobject_cast<QToolButton*>(toolbar.widgetForAction(pFirstAction));
+    QToolButton *pMore = qobject_cast<QToolButton*>(toolbar.widgetForAction(pMoreAction));
+    RTTESTI_CHECK_RETV(pFirst && pMore);
+    surface.resize(400, 65);
+    surface.show();
+
+    QPalette light;
+    light.setColor(QPalette::Window, Qt::white);
+    light.setColor(QPalette::WindowText, Qt::black);
+    QPalette dark;
+    dark.setColor(QPalette::Window, QColor("#212837"));
+    dark.setColor(QPalette::Base, QColor("#161d29"));
+    dark.setColor(QPalette::WindowText, QColor("#f3f6ff"));
+    for (const QPalette &palette : {light, dark})
+    {
+        surface.setStyleSheet(UIManagerStyle::toolBarStyleSheet(palette));
+        const UIAppearance::PaneColors colors(palette);
+        for (Qt::LayoutDirection enmDirection : {Qt::LeftToRight, Qt::RightToLeft})
+        {
+            surface.setLayoutDirection(enmDirection);
+            QApplication::processEvents();
+            for (const QToolButton *pButton : {pFirst, pMore})
+            {
+                const QRect bounds(pButton->mapTo(&surface, QPoint(0, 0)), pButton->size());
+                RTTESTI_CHECK(surface.rect().adjusted(8, 4, -8, -5).contains(bounds));
+            }
+
+            /* Render only the hovered frame and indicator, without an icon or label. */
+            for (bool fSplit : {false, true})
+            {
+                QStyleOptionToolButton option;
+                option.initFrom(pMore);
+                option.rect = QRect(0, 0, 62, 50);
+                option.state = QStyle::State_Enabled | QStyle::State_MouseOver;
+                option.features = QStyleOptionToolButton::HasMenu;
+                option.subControls = QStyle::SC_ToolButton;
+                if (fSplit)
+                {
+                    option.features |= QStyleOptionToolButton::MenuButtonPopup;
+                    option.subControls |= QStyle::SC_ToolButtonMenu;
+                }
+                QImage image(option.rect.size(), QImage::Format_ARGB32_Premultiplied);
+                image.fill(Qt::transparent);
+                QPainter painter(&image);
+                pMore->style()->drawComplexControl(QStyle::CC_ToolButton, &option, &painter, pMore);
+                painter.end();
+                RTTESTI_CHECK(image.pixelColor(option.rect.center()) == colors.hover);
+                RTTESTI_CHECK(image.pixelColor(QPoint(0, 0)).alpha() == 0);
+                QRect arrow;
+                for (int y = 6; y < image.height() - 6; ++y)
+                    for (int x = 2; x < image.width() - 2; ++x)
+                    {
+                        const QColor pixel = image.pixelColor(x, y);
+                        if (   pixel.alpha() == 255
+                            && qAbs(pixel.lightness() - colors.hover.lightness()) > 40)
+                            arrow |= QRect(x, y, 1, 1);
+                    }
+                RTTESTI_CHECK(arrow.isValid() && qAbs(arrow.center().y() - option.rect.center().y()) <= 2);
+                RTTESTI_CHECK((arrow.center().x() > option.rect.center().x()) == (enmDirection == Qt::LeftToRight));
+            }
+        }
+    }
+}
+
+/** Verifies the scrollbar geometry and that the styled handles can still be dragged. */
+static void tstScrollBars()
+{
+    RTTestISub("Rounded scrollbars in both orientations");
+    QScrollArea area;
+    QWidget *pContent = new QWidget;
+    pContent->resize(620, 500);
+    area.setWidget(pContent);
+    area.resize(320, 240);
+    area.show();
+
+    QPalette light;
+    light.setColor(QPalette::Window, Qt::white);
+    light.setColor(QPalette::WindowText, Qt::black);
+    QPalette dark;
+    dark.setColor(QPalette::Window, QColor("#212837"));
+    dark.setColor(QPalette::Base, QColor("#161d29"));
+    dark.setColor(QPalette::WindowText, QColor("#f3f6ff"));
+    for (const QPalette &palette : {light, dark})
+    {
+        area.setPalette(palette);
+        area.setStyleSheet(UIManagerStyle::toolPageStyleSheet(palette));
+        QApplication::processEvents();
+        for (QScrollBar *pBar : {area.verticalScrollBar(), area.horizontalScrollBar()})
+        {
+            const bool fVertical = pBar->orientation() == Qt::Vertical;
+            RTTESTI_CHECK(pBar->isVisible() && (fVertical ? pBar->width() : pBar->height()) == 12);
+            pBar->setValue(0);
+            const QPoint start = fVertical ? QPoint(6, 14) : QPoint(14, 6);
+            const QPoint end = start + (fVertical ? QPoint(0, 40) : QPoint(40, 0));
+            QMouseEvent press(QEvent::MouseButtonPress, start, pBar->mapToGlobal(start),
+                              Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
+            QApplication::sendEvent(pBar, &press);
+            RTTESTI_CHECK(pBar->isSliderDown());
+            QMouseEvent move(QEvent::MouseMove, end, pBar->mapToGlobal(end),
+                             Qt::NoButton, Qt::LeftButton, Qt::NoModifier);
+            QApplication::sendEvent(pBar, &move);
+            QMouseEvent release(QEvent::MouseButtonRelease, end, pBar->mapToGlobal(end),
+                                Qt::LeftButton, Qt::NoButton, Qt::NoModifier);
+            QApplication::sendEvent(pBar, &release);
+            RTTESTI_CHECK(!pBar->isSliderDown() && pBar->value() > 0);
+        }
+    }
+}
+
 /** Checks phone setup, creation and navigation in an embedded stack. */
 static void tstPage(const QString &strRoot, const QString &strSdk, const QString &strJava)
 {
     const QString strSnapshots = qEnvironmentVariable("VBOX_GUI_TEST_SNAPSHOT_DIR");
     RTTestISub("Embedded page first use and translation");
     QStackedWidget stack;
+    const QPalette appPalette = qApp->palette();
+    stack.setStyleSheet(UIManagerStyle::toolPageStyleSheet(appPalette));
+    QPalette backdrop;
+    backdrop.setColor(QPalette::Window, UIManagerStyle::backdropColor(appPalette));
+    stack.setPalette(backdrop);
     QWidget *pOtherPage = new QWidget(&stack);
     stack.addWidget(pOtherPage);
-    UIPhoneManager page(&stack, strRoot + "/empty-page-data");
-    stack.addWidget(&page);
     stack.resize(760, 640);
     stack.show();
-    stack.setCurrentWidget(&page);
+    UIPhoneManager page(&stack, strRoot + "/empty-page-data");
+    QFrame *pCard = new QFrame(&stack);
+    pCard->setObjectName(QStringLiteral("managerToolCard"));
+    QVBoxLayout *pLayout = new QVBoxLayout(pCard);
+    pLayout->setContentsMargins(20, 14, 20, 20);
+    pLayout->addWidget(&page);
+    stack.addWidget(pCard);
+    stack.setCurrentWidget(pCard);
     RTTESTI_CHECK(!page.isWindow() && page.window() == &stack);
+    QApplication::processEvents();
+    const QString strInitialStyle = page.styleSheet();
+    for (int i = 0; i < 8; ++i)
+    {
+        stack.setCurrentWidget(pOtherPage);
+        stack.setCurrentWidget(pCard);
+        QApplication::processEvents();
+        RTTESTI_CHECK(page.isVisible() && page.styleSheet() == strInitialStyle);
+    }
+
+    QPalette changed = appPalette;
+    changed.setColor(QPalette::Window, QColor("#212837"));
+    changed.setColor(QPalette::Base, QColor("#161d29"));
+    changed.setColor(QPalette::WindowText, QColor("#f3f6ff"));
+    qApp->setPalette(changed);
+    stack.setStyleSheet(UIManagerStyle::toolPageStyleSheet(changed));
+    QApplication::processEvents();
+    RTTESTI_CHECK(page.styleSheet().contains(QStringLiteral("#161d29")));
+    qApp->setPalette(appPalette);
+    stack.setStyleSheet(UIManagerStyle::toolPageStyleSheet(appPalette));
+    QApplication::processEvents();
+    RTTESTI_CHECK(page.styleSheet() == strInitialStyle);
     QPushButton *pCreate = page.findChild<QPushButton*>("phoneCreate");
     QAction *pStart = page.findChild<QAction*>("phoneStart");
     QLineEdit *pSdk = page.findChild<QLineEdit*>("phoneSdkPath");
@@ -617,12 +789,14 @@ static void tstPage(const QString &strRoot, const QString &strSdk, const QString
     pList->setCurrentRow(iOtherRow);
     RTTESTI_CHECK(pStart->isEnabled() && pSelectedName->isVisible());
     RTTESTI_CHECK(pSelectedName->text() == "UI test phone" && pSelectedMemory->text() == "2048 MB");
+    QApplication::processEvents();
+    RTTESTI_CHECK(pSelectedName->mapTo(&page, QPoint(0, 0)).y() < 100);
     if (!strSnapshots.isEmpty())
         RTTESTI_CHECK(page.grab().save(strSnapshots + "/phone-0.png"));
     RTTestISub("Phone catalog survives page switching");
     stack.setCurrentWidget(pOtherPage);
     RTTESTI_CHECK(!page.isVisible());
-    stack.setCurrentWidget(&page);
+    stack.setCurrentWidget(pCard);
     QApplication::processEvents();
     RTTESTI_CHECK(tstWait(*pBackend));
     RTTESTI_CHECK(page.isVisible());
@@ -659,7 +833,12 @@ int main(int argc, char **argv)
     if (!qEnvironmentVariableIsSet("VBOX_GUI_TEST_NO_APP_STYLE"))
         app.setStyleSheet(UIAppearance::styleSheet(app.palette()));
     UIDesktopWidgetWatchdog::create();
-    QTemporaryDir directory;
+    tstToolBar();
+    tstScrollBars();
+    const QString strSnapshots = qEnvironmentVariable("VBOX_GUI_TEST_SNAPSHOT_DIR");
+    const QDir scratch = strSnapshots.isEmpty() ? QDir::temp() : QDir(strSnapshots);
+    RTTESTI_CHECK(scratch.exists() || scratch.mkpath(QStringLiteral(".")));
+    QTemporaryDir directory(scratch.filePath(QStringLiteral("navebox-phone-XXXXXX")));
     RTTESTI_CHECK(directory.isValid());
     if (directory.isValid())
     {

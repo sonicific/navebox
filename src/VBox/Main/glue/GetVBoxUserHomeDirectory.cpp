@@ -52,18 +52,17 @@ char g_szXdgConfigHome[RTPATH_MAX] = "";
 
 /**
  * Possible locations for the VirtualBox user configuration folder,
- * listed from oldest (as in legacy) to newest.  These can be either
+ * listed in preference order.  These can be either
  * absolute or relative to the home directory.  We use the first entry
  * of the list which corresponds to a real folder on storage, or
- * create a folder corresponding to the last in the list (the least
- * legacy) if none do.
+ * create the current default folder if none do.
  */
 const char * const g_apcszUserHome[] =
 {
 #ifdef RT_OS_DARWIN
     "Library/VirtualBox",
 #elif defined RT_OS_WINDOWS
-    ".VirtualBox",
+    ".Navebox", ".VirtualBox",
 #else
     ".VirtualBox", g_szXdgConfigHome,
 #endif
@@ -128,6 +127,10 @@ int GetVBoxUserHomeDirectory(char *aDir, size_t aDirLen, bool fCreateDir)
                     break;
                 }
             }
+#ifdef RT_OS_WINDOWS
+            if (!fFound)
+                vrc = composeHomePath(aDir, aDirLen, g_apcszUserHome[0]);
+#endif
         }
 
         /* ensure the home directory exists */
