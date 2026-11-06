@@ -201,7 +201,7 @@ static void tstAbout()
     RTTESTI_CHECK(qApp->installTranslator(&translator));
     QApplication::processEvents();
     QApplication::processEvents();
-    RTTESTI_CHECK(dialog.windowTitle() == QStringLiteral("Translated: About"));
+    RTTESTI_CHECK(dialog.windowTitle() == QStringLiteral("Translated: About - ") + UIBranding::name());
     RTTESTI_CHECK(pCopy->text() == QStringLiteral("Translated: Copy Build Information"));
     for (int i = 0; i < labels.size(); ++i)
     {
@@ -212,7 +212,7 @@ static void tstAbout()
     RTTESTI_CHECK(qApp->removeTranslator(&translator));
     QApplication::processEvents();
     QApplication::processEvents();
-    RTTESTI_CHECK(dialog.windowTitle() == QStringLiteral("About"));
+    RTTESTI_CHECK(dialog.windowTitle() == QStringLiteral("About - ") + UIBranding::name());
 
     RTTestISub("About link palette changes");
     QLabel *pEmail = 0;
@@ -224,6 +224,7 @@ static void tstAbout()
     palette.setColor(QPalette::Window, Qt::white);
     palette.setColor(QPalette::Link, QColor(210, 0, 210));
     dialog.setPalette(palette);
+    QApplication::processEvents();
     if (pEmail)
         RTTESTI_CHECK(pEmail->text().contains(QStringLiteral("#d200d2")));
 
@@ -513,6 +514,10 @@ static void tstAboutSnapshots()
         RTTESTI_CHECK(QFontMetrics(dialog.font()).inFont(QChar('N')));
         dialog.show();
         QApplication::processEvents();
+        const QLabel *pVersion = dialog.findChild<QLabel*>(QStringLiteral("naveboxVersion"));
+        const QLabel *pLogo = dialog.findChild<QLabel*>(QStringLiteral("naveboxAboutLogo"));
+        RTTESTI_CHECK(pVersion && pVersion->rect().contains(QRect(QPoint(), pVersion->sizeHint())));
+        RTTESTI_CHECK(pLogo && pVersion && qAbs(pVersion->x() - pLogo->geometry().right()) < 50);
         const QString strName = fDark ? QStringLiteral("about-dark.png") : QStringLiteral("about-light.png");
         RTTESTI_CHECK(dialog.grab().save(directory.filePath(strName)));
     }

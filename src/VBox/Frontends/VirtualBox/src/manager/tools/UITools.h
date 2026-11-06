@@ -39,7 +39,6 @@
 
 /* Forward declarations: */
 class QLabel;
-class QToolButton;
 class QVBoxLayout;
 class UIToolsModel;
 class UIToolsView;
@@ -88,7 +87,7 @@ private:
       * @{ */
         /** Prepares all. */
         void prepare();
-        /** Adds the brand and collapse control to the global navigation. */
+        /** Adds the brand to the global navigation. */
         void prepareNavigation();
         /** Cleanups all. */
         void cleanup();
@@ -112,13 +111,11 @@ private:
         QLabel *m_pBrandIcon = 0;
         /** Holds the product name, visible when navigation is expanded. */
         QLabel *m_pBrandName = 0;
-        /** Holds the action for expanding and collapsing navigation. */
-        QToolButton *m_pNavigationToggle = 0;
     /** @} */
 
 private slots:
 
-    /** Updates the brand and the toggle for the current theme, language and state. */
+    /** Updates the brand for the current display scale and navigation state. */
     void sltUpdateNavigation();
 };
 

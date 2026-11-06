@@ -76,6 +76,7 @@
 #include "UIMediumTools.h"
 #include "UIMediumManager.h"
 #include "UIModalWindowManager.h"
+#include "UIManagerStyle.h"
 #include "UINetworkManager.h"
 #include "UINotificationCenter.h"
 #include "UIQObjectStuff.h"
@@ -671,6 +672,7 @@ void UIVirtualBoxManager::sltRetranslateUI()
              +  QString(" - " VBOX_BLEEDING_EDGE);
 #endif /* VBOX_BLEEDING_EDGE */
     setWindowTitle(strTitle);
+    updateNavigationToggle();
 }
 
 bool UIVirtualBoxManager::event(QEvent *pEvent)
@@ -2524,7 +2526,23 @@ void UIVirtualBoxManager::prepareMenuBar()
     m_menuUpdateHandlers[UIActionIndexMN_M_Machine_M_Console] = &UIVirtualBoxManager::updateMenuMachineConsole;
     m_menuUpdateHandlers[UIActionIndexMN_M_Machine_M_Stop] = &UIVirtualBoxManager::updateMenuMachineClose;
 
+    m_pNavigationToggle = new QAction(menuBar());
+    m_pNavigationToggle->setObjectName(QStringLiteral("managerNavigationToggle"));
+    connect(m_pNavigationToggle, &QAction::triggered, this, []
+    {
+        gEDataManager->setToolTextVisible(!gEDataManager->isToolTextVisible());
+    });
+    connect(gEDataManager, &UIExtraDataManager::sigToolLabelsVisibilityChange,
+            this, &UIVirtualBoxManager::updateNavigationToggle);
+    connect(&uiCommon(), &UICommon::sigThemeChange, this, &UIVirtualBoxManager::updateNavigationToggle);
+    connect(qApp, &QGuiApplication::layoutDirectionChanged, this, &UIVirtualBoxManager::updateNavigationToggle);
+    connect(this, &UIVirtualBoxManager::sigWindowRemapped, this, &UIVirtualBoxManager::updateNavigationToggle);
+    updateNavigationToggle();
+
     /* Build menu-bar: */
+#ifndef VBOX_WS_MAC
+    menuBar()->addAction(m_pNavigationToggle);
+#endif
     foreach (QMenu *pMenu, actionPool()->menus())
     {
 #ifdef VBOX_WS_MAC
@@ -2533,7 +2551,9 @@ void UIVirtualBoxManager::prepareMenuBar()
         {
             /* Insert 'Window' menu: */
             UIWindowMenuManager::create();
-            menuBar()->addMenu(gpWindowMenuManager->createMenu(this));
+            QMenu *pWindowMenu = gpWindowMenuManager->createMenu(this);
+            pWindowMenu->addAction(m_pNavigationToggle);
+            menuBar()->addMenu(pWindowMenu);
             gpWindowMenuManager->addWindow(this);
         }
 #endif
@@ -2555,6 +2575,19 @@ void UIVirtualBoxManager::prepareMenuBar()
 #ifdef VBOX_WS_WIN
     m_pTitleBar->prepareFrame();
 #endif
+}
+
+void UIVirtualBoxManager::updateNavigationToggle()
+{
+    if (!m_pNavigationToggle)
+        return;
+    const bool fExpanded = gEDataManager->isToolTextVisible();
+    const QString strAction = fExpanded ? tr("Collapse sidebar") : tr("Expand sidebar");
+    m_pNavigationToggle->setText(strAction);
+    m_pNavigationToggle->setToolTip(strAction);
+    m_pNavigationToggle->setStatusTip(strAction);
+    m_pNavigationToggle->setIcon(UIManagerStyle::navigationToggleIcon(QApplication::palette(), fExpanded,
+                                                                    layoutDirection(), devicePixelRatioF()));
 }
 
 void UIVirtualBoxManager::prepareStatusBar()

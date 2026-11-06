@@ -421,6 +421,9 @@ int UIToolsItem::minimumWidthHint() const
 {
     /* Sanity check: */
     AssertPtrReturn(model(), 0);
+    if (itemClass() == UIToolClass_Global)
+        return model()->showItemNames() ? 36 + m_pixmapSize.width() + m_nameSize.width()
+                                        : 24 + m_pixmapSize.width();
 
     /* Prepare variables: */
     const int iMargin = data(ToolsItemData_Margin).toInt();
@@ -448,10 +451,9 @@ int UIToolsItem::minimumWidthHint() const
     /* Take into account label size for non-Aux tools
      * 1. if text labels requested or
      * 2. machine item selected: */
-    const bool fCondition1 = itemClass() == UIToolClass_Global && model()->showItemNames();
     const bool fCondition2 = itemClass() == UIToolClass_Machine && (   model()->showItemNames()
                                                                     || model()->currentItem() == this);
-    if (fCondition1 || fCondition2)
+    if (fCondition2)
     {
         iProposedWidth += m_nameSize.width();
 
@@ -775,32 +777,20 @@ void UIToolsItem::paintBackground(QPainter *pPainter, const QRect &rectangle) co
     const bool fSelected = model()->currentItem() == this;
     if (fSelected || isHovered())
     {
-        /* A quiet accent wash replaces the old grey gradient and spotlight. */
         QColor accent = pal.color(isEnabled() ? QPalette::Active : QPalette::Disabled, QPalette::Highlight);
         QColor surface = accent;
-        surface.setAlpha(fSelected ? 26 : 12);
+        const bool fFocused = fSelected && model()->view()->hasFocus();
+        surface.setAlpha(fSelected ? (fFocused ? 38 : 26) : 12);
         pPainter->setRenderHint(QPainter::Antialiasing);
         pPainter->setPen(Qt::NoPen);
         pPainter->setBrush(surface);
         pPainter->drawRoundedRect(QRectF(rectangle).adjusted(3, 3, -3, -3), 7, 7);
-        if (fSelected)
+        if (fSelected && itemClass() == UIToolClass_Machine)
         {
             pPainter->setBrush(accent);
-            if (itemClass() == UIToolClass_Machine)
-                pPainter->drawRoundedRect(QRectF(rectangle.left() + 8, rectangle.bottom() - 2,
-                                                qMax(0, rectangle.width() - 16), 2), 1, 1);
-            else
-                pPainter->drawRoundedRect(QRectF(rectangle.left() + 1, rectangle.top() + 9,
-                                                3, qMax(0, rectangle.height() - 18)), 1.5, 1.5);
+            pPainter->drawRoundedRect(QRectF(rectangle.left() + 8, rectangle.bottom() - 2,
+                                            qMax(0, rectangle.width() - 16), 2), 1, 1);
         }
-#ifndef VBOX_WS_MAC
-        if (fSelected && model()->view()->hasFocus())
-        {
-            pPainter->setPen(QPen(accent, 1, Qt::DotLine));
-            pPainter->setBrush(Qt::NoBrush);
-            pPainter->drawRoundedRect(QRectF(rectangle).adjusted(3.5, 3.5, -3.5, -3.5), 7, 7);
-        }
-#endif
     }
     pPainter->restore();
 }
@@ -832,8 +822,8 @@ void UIToolsItem::paintToolInfo(QPainter *pPainter, const QRect &rectangle) cons
 #else
         int iPixmapX = 1.5 * iMargin;
 #endif
-        if (itemClass() == UIToolClass_Global && !model()->showItemNames())
-            iPixmapX = (rectangle.width() - m_pixmapSize.width()) / 2;
+        if (itemClass() == UIToolClass_Global)
+            iPixmapX = model()->showItemNames() ? 14 : (rectangle.width() - m_pixmapSize.width()) / 2;
         const int iPixmapY = (iFullHeight - m_pixmap.height() / m_pixmap.devicePixelRatio()) / 2;
 
         /* Paint pixmap: */
@@ -859,6 +849,8 @@ void UIToolsItem::paintToolInfo(QPainter *pPainter, const QRect &rectangle) cons
 #else
         int iNameX = 1.5 * iMargin + m_pixmapSize.width() + 2 * iSpacing;
 #endif
+        if (itemClass() == UIToolClass_Global)
+            iNameX = 14 + m_pixmapSize.width() + 8;
         const int iNameY = (iFullHeight - m_nameSize.height()) / 2;
 
         /* Paint name for non-Aux tools
@@ -885,7 +877,7 @@ void UIToolsItem::paintToolInfo(QPainter *pPainter, const QRect &rectangle) cons
                       name());
 
             /* Paint animated underline: */
-            if (hoveringProgress())
+            if (itemClass() == UIToolClass_Machine && hoveringProgress())
             {
                 QFontMetrics fm(fnt);
                 const double fRatio = (double)hoveringProgress() / 100;

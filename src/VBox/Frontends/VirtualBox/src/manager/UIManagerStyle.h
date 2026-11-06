@@ -65,8 +65,6 @@ public:
     static QString toolPageStyleSheet(const QPalette &palette);
     /** Returns the style sheet for the Manager's main toolbar. */
     static QString toolBarStyleSheet(const QPalette &palette);
-    /** Returns the navigation toggle style for @a palette and @a fExpanded. */
-    static QString navigationToggleStyleSheet(const QPalette &palette, bool fExpanded);
     /** Draws a navigation panel icon for the given state, layout direction and display scale. */
     static QIcon navigationToggleIcon(const QPalette &palette, bool fExpanded,
                                       Qt::LayoutDirection enmDirection, qreal fDevicePixelRatio);

@@ -44,6 +44,7 @@
 #include "UIManagerDefs.h"
 
 /* Forward declarations: */
+class QAction;
 class QMenu;
 class QIManagerDialog;
 class UIAction;
@@ -361,6 +362,8 @@ private:
         void prepareIcon();
         /** Prepares menu-bar. */
         void prepareMenuBar();
+        /** Updates the icon and accessible label for the sidebar action. */
+        void updateNavigationToggle();
         /** Prepares status-bar. */
         void prepareStatusBar();
         /** Prepares toolbar. */
@@ -516,6 +519,8 @@ private:
 
     /** Holds the action-pool instance. */
     UIActionPool *m_pActionPool;
+    /** Holds the sidebar action placed before File. */
+    QAction *m_pNavigationToggle = 0;
 #ifdef VBOX_WS_WIN
     /** Holds the Windows menu bar and native caption integration. */
     UIManagerTitleBar *m_pTitleBar = 0;

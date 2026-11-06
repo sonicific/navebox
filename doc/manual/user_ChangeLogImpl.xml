@@ -125,8 +125,9 @@ Rules for adding a changelog entry to make them look more uniform:
 
       <listitem>
         <para>Navebox GUI: Place Manager menus and colored window controls in
-          the Windows title bar, and show the product identity and a two-state
-          collapse control in the left navigation</para>
+          the Windows title bar and move the product identity into the sidebar.
+          Toggle the compact sidebar from the icon before File and view
+          product and build information in the refreshed About dialog</para>
       </listitem>
 
       <listitem>

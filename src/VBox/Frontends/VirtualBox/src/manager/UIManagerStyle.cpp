@@ -200,45 +200,34 @@ QString UIManagerStyle::toolBarStyleSheet(const QPalette &palette)
 }
 
 /* static */
-QString UIManagerStyle::navigationToggleStyleSheet(const QPalette &palette, bool fExpanded)
-{
-    const UIAppearance::PaneColors colors(palette);
-    return QStringLiteral(
-        "QToolButton#managerNavigationToggle { background: %5; color: %1;"
-        " border: 1px solid %6; border-radius: 9px; padding: %4; font-weight: 500; }"
-        "QToolButton#managerNavigationToggle:hover { background: %2; }"
-        "QToolButton#managerNavigationToggle:pressed { background: %3; }"
-        "QToolButton#managerNavigationToggle:focus { border-color: palette(highlight); }")
-        .arg(colors.secondary.name(), colors.hover.name(), colors.pressed.name(),
-             fExpanded ? QStringLiteral("7px 9px") : QStringLiteral("6px 3px"),
-             colors.surface.name(), colors.border.name());
-}
-
-/* static */
 QIcon UIManagerStyle::navigationToggleIcon(const QPalette &palette, bool fExpanded,
                                           Qt::LayoutDirection enmDirection, qreal fDevicePixelRatio)
 {
-    const int iExtent = qCeil(18 * fDevicePixelRatio);
+    const int iExtent = qCeil(16 * fDevicePixelRatio);
     QPixmap pixmap(iExtent, iExtent);
     pixmap.setDevicePixelRatio(fDevicePixelRatio);
     pixmap.fill(Qt::transparent);
     QPainter painter(&pixmap);
     painter.setRenderHint(QPainter::Antialiasing);
     const UIAppearance::PaneColors colors(palette);
-    painter.setPen(QPen(colors.secondary, 1.25, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     if (enmDirection == Qt::RightToLeft)
     {
-        painter.translate(18, 0);
+        painter.translate(16, 0);
         painter.scale(-1, 1);
     }
-    painter.setBrush(colors.hover);
-    painter.drawRoundedRect(QRectF(1.75, 2.75, 14.5, 12.5), 2.5, 2.5);
-    painter.drawLine(QPointF(6.25, 3.25), QPointF(6.25, 14.75));
-    painter.setPen(QPen(colors.secondary, 1.4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-    const qreal x = fExpanded ? 13 : 9.5;
-    const qreal xTip = fExpanded ? 9.5 : 13;
-    const QPointF aChevron[] = {QPointF(x, 6.5), QPointF(xTip, 9), QPointF(x, 11.5)};
-    painter.drawPolyline(aChevron, 3);
+    const QRectF frame(2, 3, 12, 10);
+    if (fExpanded)
+    {
+        painter.setClipRect(QRectF(2, 3, 4, 10));
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(colors.pressed);
+        painter.drawRoundedRect(frame, 2.5, 2.5);
+        painter.setClipping(false);
+    }
+    painter.setBrush(Qt::NoBrush);
+    painter.setPen(QPen(colors.secondary, 1.1));
+    painter.drawRoundedRect(frame, 2.5, 2.5);
+    painter.drawLine(QPointF(6, 3.4), QPointF(6, 12.6));
     painter.end();
     return QIcon(pixmap);
 }

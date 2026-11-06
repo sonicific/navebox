@@ -72,6 +72,8 @@ private:
 
     /** Prepares all. */
     void prepare();
+    /** Refreshes the dialog surfaces and links when the palette changes. */
+    void updateAppearance();
     /** Prepares the scrollable page and its fixed action row. */
     void prepareMainLayout();
     /** Adds the branding and version header. */

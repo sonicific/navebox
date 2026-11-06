@@ -257,7 +257,7 @@ void UIToolsModel::updateLayout()
                 /* Set item position: */
                 pItem->setPos(iMargin, iVerticalIndent);
                 /* Set root-item size: */
-                pItem->resize(iViewportWidth, iItemHeight);
+                pItem->resize(qMax(0, iViewportWidth - 2 * iMargin), iItemHeight);
                 /* Make sure item is shown: */
                 pItem->show();
                 /* Advance vertical indent: */
