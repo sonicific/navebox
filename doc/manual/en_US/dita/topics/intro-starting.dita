@@ -37,6 +37,10 @@
     <p>Navebox opens with the navigation expanded and <b>Machines</b> selected
       when machines are available. With an empty machine list, it opens
       <b>Home</b>.</p>
+    <p>The Navebox logo and name are at the top of the navigation pane. Use
+      <b>Collapsed</b> at the bottom to show icons only, or <b>Expand</b> to
+      restore the labels. On Windows, the Manager menus are in the title bar
+      beside the window controls.</p>
     <p>Use the action rows in <b>Home</b> to open global preferences, create
       a virtual machine, add a saved machine, import an appliance, or open
       the VirtualBox documentation and community website. Click a row or use

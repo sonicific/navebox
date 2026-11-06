@@ -101,6 +101,8 @@
 # include "UIWindowMenuManager.h"
 # include "UIVersion.h"
 # include "VBoxUtils-darwin.h"
+#elif defined(VBOX_WS_WIN)
+# include "UIManagerTitleBar.h"
 #else
 # include "UIMenuBar.h"
 #endif
@@ -647,6 +649,15 @@ bool UIVirtualBoxManager::eventFilter(QObject *pObject, QEvent *pEvent)
     return QIMainWindow::eventFilter(pObject, pEvent);
 }
 #endif /* VBOX_WS_MAC */
+
+#ifdef VBOX_WS_WIN
+bool UIVirtualBoxManager::nativeEvent(const QByteArray &strType, void *pMessage, qintptr *pResult)
+{
+    if (m_pTitleBar && m_pTitleBar->handleFrameEvent(strType, pMessage, pResult))
+        return true;
+    return QIMainWindow::nativeEvent(strType, pMessage, pResult);
+}
+#endif
 
 void UIVirtualBoxManager::sltRetranslateUI()
 {
@@ -2485,9 +2496,14 @@ void UIVirtualBoxManager::prepareIcon()
 
 void UIVirtualBoxManager::prepareMenuBar()
 {
-#ifndef VBOX_WS_MAC
+#ifdef VBOX_WS_WIN
+    m_pTitleBar = new UIManagerTitleBar(this);
+    setMenuBar(m_pTitleBar);
+#elif !defined(VBOX_WS_MAC)
     /* Create menu-bar: */
     setMenuBar(new UIMenuBar);
+#endif
+#ifndef VBOX_WS_MAC
     if (menuBar())
     {
         /* Make sure menu-bar fills own solid background: */
@@ -2536,6 +2552,9 @@ void UIVirtualBoxManager::prepareMenuBar()
 
     /* Setup menu-bar policy: */
     menuBar()->setContextMenuPolicy(Qt::CustomContextMenu);
+#ifdef VBOX_WS_WIN
+    m_pTitleBar->prepareFrame();
+#endif
 }
 
 void UIVirtualBoxManager::prepareStatusBar()

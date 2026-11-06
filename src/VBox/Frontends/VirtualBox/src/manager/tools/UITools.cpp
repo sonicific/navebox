@@ -26,12 +26,22 @@
  */
 
 /* Qt includes: */
+#include <QApplication>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QToolButton>
 #include <QVBoxLayout>
 
 /* GUI includes: */
+#include "UIBranding.h"
+#include "UICommon.h"
+#include "UIExtraDataManager.h"
+#include "UIManagerStyle.h"
 #include "UITools.h"
 #include "UIToolsModel.h"
 #include "UIToolsView.h"
+#include "UITranslationEventListener.h"
+#include "UIVirtualBoxManager.h"
 
 /* Other VBox includes: */
 #include "iprt/assert.h"
@@ -118,9 +128,74 @@ void UITools::prepare()
         connect(m_pToolsModel, &UIToolsModel::sigSelectionChanged,
                 this, &UITools::sigSelectionChanged);
 
+        if (m_enmClass == UIToolClass_Global)
+            prepareNavigation();
+
         /* Init model finally: */
         m_pToolsModel->init();
     }
+}
+
+void UITools::prepareNavigation()
+{
+    QWidget *pBrandHeader = new QWidget(this);
+    pBrandHeader->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    QHBoxLayout *pBrand = new QHBoxLayout(pBrandHeader);
+    pBrand->setContentsMargins(8, 10, 8, 9);
+    pBrand->setSpacing(7);
+    m_pBrandIcon = new QLabel(pBrandHeader);
+    m_pBrandIcon->setFixedSize(24, 24);
+    m_pBrandIcon->setAlignment(Qt::AlignCenter);
+    m_pBrandIcon->setToolTip(UIBranding::name());
+    pBrand->addWidget(m_pBrandIcon, 0, Qt::AlignHCenter);
+    m_pBrandName = new QLabel(UIBranding::name(), pBrandHeader);
+    QFont font = m_pBrandName->font();
+    font.setBold(true);
+    if (font.pointSizeF() > 0)
+        font.setPointSizeF(font.pointSizeF() * 1.25);
+    else
+        font.setPixelSize(qRound(font.pixelSize() * 1.25));
+    m_pBrandName->setFont(font);
+    pBrand->addWidget(m_pBrandName, 1);
+    m_pMainLayout->insertWidget(0, pBrandHeader);
+
+    QHBoxLayout *pFooter = new QHBoxLayout;
+    pFooter->setContentsMargins(6, 5, 6, 6);
+    m_pNavigationToggle = new QToolButton(this);
+    m_pNavigationToggle->setObjectName(QStringLiteral("managerNavigationToggle"));
+    m_pNavigationToggle->setIconSize(QSize(18, 18));
+    m_pNavigationToggle->setFocusPolicy(Qt::TabFocus);
+    m_pNavigationToggle->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    pFooter->addWidget(m_pNavigationToggle);
+    m_pMainLayout->addLayout(pFooter);
+
+    connect(m_pNavigationToggle, &QToolButton::clicked, this, []
+    {
+        gEDataManager->setToolTextVisible(!gEDataManager->isToolTextVisible());
+    });
+    connect(gEDataManager, &UIExtraDataManager::sigToolLabelsVisibilityChange, this, &UITools::sltUpdateNavigation);
+    connect(&uiCommon(), &UICommon::sigThemeChange, this, &UITools::sltUpdateNavigation);
+    connect(&translationEventListener(), &UITranslationEventListener::sigRetranslateUI, this, &UITools::sltUpdateNavigation);
+    connect(gpManager, &UIVirtualBoxManager::sigWindowRemapped, this, &UITools::sltUpdateNavigation);
+    connect(qApp, &QGuiApplication::layoutDirectionChanged, this, &UITools::sltUpdateNavigation);
+    sltUpdateNavigation();
+}
+
+void UITools::sltUpdateNavigation()
+{
+    const bool fExpanded = gEDataManager->isToolTextVisible();
+    const QString strAction = fExpanded ? tr("Collapsed") : tr("Expand");
+    m_pBrandName->setVisible(fExpanded);
+    m_pBrandIcon->setPixmap(UIBranding::icon().pixmap(m_pBrandIcon->size(), devicePixelRatioF()));
+    m_pNavigationToggle->setText(strAction);
+    m_pNavigationToggle->setToolTip(strAction);
+    m_pNavigationToggle->setAccessibleName(strAction);
+    m_pNavigationToggle->setToolButtonStyle(fExpanded ? Qt::ToolButtonTextBesideIcon : Qt::ToolButtonTextUnderIcon);
+    m_pNavigationToggle->setIcon(UIManagerStyle::navigationToggleIcon(QApplication::palette(),
+                                     fExpanded, layoutDirection(), devicePixelRatioF()));
+    const QString strStyle = UIManagerStyle::navigationToggleStyleSheet(QApplication::palette(), fExpanded);
+    if (m_pNavigationToggle->styleSheet() != strStyle)
+        m_pNavigationToggle->setStyleSheet(strStyle);
 }
 
 void UITools::cleanup()

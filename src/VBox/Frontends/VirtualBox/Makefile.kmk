@@ -495,7 +495,8 @@ VirtualBox_LIBS.win = \
 	$(PATH_SDK_$(VBOX_WINPSDK)_LIB)/Htmlhelp.Lib
 VirtualBox_LIBS.win += \
 	$(PATH_SDK_$(VBOX_WINPSDK)_LIB)/ddraw.lib \
-	$(PATH_SDK_$(VBOX_WINPSDK)_LIB)/dxguid.lib
+	$(PATH_SDK_$(VBOX_WINPSDK)_LIB)/dxguid.lib \
+	$(PATH_SDK_$(VBOX_WINPSDK)_LIB)/dwmapi.lib
 
 # VBox keyboard shared library for X11 hosts:
 if1of ($(KBUILD_TARGET), freebsd linux netbsd openbsd solaris)
@@ -1233,6 +1234,7 @@ if1of ($(KBUILD_TARGET), freebsd linux netbsd openbsd solaris) # U*nix
 endif
 
 VirtualBox_SOURCES.win += \
+	src/manager/UIManagerTitleBar.cpp \
 	src/platform/win/UIDesktopServices_win.cpp
 
 $(call VBOX_SET_VER_INFO_EXE,VirtualBox,Navebox,$(VBOX_WINDOWS_ICON_FILE),Navebox.exe)

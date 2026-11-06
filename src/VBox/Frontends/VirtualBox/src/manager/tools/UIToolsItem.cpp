@@ -566,8 +566,6 @@ QString UIToolsItem::typeToName(UIToolType enmType)
 {
     switch (enmType)
     {
-        // Aux
-        case UIToolType_Toggle:      return tr("Show text");
         // Global
         case UIToolType_Home:        return tr("Home");
         case UIToolType_Machines:    return tr("Machines");
@@ -651,10 +649,6 @@ QIcon UIToolsItem::typeToIcon(UIToolType enmType)
 {
     switch (enmType)
     {
-        /* Aux tools: */
-        case UIToolType_Toggle:
-            return UIIconPool::iconSet(":/tools_menu_24px.png", ":/tools_menu_24px.png");
-
         /* Global tools: */
         case UIToolType_Home:
             return UIIconPool::iconSet(":/welcome_screen_24px.png", ":/welcome_screen_24px.png");
@@ -838,6 +832,8 @@ void UIToolsItem::paintToolInfo(QPainter *pPainter, const QRect &rectangle) cons
 #else
         int iPixmapX = 1.5 * iMargin;
 #endif
+        if (itemClass() == UIToolClass_Global && !model()->showItemNames())
+            iPixmapX = (rectangle.width() - m_pixmapSize.width()) / 2;
         const int iPixmapY = (iFullHeight - m_pixmap.height() / m_pixmap.devicePixelRatio()) / 2;
 
         /* Paint pixmap: */

@@ -48,6 +48,9 @@ class QMenu;
 class QIManagerDialog;
 class UIAction;
 class UIActionPool;
+#ifdef VBOX_WS_WIN
+class UIManagerTitleBar;
+#endif
 class UINativeWizard;
 struct UIUnattendedInstallData;
 class UIVirtualBoxWidget;
@@ -98,6 +101,10 @@ protected:
 #ifdef VBOX_WS_MAC
         /** Mac OS X: Preprocesses any @a pEvent for passed @a pObject. */
         virtual bool eventFilter(QObject *pObject, QEvent *pEvent) RT_OVERRIDE;
+#endif
+#ifdef VBOX_WS_WIN
+        /** Forwards Windows caption messages to the Manager title bar. */
+        virtual bool nativeEvent(const QByteArray &strType, void *pMessage, qintptr *pResult) RT_OVERRIDE;
 #endif
 
         /** Handles any Qt @a pEvent. */
@@ -509,6 +516,10 @@ private:
 
     /** Holds the action-pool instance. */
     UIActionPool *m_pActionPool;
+#ifdef VBOX_WS_WIN
+    /** Holds the Windows menu bar and native caption integration. */
+    UIManagerTitleBar *m_pTitleBar = 0;
+#endif
     /** Holds the map of menu update-handlers. */
     QMap<int, MenuUpdateHandler> m_menuUpdateHandlers;
 

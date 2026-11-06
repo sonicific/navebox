@@ -124,6 +124,12 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
+        <para>Navebox GUI: Place Manager menus and colored window controls in
+          the Windows title bar, and show the product identity and a two-state
+          collapse control in the left navigation</para>
+      </listitem>
+
+      <listitem>
         <para>Navebox GUI: Redesigned Home with an illustrated header and
           keyboard-accessible rows for common VM actions and help resources.
           Refined the light palette, softened dividers, and aligned the toolbar

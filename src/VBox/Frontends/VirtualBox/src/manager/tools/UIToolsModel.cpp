@@ -51,7 +51,7 @@ UIToolsModel::UIToolsModel(QObject *pParent, UIToolClass enmClass)
     , m_pScene(0)
     , m_pView(0)
     , m_fItemsEnabled(true)
-    , m_fShowItemNames(gEDataManager->isToolTextVisible())
+    , m_fShowItemNames(enmClass == UIToolClass_Machine || gEDataManager->isToolTextVisible())
 {
     prepare();
 }
@@ -230,7 +230,6 @@ void UIToolsModel::updateLayout()
     const int iSpacing = data(ToolsModelData_Spacing).toInt();
     const QSize viewportSize = scene()->views()[0]->viewport()->size();
     const int iViewportWidth = viewportSize.width();
-    const int iViewportHeight = viewportSize.height();
 
     /* Depending on tool class: */
     switch (m_enmClass)
@@ -265,26 +264,6 @@ void UIToolsModel::updateLayout()
                 iVerticalIndent += (iItemHeight + iSpacing);
             }
 
-            /* Start from bottom: */
-            int iVerticalIndentAux = iViewportHeight - iMargin;
-
-            /* Layout aux children: */
-            foreach (UIToolsItem *pItem, items())
-            {
-                /* Skip everything besides Aux children: */
-                if (pItem->itemClass() != UIToolClass_Aux)
-                    continue;
-
-                /* Set item position: */
-                pItem->setPos(iMargin, iVerticalIndentAux - pItem->minimumHeightHint());
-                /* Set root-item size: */
-                pItem->resize(iViewportWidth, pItem->minimumHeightHint());
-                /* Make sure item is shown: */
-                pItem->show();
-                /* Decrease vertical indent: */
-                iVerticalIndentAux -= (pItem->minimumHeightHint() + iSpacing);
-            }
-
             break;
         }
 
@@ -292,6 +271,7 @@ void UIToolsModel::updateLayout()
         {
             /* Start from left: */
             int iHorizontalIndent = iMargin;
+            const int iViewportHeight = viewportSize.height();
 
             /* Layout Machine children: */
             foreach (UIToolsItem *pItem, items())
@@ -408,7 +388,7 @@ bool UIToolsModel::eventFilter(QObject *pWatched, QEvent *pEvent)
                 UIToolsItem *pPreviousItem = 0;
                 if (iPosition > 0 && iPosition < items().size())
                     pPreviousItem = items().at(iPosition - 1);
-                if (pPreviousItem && pPreviousItem->isEnabled() && pPreviousItem->itemClass() != UIToolClass_Aux)
+                if (pPreviousItem && pPreviousItem->isEnabled())
                     return triggerItem(pPreviousItem);
             }
 
@@ -422,7 +402,7 @@ bool UIToolsModel::eventFilter(QObject *pWatched, QEvent *pEvent)
                 UIToolsItem *pNextItem = 0;
                 if (iPosition >= 0 && iPosition < items().size() - 1)
                     pNextItem = items().at(iPosition + 1);
-                if (pNextItem && pNextItem->isEnabled() && pNextItem->itemClass() != UIToolClass_Aux)
+                if (pNextItem && pNextItem->isEnabled())
                     return triggerItem(pNextItem);
             }
 
@@ -513,7 +493,6 @@ void UIToolsModel::prepareItems()
             prepareItem(UIToolType_Network);
             prepareItem(UIToolType_Cloud);
             prepareItem(UIToolType_Resources);
-            prepareItem(UIToolType_Toggle);
             break;
         }
         case UIToolClass_Machine:
@@ -555,8 +534,9 @@ void UIToolsModel::prepareConnections()
             this, &UIToolsModel::sltHandleCommitData);
 
     /* Extra-data stuff: */
-    connect(gEDataManager, &UIExtraDataManager::sigToolLabelsVisibilityChange,
-            this, &UIToolsModel::sltHandleToolLabelsVisibilityChange);
+    if (m_enmClass == UIToolClass_Global)
+        connect(gEDataManager, &UIExtraDataManager::sigToolLabelsVisibilityChange,
+                this, &UIToolsModel::sltHandleToolLabelsVisibilityChange);
 }
 
 void UIToolsModel::loadCurrentItems()
@@ -643,22 +623,6 @@ bool UIToolsModel::triggerItem(UIToolsItem *pItem)
     /* Handle known item classes: */
     switch (pItem->itemClass())
     {
-        case UIToolClass_Aux:
-        {
-            /* Handle known item types: */
-            switch (pItem->itemType())
-            {
-                case UIToolType_Toggle:
-                {
-                    /* Save the change: */
-                    gEDataManager->setToolTextVisible(!m_fShowItemNames);
-                    return true;
-                }
-                default:
-                    break;
-            }
-            break;
-        }
         case UIToolClass_Global:
         case UIToolClass_Machine:
         {
