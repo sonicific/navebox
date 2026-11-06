@@ -82,8 +82,21 @@ struct UIPhoneDevice
     QString m_strSerial;   /**< Verified emulator ADB serial; never a USB device. */
     QString m_strProblem;  /**< Startup problem, if any. */
     QString m_strProfile;  /**< Recorded stock SDK profile, if known. */
+    QString m_strPackage;  /**< System image package recorded at creation. */
     bool m_fBooted = false; /**< Whether Android reports boot completion. */
     bool m_fStarting = false; /**< Whether startup is still pending. */
+};
+
+/** Read-only configuration of a phone in the private catalog. */
+struct UIPhoneConfiguration
+{
+    QString m_strProfile;   /**< SDK hardware definition identifier. */
+    QString m_strStorage;   /**< Configured data partition capacity. */
+    int m_iMemoryMB = 0;   /**< Configured RAM in MB, or zero if unavailable. */
+    int m_cCpus = 0;        /**< Configured virtual CPUs, or zero if unavailable. */
+    int m_iWidth = 0;       /**< Configured display width. */
+    int m_iHeight = 0;      /**< Configured display height. */
+    int m_iDensity = 0;     /**< Configured display density. */
 };
 
 /** Asynchronous Android SDK adapter with a separate, private AVD directory.
@@ -111,6 +124,10 @@ public:
     static QList<UIPhoneProfile> profiles();
     /** Returns the phone catalog and last verified runtime states. */
     QList<UIPhoneDevice> devices() const { return m_devices.values(); }
+    /** Returns the last known state of the selected catalog device. */
+    UIPhoneDevice device(const QString &strId) const { return m_devices.value(strId); }
+    /** Reads the saved hardware settings for one catalog device. */
+    UIPhoneConfiguration configuration(const QString &strId) const;
     /** Returns whether any SDK operation is in progress. */
     bool isBusy() const { return m_fBusy; }
     /** Returns whether the current operation is a preemptible catalog refresh. */

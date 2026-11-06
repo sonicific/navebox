@@ -2036,6 +2036,7 @@ tstNaveboxPhone_QT_MOCHDRS = \
 tstNaveboxPhone_SOURCES = \
 	testcase/tstNaveboxPhone.cpp \
 	src/globals/UIAppearance.cpp \
+	src/manager/UIManagerStyle.cpp \
 	src/phone/UIPhoneBackend.cpp \
 	src/phone/UIPhoneManager.cpp
 tstNaveboxPhone_QT_MODULES = Core Gui Widgets

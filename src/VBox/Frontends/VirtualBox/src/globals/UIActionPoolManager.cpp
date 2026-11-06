@@ -161,8 +161,10 @@ class UIActionSimpleManagerAndroidPhones : public UIActionSimple
 public:
     /** Constructs the phone manager action. */
     UIActionSimpleManagerAndroidPhones(UIActionPool *pParent)
-        : UIActionSimple(pParent, ":/machine_32px.png", ":/machine_16px.png")
-    {}
+        : UIActionSimple(pParent, QIcon(":/navebox-phone.svg"))
+    {
+        setProperty("UIToolType", QVariant::fromValue(UIToolType_Phones));
+    }
 
 protected:
     /** Returns the stable shortcut settings identifier. */
@@ -171,7 +173,7 @@ protected:
     virtual void retranslateUi() RT_OVERRIDE
     {
         setIconText(QApplication::translate("UIActionPool", "Phones"));
-        setName(QApplication::translate("UIActionPool", "&Android Phones..."));
+        setName(QApplication::translate("UIActionPool", "&Android Phones"));
         setStatusTip(QApplication::translate("UIActionPool", "Create and manage Android virtual phones"));
         setToolTip(simplifyText(text()));
     }

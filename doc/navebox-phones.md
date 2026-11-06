@@ -3,7 +3,8 @@
 
 # Android virtual phones in Navebox
 
-Open **File > Android Phones**, or click **Phones** on the Home toolbar.
+Select **Phones** in the main navigation next to **Machines**. **File >
+Android Phones** and the **Phones** button on the Home toolbar open the same page.
 Android phones use Android Emulator, independently of VirtualBox VMs. The
 emulator supplies touch input, rotation, volume, camera and other device
 controls in its own window. VirtualBox VM files and their public API do not
@@ -19,17 +20,12 @@ and a stable phone system image for API 26 or newer matching the host CPU.
 The initial qualification target is Windows x64 with an x86_64 image. Other
 host platforms require their own build and runtime qualification.
 
-In Android Phones, open **SDK Settings**, then select the SDK directory and
+In Android Phones, click **SDK Settings** in the main toolbar, then select the SDK directory and
 a compatible Java home. The Java home is the directory containing `bin/java`. It can be a compatible
 standalone JDK, including a portable JDK, or Android Studio's bundled `jbr`.
 Click **Apply SDK**, then **Check Acceleration**, then **Done**.
-SDK Settings temporarily replaces the phone pages with a setup card. Click
-**Done** to return. Applying an SDK keeps setup open so acceleration can be
-checked before creating a phone. Fields and actions share the same height,
-and paired Browse buttons and SDK action buttons have matching widths.
-Switching views preserves the current window center when it fits on the
-screen. The dialog centers on the manager again if its window position or
-work area changes between openings.
+SDK Settings opens a modal centered over the manager. Applying an SDK keeps
+setup open for the acceleration check. Click **Done** to close it.
 Navebox uses installed SDK components and does not download packages, accept
 licenses, enable Windows features or change firmware/security settings.
 Setup instructions and acceleration requirements are maintained by Android:
@@ -55,7 +51,7 @@ check does not qualify every GPU driver or Android system image.
 
 ## Create and use a phone
 
-On **Create Phone**, enter a name, choose an installed image, and set RAM,
+Click **Create Phone** in the main toolbar to open the creation dialog. Enter a name, choose an installed image, and set RAM,
 CPUs, data-partition capacity and a portrait device profile. Defaults are 2048 MB,
 up to two CPUs, an 8 GB data partition and 720 x 1280 pixels. Storage is a
 maximum partition capacity and can consume additional host space as apps
@@ -75,9 +71,11 @@ identifies the Android build. Use different installed Android images for build
 coverage. The hardware profile option leaves the Android image and its build
 properties intact.
 
-Click **Create Phone**. The manager opens **Phones** and selects the new phone;
-click **Start** to boot it. SDK settings and diagnostic output stay collapsed
-until needed; click **Details** to inspect an operation's full output.
+Click **Create Phone** in the dialog. On success it closes and selects the new phone.
+Each phone appears on the left with a phone icon, its name and its status.
+Select a phone to see its general, system, display and storage details on the
+right. **Start** in the toolbar is enabled for a selected, stopped phone with
+a configured SDK. Click **Details** to inspect an operation's full output.
 Booting and Ready are distinct states: **Install APK** and the navigation
 actions under **More** are enabled after Android reports boot completion.
 **More > Cold Boot** skips
@@ -89,9 +87,9 @@ the SDK's `-gpu software` mode for the session and skips loading or saving a
 Quick Boot snapshot. The SDK must support that graphics mode. VM acceleration
 and the writable Android data partition remain in use.
 
-Closing the phone manager or Navebox leaves emulator windows running. Reopen
-the manager and click **Refresh** to discover them again. Close a phone's
-emulator window, or use **Stop**, to end its session.
+Switching to another page or closing Navebox leaves emulator windows running.
+Return to **Phones** to refresh the list, or click **Refresh** at any time.
+Close a phone's emulator window, or use **Stop**, to end its session.
 
 With multiple phones, status refresh takes longer because each connected
 emulator is checked separately. A phone action can interrupt a refresh and

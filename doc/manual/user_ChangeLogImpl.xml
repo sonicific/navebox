@@ -80,12 +80,21 @@ Rules for adding a changelog entry to make them look more uniform:
     <itemizedlist>
 
       <listitem>
-        <para>Navebox GUI: Added an Android Phones manager for creating private
+        <para>Navebox GUI: Added a Phones page beside Machines for creating private
           Android SDK virtual devices, checking acceleration, starting and
           stopping phones, monitoring boot completion, and installing APKs.
+          The main toolbar opens Create Phone and SDK Settings dialogs and
+          enables device actions based on the selected phone. Each phone has an
+          icon and state in the list, with configuration displayed beside it.
           Phone creation offers display and hardware profile variation for
           testing and a software-rendered cold boot. Phone actions can interrupt
           a status refresh.</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox GUI: Open the manager with expanded navigation and select
+          Machines when available. Refine icons, spacing, and details panels
+          in the Machines and Phones views.</para>
       </listitem>
 
       <listitem>
@@ -148,9 +157,7 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
-        <para>Navebox GUI: Center dialogs using their own window frame and keep
-          Android Phones centered when switching SDK views or reopening after
-          the manager moves</para>
+        <para>Navebox GUI: Center dialogs using their own window frame.</para>
       </listitem>
 
       <listitem>

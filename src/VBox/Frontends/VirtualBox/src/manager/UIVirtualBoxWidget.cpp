@@ -43,6 +43,7 @@
 #include "UIMachineToolsWidget.h"
 #include "UIManagerStyle.h"
 #include "UINotificationCenter.h"
+#include "UIPhoneManager.h"
 #include "UIToolPane.h"
 #include "UIVirtualBoxEventHandler.h"
 #include "UIVirtualBoxManager.h"
@@ -338,6 +339,10 @@ void UIVirtualBoxWidget::sltUpdateToolbarStyle()
 
 void UIVirtualBoxWidget::prepare()
 {
+    /* Start with the navigation expanded; the toggle can collapse it for this session. */
+    if (!gEDataManager->isToolTextVisible())
+        gEDataManager->setToolTextVisible(true);
+
     /* Prepare everything: */
     prepareWidgets();
     prepareConnections();
@@ -513,6 +518,19 @@ void UIVirtualBoxWidget::updateToolbar()
     /* Populate toolbar depending on actual tool-type: */
     switch (enmType)
     {
+        case UIToolType_Phones:
+        {
+            const UIPhoneManager *pPhones = globalToolPane()->phoneManager();
+            if (pPhones)
+                for (QAction *pAction : pPhones->toolbarActions())
+                {
+                    m_pToolBar->addAction(pAction);
+                    if (pAction->menu())
+                        if (QToolButton *pButton = qobject_cast<QToolButton*>(m_pToolBar->widgetForAction(pAction)))
+                            pButton->setPopupMode(QToolButton::InstantPopup);
+                }
+            break;
+        }
         case UIToolType_Home:
         {
             m_pToolBar->addAction(actionPool()->action(UIActionIndexMN_M_Home_S_New));

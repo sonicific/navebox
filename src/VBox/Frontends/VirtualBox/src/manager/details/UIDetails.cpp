@@ -34,6 +34,7 @@
 #include "UIDetailsModel.h"
 #include "UIDetailsView.h"
 #include "UIExtraDataManager.h"
+#include "UIManagerStyle.h"
 
 /* Other VBox includes: */
 #include "iprt/assert.h"
@@ -73,7 +74,8 @@ void UIDetails::prepareContents()
     m_pMainLayout = new QVBoxLayout(this);
     if (m_pMainLayout)
     {
-        m_pMainLayout->setContentsMargins(0, 0, 0, 0);
+        const int iInset = UIManagerStyle::detailsPaneInset();
+        m_pMainLayout->setContentsMargins(iInset, 0, iInset, 0);
         m_pMainLayout->setSpacing(0);
 
         /* Prepare model: */

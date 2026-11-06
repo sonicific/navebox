@@ -394,8 +394,31 @@ void UIPhoneBackend::loadCatalog()
         device.m_strId = strId;
         device.m_strName = object.value("name").toString().left(64);
         device.m_strProfile = object.value("profile").toString();
+        device.m_strPackage = object.value("image").toString().left(160);
         m_devices.insert(strId, device);
     }
+}
+
+UIPhoneConfiguration UIPhoneBackend::configuration(const QString &strId) const
+{
+    UIPhoneConfiguration result;
+    if (!uiPhoneValidId(strId) || !m_devices.contains(strId))
+        return result;
+    const QString strDirectory = avdRoot() + '/' + strId + ".avd";
+    const QString strConfig = strDirectory + "/config.ini";
+    if (!uiPhoneIsWithin(strDirectory, avdRoot()) || !uiPhoneIsWithin(strConfig, strDirectory)
+        || !QFileInfo(strConfig).isFile())
+        return result;
+
+    const QMap<QString, QString> values = uiPhoneReadProperties(strConfig);
+    result.m_strProfile = values.value("hw.device.name", m_devices.value(strId).m_strProfile).left(64);
+    result.m_strStorage = values.value("disk.dataPartition.size").left(32);
+    result.m_iMemoryMB = values.value("hw.ramSize").toInt();
+    result.m_cCpus = values.value("hw.cpu.ncore").toInt();
+    result.m_iWidth = values.value("hw.lcd.width").toInt();
+    result.m_iHeight = values.value("hw.lcd.height").toInt();
+    result.m_iDensity = values.value("hw.lcd.density").toInt();
+    return result;
 }
 
 void UIPhoneBackend::setBusy(bool fBusy)

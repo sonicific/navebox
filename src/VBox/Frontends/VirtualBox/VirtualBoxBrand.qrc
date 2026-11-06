@@ -15,6 +15,7 @@
     <file alias="VirtualBox_48px.png">@VBOX_NAVEBOX_BRAND_DIR@/navebox-48.png</file>
     <file alias="VirtualBox_64px.png">@VBOX_NAVEBOX_BRAND_DIR@/navebox-64.png</file>
     <file alias="VirtualBox.svg">@VBOX_NAVEBOX_BRAND_DIR@/navebox.svg</file>
+    <file alias="navebox-phone.svg">@VBOX_NAVEBOX_BRAND_DIR@/phone.svg</file>
     <file alias="navebox.ico">@VBOX_NAVEBOX_BRAND_DIR@/navebox.ico</file>
     <file alias="navebox-256.png">@VBOX_NAVEBOX_BRAND_DIR@/navebox-256.png</file>
     <file alias="navebox-chevron-down-light.png">@VBOX_NAVEBOX_BRAND_DIR@/chevron-down-light.png</file>

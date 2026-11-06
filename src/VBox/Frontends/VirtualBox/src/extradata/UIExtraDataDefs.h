@@ -969,7 +969,9 @@ enum UIToolType
     UIToolType_Snapshots,
     UIToolType_Logs,
     UIToolType_ResourceUse,
-    UIToolType_FileManager
+    UIToolType_FileManager,
+    /* Additional global tools (keep existing type values stable): */
+    UIToolType_Phones
 };
 Q_DECLARE_METATYPE(UIToolType);
 

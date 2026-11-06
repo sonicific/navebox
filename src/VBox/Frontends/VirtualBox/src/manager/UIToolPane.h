@@ -51,6 +51,7 @@ class UIHomePane;
 class UIMachineToolsWidget;
 class UIMediumManagerWidget;
 class UINetworkManagerWidget;
+class UIPhoneManager;
 class UISnapshotPane;
 class UIVMActivityOverviewWidget;
 class UIVMActivityToolWidget;
@@ -127,6 +128,9 @@ public:
     /** Returns the help keyword of the current tool's widget. */
     QString currentHelpKeyword() const;
 
+    /** Returns the Android Phones page after it has been opened. */
+    UIPhoneManager *phoneManager() const { return m_pPanePhones; }
+
     /** @name Global tool stuff.
       * @{ */
         /** Returns the Machine Tools Widget instance. */
@@ -188,6 +192,8 @@ private:
 
         /** Holds the Machine Tools Widget instance. */
         UIMachineToolsWidget         *m_pPaneMachines;
+        /** Holds the Android Phones pane instance. */
+        UIPhoneManager               *m_pPanePhones;
         /** Holds the Extension Pack Manager instance. */
         UIExtensionPackManagerWidget *m_pPaneExtensions;
         /** Holds the Virtual Media Manager instance. */

@@ -93,7 +93,6 @@
 #include "UIWizardNewCloudVM.h"
 #include "UIWizardNewVD.h"
 #include "UIWizardNewVM.h"
-#include "UIPhoneManager.h"
 #ifdef VBOX_GUI_WITH_NETWORK_MANAGER
 # include "UIUpdateManager.h"
 #endif
@@ -599,7 +598,6 @@ UIVirtualBoxManager::UIVirtualBoxManager()
     , m_fFirstMediumEnumerationHandled(false)
     , m_pActionPool(0)
     , m_pWidget(0)
-    , m_pPhoneManager(0)
     , m_iGeometrySaveTimerId(-1)
     , m_fSnapshotCloneByDefault(false)
     , m_fImportFromOCI(false)
@@ -1348,16 +1346,6 @@ void UIVirtualBoxManager::sltCloseWizard(WizardType enmType)
 
     /* Cleanup instance: */
     delete m_wizards.take(enmType);
-}
-
-void UIVirtualBoxManager::sltOpenPhoneManager()
-{
-    if (!m_pPhoneManager)
-        m_pPhoneManager = new UIPhoneManager(this);
-    m_pPhoneManager->show();
-    m_pPhoneManager->raise();
-    m_pPhoneManager->activateWindow();
-    m_pPhoneManager->refresh();
 }
 
 void UIVirtualBoxManager::sltOpenNewMachineWizard()
@@ -2633,8 +2621,11 @@ void UIVirtualBoxManager::prepareConnections()
             this, &UIVirtualBoxManager::sltHandleMenuPrepare);
 
     /* 'File' menu connections: */
-    connect(actionPool()->action(UIActionIndexMN_M_File_S_AndroidPhones), &UIAction::triggered,
-            this, &UIVirtualBoxManager::sltOpenPhoneManager);
+    UIAction *pPhonesAction = actionPool()->action(UIActionIndexMN_M_File_S_AndroidPhones);
+    connect(pPhonesAction, &UIAction::triggered, this, [this, pPhonesAction]()
+    {
+        sltPerformSwitchToTool(pPhonesAction);
+    });
     connect(actionPool()->action(UIActionIndexMN_M_File_S_ImportAppliance), &UIAction::triggered,
             this, &UIVirtualBoxManager::sltOpenImportApplianceWizard);
     connect(actionPool()->action(UIActionIndexMN_M_File_S_ExportAppliance), &UIAction::triggered,

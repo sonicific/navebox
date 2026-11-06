@@ -571,6 +571,7 @@ void UIToolsItem::sltRetranslateUI()
         // Global
         case UIToolType_Home:        setName(tr("Home")); break;
         case UIToolType_Machines:    setName(tr("Machines")); break;
+        case UIToolType_Phones:      setName(tr("Phones")); break;
         case UIToolType_Extensions:  setName(tr("Extensions")); break;
         case UIToolType_Media:       setName(tr("Media")); break;
         case UIToolType_Network:     setName(tr("Network")); break;
@@ -650,7 +651,9 @@ QIcon UIToolsItem::typeToIcon(UIToolType enmType)
         case UIToolType_Home:
             return UIIconPool::iconSet(":/welcome_screen_24px.png", ":/welcome_screen_24px.png");
         case UIToolType_Machines:
-            return UIIconPool::iconSet(":/machine_details_manager_24px.png", ":/machine_details_manager_disabled_24px.png");
+            return UIIconPool::iconSet(":/machine_24px.png");
+        case UIToolType_Phones:
+            return QIcon(":/navebox-phone.svg");
         case UIToolType_Extensions:
             return UIIconPool::iconSet(":/extension_pack_manager_24px.png", ":/extension_pack_manager_disabled_24px.png");
         case UIToolType_Media:

@@ -185,8 +185,8 @@ private:
       * @{ */
         /** Holds the aspect-ratio of the preview. */
         double     m_dRatio;
-        /** Holds the layout margin. */
-        const int  m_iMargin;
+        /** Holds the padding around the preview display. */
+        const int  m_iPreviewPadding;
         /** Holds the viewport rectangle. */
         QRect      m_vRect;
 

@@ -32,6 +32,9 @@
     <p>The main toolbar, machine selection, and rounded details cards use
       the application color theme. Selected machines use the theme's highlight
       and matching text colors in both light and dark modes.</p>
+    <p>Navebox opens with the navigation expanded and <b>Machines</b> selected
+      when machines are available. With an empty machine list, it opens
+      <b>Home</b>.</p>
     <p>The About dialog shows the product version, contact details, build
       information, and credits on one scrollable page. Use <b>Copy Build
         Information</b> to copy the product and platform versions, build type,
@@ -40,22 +43,24 @@
       parent window or the available screen area.</p>
     <section id="navebox-android-phones">
       <title>Android Phones in Navebox</title>
-      <p>Choose <b>File</b>, then <b>Android Phones</b>, to create and manage
-        Android virtual phones with a separately installed Android SDK. Install
+      <p>Select <b>Phones</b> in the main navigation next to <b>Machines</b>,
+        or choose <b>File</b>, then <b>Android Phones</b>. Use this page to
+        create and manage Android virtual phones with a separately installed Android SDK. Install
         Android Emulator, Platform-Tools, Command-Line Tools and a stable phone
         image matching the host CPU (API 26 or newer) using the standalone SDK
         tools or Android Studio's SDK Manager. Android Studio is optional.
-        Open <b>SDK Settings</b>, select the SDK and a compatible Java home in the phone
+        Click <b>SDK Settings</b> in the main toolbar, select the SDK and a compatible Java home in the phone
         manager, click <b>Apply SDK</b>, then <b>Check Acceleration</b>, then
         <b>Done</b>.</p>
-      <p>SDK Settings replaces the phone pages while it is open. Applying an
-        SDK keeps setup open for the acceleration check. Click <b>Done</b>
-        to return to the phone pages.</p>
-      <p>On <b>Create Phone</b>, choose a name, image, memory, CPUs, storage and
+      <p>SDK Settings opens a modal. Applying an SDK keeps setup open for the
+        acceleration check. Click <b>Done</b> to close it.</p>
+      <p>Click <b>Create Phone</b> in the main toolbar to open the creation dialog. Choose a name, image, memory, CPUs, storage and
         device profile. <b>Vary for testing</b> selects a supported hardware
         profile and display at creation. Phones with the same image can share
-        the Android build fingerprint. After creation, the new phone is selected on <b>Phones</b>; click
-        <b>Start</b>. The emulator opens in its own window. When its status is
+        the Android build fingerprint. After creation, the new phone is selected in the list.
+        Each phone is listed with its icon, name and status. Select a phone on
+        the left to view its configuration on the right. Click <b>Start</b> in
+        the toolbar to launch the selected stopped phone. The emulator opens in its own window. When its status is
         <b>Ready</b>, use <b>Install APK</b> or the navigation actions under <b>More</b>.
         <b>More</b>, then <b>Cold Boot</b>, skips loading a snapshot without deleting phone data.
         If GPU Auto fails, <b>Cold Boot with Software Graphics</b> uses a
@@ -63,8 +68,8 @@
         <b>Stop</b> shuts down the selected emulator.</p>
       <p>Phone data is stored in a separate Phones directory under the
         application's local data directory. Android Studio's device catalog is
-        not modified. Closing Navebox leaves the phones running; reopen the
-        phone manager to discover them again. Use <b>More</b>, then <b>Open Log</b>, to inspect a
+        not modified. Phones keep running when you switch pages or close Navebox.
+        Return to <b>Phones</b> to refresh the list. Use <b>More</b>, then <b>Open Log</b>, to inspect a
         startup failure. Navebox does not install SDK packages, accept SDK
         licenses, or change host virtualization settings. APK compatibility
         depends on the selected Android image and its supported CPU ABI.</p>

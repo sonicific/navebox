@@ -51,6 +51,9 @@ public:
     /** Returns the raised surface color for cards and navigation. */
     static QColor surfaceColor(const QPalette &palette);
 
+    /** Insets details cards from the edges of the machine and phone panes. */
+    static constexpr int detailsPaneInset() { return 5; }
+
     /** Returns the style sheet for the Manager's main toolbar. */
     static QString toolBarStyleSheet(const QPalette &palette);
 };

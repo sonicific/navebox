@@ -26,8 +26,10 @@
  */
 
 /* Qt includes: */
+#include <QAction>
 #include <QApplication>
 #include <QComboBox>
+#include <QDialog>
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFile>
@@ -38,12 +40,13 @@
 #include <QJsonObject>
 #include <QLabel>
 #include <QLineEdit>
+#include <QListWidget>
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QSaveFile>
+#include <QSpinBox>
+#include <QStackedWidget>
 #include <QSysInfo>
-#include <QTabWidget>
-#include <QTableWidget>
 #include <QTemporaryDir>
 #include <QThread>
 #include <QTimer>
@@ -488,158 +491,143 @@ public:
     }
 };
 
-/** Checks initial gating, accessible controls, translation and dialog lifetime. */
-static void tstDialog(const QString &strRoot, const QString &strSdk, const QString &strJava)
+/** Checks phone setup, creation and navigation in an embedded stack. */
+static void tstPage(const QString &strRoot, const QString &strSdk, const QString &strJava)
 {
     const QString strSnapshots = qEnvironmentVariable("VBOX_GUI_TEST_SNAPSHOT_DIR");
-    RTTestISub("Dialog first use, translation and lifetime");
-    UIPhoneManager dialog(0, strRoot + "/empty-dialog-data");
-    QPushButton *pCreate = dialog.findChild<QPushButton*>("phoneCreate");
-    QPushButton *pStart = dialog.findChild<QPushButton*>("phoneStart");
-    QLineEdit *pSdk = dialog.findChild<QLineEdit*>("phoneSdkPath");
-    QTabWidget *pTabs = dialog.findChild<QTabWidget*>();
-    RTTESTI_CHECK(pCreate && pStart && pSdk && pTabs);
-    if (!pCreate || !pStart || !pSdk || !pTabs)
-        return;
+    RTTestISub("Embedded page first use and translation");
+    QStackedWidget stack;
+    QWidget *pOtherPage = new QWidget(&stack);
+    stack.addWidget(pOtherPage);
+    UIPhoneManager page(&stack, strRoot + "/empty-page-data");
+    stack.addWidget(&page);
+    stack.resize(760, 640);
+    stack.show();
+    stack.setCurrentWidget(&page);
+    RTTESTI_CHECK(!page.isWindow() && page.window() == &stack);
+    QPushButton *pCreate = page.findChild<QPushButton*>("phoneCreate");
+    QAction *pStart = page.findChild<QAction*>("phoneStart");
+    QLineEdit *pSdk = page.findChild<QLineEdit*>("phoneSdkPath");
+    QDialog *pCreateDialog = page.findChild<QDialog*>("phoneCreateDialog");
+    QDialog *pSdkDialog = page.findChild<QDialog*>("phoneSdkPanel");
+    const QList<QAction*> actions = page.toolbarActions();
+    RTTESTI_CHECK_RETV(pCreate && pStart && pSdk && pCreateDialog && pSdkDialog && actions.size() == 8);
+    QAction *pNewAction = actions.at(0);
+    QAction *pSdkAction = actions.at(1);
+    RTTESTI_CHECK(actions.contains(pStart) && !pStart->icon().pixmap(32, 32).isNull());
+    RTTESTI_CHECK(!page.findChild<QLabel*>("phoneHeading") && !page.findChild<QPushButton*>("phoneStart"));
     RTTESTI_CHECK(!pCreate->isEnabled() && !pStart->isEnabled());
     RTTESTI_CHECK(!pSdk->accessibleName().isEmpty());
-    QWidget *pSdkPanel = dialog.findChild<QWidget*>("phoneSdkPanel");
-    QPushButton *pSdkSettings = dialog.findChild<QPushButton*>("phoneSdkSettings");
-    RTTESTI_CHECK(pSdkPanel && pSdkSettings && pSdkPanel->isHidden());
-    dialog.show();
+    QPushButton *pSdkDone = page.findChild<QPushButton*>("phoneSdkDone");
+    QPushButton *pCancel = page.findChild<QPushButton*>("phoneCreateCancel");
+    RTTESTI_CHECK_RETV(pSdkDone && pCancel && pSdkDialog->isHidden());
     QApplication::processEvents();
-    pTabs->setCurrentIndex(1);
+    pNewAction->trigger();
+    QApplication::processEvents();
+    RTTESTI_CHECK(pCreateDialog->isWindow() && pCreateDialog->windowModality() == Qt::WindowModal);
+    RTTESTI_CHECK(pCreate->isVisible() && page.isVisible());
     QITestPhoneTranslator translator;
     qApp->installTranslator(&translator);
     QApplication::processEvents();
-    RTTESTI_CHECK(dialog.windowTitle().startsWith("T: "));
+    RTTESTI_CHECK(page.accessibleName().startsWith("T: "));
     RTTESTI_CHECK(pCreate->text().startsWith("T: "));
-    RTTESTI_CHECK(pTabs->currentIndex() == 1);
+    RTTESTI_CHECK(pNewAction->text().startsWith("T: ") && pSdkAction->text().startsWith("T: "));
+    RTTESTI_CHECK(pCreateDialog->isVisible());
     qApp->removeTranslator(&translator);
     QApplication::processEvents();
-    RTTestISub("Dialog SDK application and phone creation");
-    QLineEdit *pJava = dialog.findChild<QLineEdit*>("phoneJavaHome");
-    QLineEdit *pName = dialog.findChild<QLineEdit*>("phoneName");
-    QPushButton *pApply = dialog.findChild<QPushButton*>("phoneApplySdk");
-    QComboBox *pImage = dialog.findChild<QComboBox*>("phoneImage");
-    QTableWidget *pTable = dialog.findChild<QTableWidget*>("phoneTable");
-    UIPhoneBackend *pBackend = dialog.findChild<UIPhoneBackend*>();
-    RTTESTI_CHECK(pJava && pName && pApply && pImage && pTable && pBackend);
-    if (!pJava || !pName || !pApply || !pImage || !pTable || !pBackend)
-        return;
+    pCancel->click();
+    RTTESTI_CHECK(pCreateDialog->isHidden());
+    RTTestISub("Page SDK application and phone creation");
+    QLineEdit *pJava = page.findChild<QLineEdit*>("phoneJavaHome");
+    QLineEdit *pName = page.findChild<QLineEdit*>("phoneName");
+    QPushButton *pApply = page.findChild<QPushButton*>("phoneApplySdk");
+    QComboBox *pImage = page.findChild<QComboBox*>("phoneImage");
+    QListWidget *pList = page.findChild<QListWidget*>("phoneList");
+    UIPhoneBackend *pBackend = page.findChild<UIPhoneBackend*>();
+    RTTESTI_CHECK_RETV(pJava && pName && pApply && pImage && pList && pBackend);
     pSdk->setText(strSdk);
     pJava->setText(strJava);
-    if (pSdkSettings && pSdkPanel)
     {
-        pSdkSettings->click();
+        const QRect frame = stack.frameGeometry();
+        pSdkAction->trigger();
         QApplication::processEvents();
-        RTTESTI_CHECK(!pSdkPanel->isHidden());
-        foreach (QWidget *pControl, QList<QWidget*>() << pJava << pName << pImage << pCreate << pStart << pApply << pSdkSettings)
+        RTTESTI_CHECK(pSdkDialog->isVisible() && pSdkDialog->windowModality() == Qt::WindowModal);
+        RTTESTI_CHECK(stack.frameGeometry() == frame);
+        foreach (QWidget *pControl, QList<QWidget*>() << pJava << pName << pImage << pCreate << pApply)
             RTTESTI_CHECK(pControl->height() == pSdk->height());
-        QPushButton *pBrowseSdk = dialog.findChild<QPushButton*>("phoneBrowseSdk");
-        QPushButton *pBrowseJava = dialog.findChild<QPushButton*>("phoneBrowseJava");
+        QPushButton *pBrowseSdk = page.findChild<QPushButton*>("phoneBrowseSdk");
+        QPushButton *pBrowseJava = page.findChild<QPushButton*>("phoneBrowseJava");
         RTTESTI_CHECK(pBrowseSdk && pBrowseJava);
         if (pBrowseSdk && pBrowseJava)
         {
             RTTESTI_CHECK(pBrowseSdk->size() == pBrowseJava->size());
             RTTESTI_CHECK(pBrowseSdk->height() == pSdk->height());
         }
-        RTTESTI_CHECK(pSdk->mapTo(&dialog, QPoint()).x() == pJava->mapTo(&dialog, QPoint()).x());
+        RTTESTI_CHECK(pSdk->mapTo(pSdkDialog, QPoint()).x() == pJava->mapTo(pSdkDialog, QPoint()).x());
         RTTESTI_CHECK(pSdk->width() == pJava->width());
-        RTTESTI_CHECK(pApply->size() == dialog.findChild<QPushButton*>("phoneCheckAcceleration")->size());
-        RTTESTI_CHECK(pApply->size() == dialog.findChild<QPushButton*>("phoneSetupHelp")->size());
-        RTTESTI_CHECK(pCreate->size() == pSdkSettings->size());
-        RTTESTI_CHECK(pCreate->size() == dialog.findChild<QPushButton*>("phoneClose")->size());
+        RTTESTI_CHECK(pApply->size() == page.findChild<QPushButton*>("phoneCheckAcceleration")->size());
+        RTTESTI_CHECK(pApply->size() == page.findChild<QPushButton*>("phoneSetupHelp")->size());
         if (!strSnapshots.isEmpty())
         {
             RTTESTI_CHECK(QDir().mkpath(strSnapshots));
-            pTabs->setCurrentIndex(0);
-            QApplication::processEvents();
-            RTTESTI_CHECK(dialog.grab().save(strSnapshots + "/phone-sdk.png"));
-            pTabs->setCurrentIndex(1);
+            RTTESTI_CHECK(pSdkDialog->grab().save(strSnapshots + "/phone-sdk.png"));
         }
     }
     pApply->click();
     RTTESTI_CHECK(tstWait(*pBackend));
-    RTTESTI_CHECK(!pSdkPanel || !pSdkPanel->isHidden());
-    RTTESTI_CHECK(dialog.findChild<QPushButton*>("phoneCheckAcceleration")->isEnabled());
-    if (pSdkSettings)
-        pSdkSettings->click();
+    RTTESTI_CHECK(pSdkDialog->isVisible());
+    RTTESTI_CHECK(page.findChild<QPushButton*>("phoneCheckAcceleration")->isEnabled());
+    pSdkDone->click();
+    RTTESTI_CHECK(pSdkDialog->isHidden());
+    pNewAction->trigger();
     QApplication::processEvents();
-    RTTESTI_CHECK(!pSdkPanel || pSdkPanel->isHidden());
+    RTTESTI_CHECK(pCreateDialog->isVisible() && !pStart->isEnabled());
     RTTESTI_CHECK(pImage->count() == 1);
     RTTESTI_CHECK(pImage->width() >= pImage->fontMetrics().horizontalAdvance(pImage->currentText()));
     pName->setText("UI test phone");
     RTTESTI_CHECK(pCreate->isEnabled());
+    if (!strSnapshots.isEmpty())
+        RTTESTI_CHECK(pCreateDialog->grab().save(strSnapshots + "/phone-1.png"));
     pCreate->click();
     RTTESTI_CHECK(tstWait(*pBackend));
-    RTTESTI_CHECK(pTable->rowCount() == 1);
-    RTTESTI_CHECK(pTabs->currentIndex() == 0);
+    RTTESTI_CHECK(pList->count() == 1 && pCreateDialog->isHidden());
+    RTTESTI_CHECK(pList->count() && !pList->item(0)->icon().pixmap(24, 24).isNull());
     RTTESTI_CHECK(pName->height() >= pName->sizeHint().height());
     RTTESTI_CHECK(pImage->height() >= pImage->sizeHint().height());
     RTTESTI_CHECK(pStart->isEnabled());
-    QPlainTextEdit *pResult = dialog.findChild<QPlainTextEdit*>("phoneResult");
+    QPlainTextEdit *pResult = page.findChild<QPlainTextEdit*>("phoneResult");
     RTTESTI_CHECK(pResult && pResult->isHidden());
-    RTTESTI_CHECK(!dialog.findChild<QPushButton*>("phoneInstallApk")->isEnabled());
+    RTTESTI_CHECK(!page.findChild<QAction*>("phoneInstallApk")->isEnabled());
+    QLabel *pSelectedName = page.findChild<QLabel*>("phoneSelectedName");
+    QLabel *pSelectedMemory = page.findChild<QLabel*>("phoneSelectedMemory");
+    QSpinBox *pMemory = page.findChild<QSpinBox*>("phoneMemory");
+    RTTESTI_CHECK_RETV(pSelectedName && pSelectedMemory && pMemory);
+    RTTESTI_CHECK(pSelectedName->text() == pName->text() && pSelectedMemory->text() == "2048 MB");
+    pNewAction->trigger();
+    RTTESTI_CHECK(pCreateDialog->isVisible() && pSelectedName->isVisible());
+    pName->setText("Second UI phone");
+    pMemory->setValue(3072);
+    pCreate->click();
+    RTTESTI_CHECK(tstWait(*pBackend));
+    RTTESTI_CHECK(pList->count() == 2 && !pCreateDialog->isVisible());
+    RTTESTI_CHECK(pSelectedName->text() == pName->text() && pSelectedMemory->text() == "3072 MB");
+    const int iOtherRow = pList->currentRow() == 0 ? 1 : 0;
+    pList->clearSelection();
+    RTTESTI_CHECK(!pStart->isEnabled() && !pSelectedName->isVisible());
+    pList->setCurrentRow(iOtherRow);
+    RTTESTI_CHECK(pStart->isEnabled() && pSelectedName->isVisible());
+    RTTESTI_CHECK(pSelectedName->text() == "UI test phone" && pSelectedMemory->text() == "2048 MB");
     if (!strSnapshots.isEmpty())
-    {
-        RTTESTI_CHECK(QDir().mkpath(strSnapshots));
-        for (int iPage = 0; iPage < pTabs->count(); ++iPage)
-        {
-            pTabs->setCurrentIndex(iPage);
-            QApplication::processEvents();
-            RTTESTI_CHECK(dialog.grab().save(strSnapshots + QString("/phone-%1.png").arg(iPage)));
-        }
-    }
-    dialog.close();
-    RTTESTI_CHECK(!dialog.isVisible());
-    dialog.show();
+        RTTESTI_CHECK(page.grab().save(strSnapshots + "/phone-0.png"));
+    RTTestISub("Phone catalog survives page switching");
+    stack.setCurrentWidget(pOtherPage);
+    RTTESTI_CHECK(!page.isVisible());
+    stack.setCurrentWidget(&page);
     QApplication::processEvents();
-    RTTESTI_CHECK(dialog.isVisible());
-    dialog.hide();
-}
-
-/** Exercises SDK view resizing and reopening a phone dialog after moving its owner. */
-static void tstDialogCentering(const QString &strRoot)
-{
-    RTTestISub("Phone dialog centering");
-    const QRect available = gpDesktop->availableGeometry();
-    QWidget owner;
-    owner.setGeometry(available.adjusted(30, 45, -30, -75));
-    owner.show();
-    QApplication::processEvents();
-    UIPhoneManager dialog(&owner, strRoot + "/center-dialog-data");
-    dialog.show();
-    QApplication::processEvents();
-    QPushButton *pSdkSettings = dialog.findChild<QPushButton*>("phoneSdkSettings");
-    RTTESTI_CHECK_RETV(pSdkSettings);
-
-    /* Move the dialog by hand before opening SDK settings. The resized frame
-     * should stay around that point, even away from its original owner center. */
-    dialog.move(dialog.pos() - QPoint(0, 18));
-    const QPoint manualCenter = dialog.frameGeometry().center();
-    for (int i = 0; i < 2; ++i)
-    {
-        pSdkSettings->click();
-        QApplication::processEvents();
-        const QPoint delta = dialog.frameGeometry().center() - manualCenter;
-        RTTESTI_CHECK(qAbs(delta.x()) <= 2 && qAbs(delta.y()) <= 2);
-    }
-
-    dialog.hide();
-    dialog.show();
-    QApplication::processEvents();
-    const QPoint unchangedDelta = dialog.frameGeometry().center() - manualCenter;
-    RTTESTI_CHECK(qAbs(unchangedDelta.x()) <= 2 && qAbs(unchangedDelta.y()) <= 2);
-
-    dialog.hide();
-    owner.move(owner.pos() + QPoint(0, 48));
-    QApplication::processEvents();
-    dialog.show();
-    QApplication::processEvents();
-    const QPoint target = owner.frameGeometry().intersected(available).center();
-    const QPoint delta = dialog.frameGeometry().center() - target;
-    RTTESTI_CHECK(qAbs(delta.x()) <= 2 && qAbs(delta.y()) <= 2);
+    RTTESTI_CHECK(tstWait(*pBackend));
+    RTTESTI_CHECK(page.isVisible());
+    RTTESTI_CHECK(!pCreateDialog->isVisible());
+    RTTESTI_CHECK(pList->count() == 2 && pStart->isEnabled() && pSelectedName->text() == "UI test phone");
 }
 
 int main(int argc, char **argv)
@@ -657,7 +645,6 @@ int main(int argc, char **argv)
     RTTestBanner(hTest);
     if (!qEnvironmentVariableIsSet("QT_QPA_PLATFORM"))
         qputenv("QT_QPA_PLATFORM", "offscreen");
-    qputenv("VBOX_DESKTOPWATCHDOGPOLICY_SYNTHTEST", "Disabled");
     QApplication app(argc, argv);
     const QString strStyle = qEnvironmentVariable("VBOX_GUI_TEST_STYLE", "Fusion");
     RTTESTI_CHECK(app.setStyle(strStyle));
@@ -684,8 +671,7 @@ int main(int argc, char **argv)
         if (fPrepared)
             tstBackend(directory.path(), strSdk, strJava);
         if (fPrepared)
-            tstDialog(directory.path(), strSdk, strJava);
-        tstDialogCentering(directory.path());
+            tstPage(directory.path(), strSdk, strJava);
         qunsetenv("NAVEBOX_PHONE_FAKE_ROOT");
     }
     UIDesktopWidgetWatchdog::destroy();

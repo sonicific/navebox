@@ -44,6 +44,7 @@
 #include "UIMachineToolsWidget.h"
 #include "UIMediumManager.h"
 #include "UINetworkManager.h"
+#include "UIPhoneManager.h"
 #include "UISnapshotPane.h"
 #include "UIToolPane.h"
 #include "UIVirtualMachineItem.h"
@@ -64,6 +65,7 @@ UIToolPane::UIToolPane(QWidget *pParent, UIToolClass enmClass, UIActionPool *pAc
     // Global tools
     , m_pPaneHome(0)
     , m_pPaneMachines(0)
+    , m_pPanePhones(0)
     , m_pPaneExtensions(0)
     , m_pPaneMedia(0)
     , m_pPaneNetwork(0)
@@ -166,6 +168,14 @@ void UIToolPane::openTool(UIToolType enmType)
                     m_pLayout->addWidget(m_pPaneMachines);
                     m_pLayout->setCurrentWidget(m_pPaneMachines);
                 }
+                break;
+            }
+            case UIToolType_Phones:
+            {
+                m_pPanePhones = new UIPhoneManager(this);
+                m_pPanePhones->setProperty("ToolType", QVariant::fromValue(UIToolType_Phones));
+                m_pLayout->addWidget(m_pPanePhones);
+                m_pLayout->setCurrentWidget(m_pPanePhones);
                 break;
             }
             case UIToolType_Extensions:
@@ -426,6 +436,7 @@ void UIToolPane::closeTool(UIToolType enmType)
         {
             case UIToolType_Home:        m_pPaneHome = 0; break;
             case UIToolType_Machines:    m_pPaneMachines = 0; break;
+            case UIToolType_Phones:      m_pPanePhones = 0; break;
             case UIToolType_Extensions:  m_pPaneExtensions = 0; break;
             case UIToolType_Media:       m_pPaneMedia = 0; break;
             case UIToolType_Network:     m_pPaneNetwork = 0; break;
@@ -459,6 +470,9 @@ QString UIToolPane::currentHelpKeyword() const
             break;
         case UIToolType_Machines:
             pCurrentToolWidget = m_pPaneMachines;
+            break;
+        case UIToolType_Phones:
+            pCurrentToolWidget = m_pPanePhones;
             break;
         case UIToolType_Extensions:
             pCurrentToolWidget = m_pPaneExtensions;

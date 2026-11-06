@@ -45,12 +45,16 @@ Android phone SDK adapter and manager. It copies its own executable into a
 temporary mock SDK, runs actual asynchronous subprocesses, and verifies SDK
 validation, literal Unicode/metacharacter arguments, phone creation and boot
 state, scoped ADB commands, identity changes, failure handling and catalog
-containment. It never connects to an actual ADB server or touches user AVDs.
+containment. The UI checks open the phone page in a stack and verify that the
+catalog and selection survive navigation, that the toolbar opens modal dialogs,
+and that phone selection updates details and enables applicable actions. The test never connects to an
+actual ADB server or touches user AVDs.
 On Windows, stage the test executable and the matching frontend/Qt runtime
 DLLs together in a separate test runtime directory if the host loader does
 not search `PATH` for private DLLs. The mock tools copy these local DLLs into
 their temporary SDK tool directories.
-Set `VBOX_GUI_TEST_SNAPSHOT_DIR` to export SDK setup and both phone-manager tabs.
+Set `VBOX_GUI_TEST_SNAPSHOT_DIR` to export SDK setup, the phone list with details,
+and the creation form.
 Set `VBOX_GUI_TEST_STYLE=Windows` and `VBOX_GUI_TEST_NO_APP_STYLE=1` to check
 phone-manager geometry without the shared application stylesheet. The default
 is Fusion with the shared stylesheet. These options affect only this test.

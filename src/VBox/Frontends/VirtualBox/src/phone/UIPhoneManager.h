@@ -1,6 +1,6 @@
 /* $Id$ */
 /** @file
- * VBox Qt GUI - Android phone manager dialog.
+ * VBox Qt GUI - Android phone manager page.
  */
 
 /*
@@ -31,65 +31,74 @@
 # pragma once
 #endif
 
-/* GUI includes: */
-#include "QIDialog.h"
+/* Qt includes: */
+#include <QWidget>
+
+/* Other VBox includes: */
+#include <iprt/cdefs.h>
 
 class QComboBox;
 class QAction;
+class QIDialog;
 class QFormLayout;
-class QFrame;
 class QLabel;
 class QLineEdit;
+class QListWidget;
 class QPlainTextEdit;
 class QPushButton;
 class QSpinBox;
-class QTabWidget;
-class QTableWidget;
-class QToolButton;
 class QVBoxLayout;
 class UIPhoneBackend;
+struct UIPhoneDevice;
 
 /** Phone creation and runtime controls, independent of the VirtualBox VM API. */
-class UIPhoneManager : public QIDialog
+class UIPhoneManager : public QWidget
 {
     Q_OBJECT;
 
 public:
     /** Constructs the manager; an optional data root isolates regression tests. */
     explicit UIPhoneManager(QWidget *pParent = 0, const QString &strDataRoot = QString());
-    /** Refreshes the phone list when the dialog is opened again. */
-    void refresh();
+    /** Returns the page actions for the main window toolbar. */
+    QList<QAction*> toolbarActions() const;
 
 protected:
     /** Updates all labels after a live language change. */
     virtual void changeEvent(QEvent *pEvent) RT_OVERRIDE;
-    /** Centers the reused window if its owner or available work area changed. */
+    /** Refreshes the phone list when the page becomes visible. */
     virtual void showEvent(QShowEvent *pEvent) RT_OVERRIDE;
 
 private:
-    void prepareHeader(QVBoxLayout *pLayout);
-    void prepareSdk(QVBoxLayout *pLayout);
-    void preparePhones();
+    void prepareActions();
+    void prepareSdk();
+    void preparePhones(QVBoxLayout *pLayout);
+    void preparePhoneDetails(QVBoxLayout *pLayout);
     void prepareCreation();
-    void prepareFooter(QVBoxLayout *pLayout);
+    void prepareStatus(QVBoxLayout *pLayout);
     void prepareAppearance();
     void prepareConnections();
     void retranslateUi();
     void updateControlGeometry();
     void updatePreview();
     void showResult(bool fSuccess, const QString &strMessage);
+    void refresh();
     void applySdk();
     void updateImages();
     void updateDevices();
+    void updatePhoneDetails();
+    QString deviceStatus(const UIPhoneDevice &device) const;
+    void showCreateDialog();
+    void showSdkSettings();
     void updateControls();
     void createPhone();
     QString selectedId() const;
 
-    UIPhoneBackend *m_pBackend; /**< SDK adapter; remains alive while the dialog is hidden. */
-    QLabel *m_pHeading;        /**< Main heading. */
-    QLabel *m_pRuntimeState;   /**< Compact SDK setup status. */
-    QPushButton *m_pSdkSettings; /**< Expands or collapses the SDK controls. */
-    QFrame *m_pSdkGroup;        /**< SDK setup card. */
+    UIPhoneBackend *m_pBackend; /**< SDK adapter; remains alive when navigating away. */
+    QAction *m_pCreateAction;   /**< Opens the creation dialog from the toolbar. */
+    QAction *m_pSdkAction;      /**< Opens SDK settings from the toolbar. */
+    QAction *m_pToolbarSeparator; /**< Separates setup and device actions. */
+    QIDialog *m_pCreateDialog;  /**< Window-modal phone creation form. */
+    QIDialog *m_pSdkDialog;     /**< Window-modal SDK settings. */
     QLabel *m_pSdkTitle;        /**< SDK setup heading. */
     QLineEdit *m_pSdkPath;      /**< Explicit SDK selection. */
     QLineEdit *m_pJavaHome;     /**< Explicit Java home selection. */
@@ -99,20 +108,26 @@ private:
     QPushButton *m_pApply;      /**< SDK validation and save action. */
     QPushButton *m_pCheck;      /**< Hardware acceleration check. */
     QPushButton *m_pHelp;       /**< Official SDK setup documentation. */
-    QTabWidget *m_pTabs;        /**< Running phones and creation pages. */
-    QTableWidget *m_pTable;     /**< Catalog with verified runtime status. */
+    QPushButton *m_pSdkDone;    /**< Closes SDK settings. */
+    QListWidget *m_pList;       /**< Phone cards with verified runtime status. */
     QLabel *m_pEmpty;           /**< First-use explanation. */
     QLabel *m_pEmptyTitle;      /**< First-use heading. */
-    QWidget *m_pEmptyCard;      /**< Shown instead of an empty table. */
-    QPushButton *m_pEmptyAction; /**< Opens SDK settings or the creation tab. */
-    QWidget *m_pPhoneActions;   /**< Actions for a populated catalog. */
-    QPushButton *m_pRefresh;    /**< Explicit runtime refresh. */
-    QPushButton *m_pStart;      /**< Normal startup, allowing Quick Boot. */
+    QWidget *m_pEmptyCard;      /**< Shown when the catalog is empty. */
+    QPushButton *m_pEmptyAction; /**< Opens SDK settings or the creation dialog. */
+    QWidget *m_pDeviceView;     /**< Split device list and details. */
+    QWidget *m_pSelectedDetails; /**< Sections shown for a selected phone. */
+    QLabel *m_pNoSelection;     /**< Shown before a phone is selected. */
+    QFormLayout *m_pIdentity;   /**< Selected phone identity and status. */
+    QFormLayout *m_pHardware;   /**< Selected phone profile, RAM and CPUs. */
+    QFormLayout *m_pScreen;     /**< Selected phone display configuration. */
+    QFormLayout *m_pDisk;       /**< Selected phone data partition. */
+    QAction *m_pRefresh;        /**< Explicit runtime refresh. */
+    QAction *m_pStart;          /**< Normal startup, allowing Quick Boot. */
     QAction *m_pColdBoot;       /**< Startup without loading a snapshot. */
     QAction *m_pSoftwareBoot;   /**< Cold boot with a software renderer. */
-    QPushButton *m_pStop;       /**< Targeted emulator shutdown. */
-    QPushButton *m_pInstall;    /**< Targeted APK installation. */
-    QToolButton *m_pMore;       /**< Secondary phone actions. */
+    QAction *m_pStop;           /**< Targeted emulator shutdown. */
+    QAction *m_pInstall;        /**< Targeted APK installation. */
+    QAction *m_pMore;           /**< Secondary phone actions menu. */
     QAction *m_pBack;           /**< Android Back key. */
     QAction *m_pHome;           /**< Android Home key. */
     QAction *m_pRecent;         /**< Android recent-apps key. */
@@ -130,14 +145,13 @@ private:
     QLabel *m_pPreviewDisplay;  /**< Selected portrait resolution. */
     QLabel *m_pPreviewMemory;   /**< Summary of the selected resources. */
     QLabel *m_pCreateHelp;      /**< Dependency and lifecycle explanation. */
+    QLabel *m_pCreateNotice;    /**< Reports a creation failure inside the dialog. */
+    QLabel *m_pSdkNotice;       /**< Reports SDK validation inside the dialog. */
     QPushButton *m_pCreate;     /**< Creates a private Android AVD. */
+    QPushButton *m_pCancel;     /**< Closes the creation form. */
     QPlainTextEdit *m_pResult;  /**< Plain-text, bounded tool diagnostics. */
     QLabel *m_pNotice;          /**< One-line operation summary. */
     QPushButton *m_pDetails;    /**< Expands the diagnostic output. */
-    QPushButton *m_pClose;      /**< Hides the manager without stopping phones. */
-    int m_iSdkCollapsedHeight; /**< Restores the dialog height after hiding SDK settings. */
-    QRect m_ownerFrame;         /**< Owner frame when the dialog was last shown. */
-    QRect m_workArea;           /**< Available desktop area when the dialog was last shown. */
 };
 
 #endif /* !FEQT_INCLUDED_SRC_phone_UIPhoneManager_h */

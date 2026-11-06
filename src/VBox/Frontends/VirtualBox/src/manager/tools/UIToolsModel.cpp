@@ -507,6 +507,7 @@ void UIToolsModel::prepareItems()
         {
             prepareItem(UIToolType_Home);
             prepareItem(UIToolType_Machines);
+            prepareItem(UIToolType_Phones);
             prepareItem(UIToolType_Extensions);
             prepareItem(UIToolType_Media);
             prepareItem(UIToolType_Network);
@@ -563,24 +564,17 @@ void UIToolsModel::loadCurrentItems()
     /* Load last tool types: */
     UIToolType enmTypeGlobal, enmTypeMachine;
     gEDataManager->toolsPaneLastItemsChosen(enmTypeGlobal, enmTypeMachine);
-    LogRel2(("GUI: UIToolsModel: Restoring tool items as: Global=%d, Machine=%d\n",
-             (int)enmTypeGlobal, (int)enmTypeMachine));
-    UIToolsItem *pItem = 0;
-
-    /* Depending on tool class: */
+    /* Start in Machines and restore the last machine-specific tool. */
     switch (m_enmClass)
     {
         case UIToolClass_Global:
         {
-            pItem = item(enmTypeGlobal);
-            if (!pItem)
-                pItem = item(UIToolType_Home);
-            setCurrentItem(pItem);
+            setCurrentItem(item(UIToolType_Machines));
             break;
         }
         case UIToolClass_Machine:
         {
-            pItem = item(enmTypeMachine);
+            UIToolsItem *pItem = item(enmTypeMachine);
             if (!pItem)
                 pItem = item(UIToolType_Details);
             setCurrentItem(pItem);

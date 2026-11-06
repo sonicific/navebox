@@ -56,7 +56,7 @@ UIMachinePreview::UIMachinePreview(QIGraphicsWidget *pParent)
     , m_pUpdateTimer(new QTimer(this))
     , m_pUpdateTimerMenu(0)
     , m_dRatio((double)QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) / 16)
-    , m_iMargin(0)
+    , m_iPreviewPadding(qRound(14 * m_dRatio))
     , m_enmPreset(AspectRatioPreset_16x9)
     , m_pPreviewImg(0)
 {
@@ -204,13 +204,7 @@ QSizeF UIMachinePreview::sizeHint(Qt::SizeHint enmWhich, const QSizeF &constrain
     {
         AssertReturn(m_sizes.contains(m_enmPreset),
                      QIGraphicsWidget::sizeHint(enmWhich, constraint));
-        QSize size = m_sizes.value(m_enmPreset);
-        if (m_iMargin != 0)
-        {
-            size.setWidth(size.width() - 2 * m_iMargin);
-            size.setHeight(size.height() - 2 * m_iMargin);
-        }
-        return size;
+        return m_sizes.value(m_enmPreset);
     }
 
     /* Call to base-class: */
@@ -384,11 +378,12 @@ void UIMachinePreview::prepare()
     /* Create session instance: */
     m_comSession.createInstance(CLSID_Session);
 
-    /* The frame is painted as vectors.  Preset geometry needs no monitor bitmaps
-     * and is no longer limited by the resolutions of the old artwork. */
-    m_sizes.insert(AspectRatioPreset_16x10, QSize(242 * m_dRatio, 167 * m_dRatio));
-    m_sizes.insert(AspectRatioPreset_16x9, QSize(242 * m_dRatio, 155 * m_dRatio));
-    m_sizes.insert(AspectRatioPreset_4x3, QSize(242 * m_dRatio, 192 * m_dRatio));
+    /* Preserve the display sizes when adjusting the space around the frame. */
+    const int iPadding = 2 * m_iPreviewPadding;
+    const int iWidth = qRound(200 * m_dRatio) + iPadding;
+    m_sizes.insert(AspectRatioPreset_16x10, QSize(iWidth, qRound(125 * m_dRatio) + iPadding));
+    m_sizes.insert(AspectRatioPreset_16x9, QSize(iWidth, qRound(113 * m_dRatio) + iPadding));
+    m_sizes.insert(AspectRatioPreset_4x3, QSize(iWidth, qRound(150 * m_dRatio) + iPadding));
     m_ratios.insert(AspectRatioPreset_16x10, (double)16/10);
     m_ratios.insert(AspectRatioPreset_16x9, (double)16/9);
     m_ratios.insert(AspectRatioPreset_4x3, (double)4/3);
@@ -472,10 +467,8 @@ void UIMachinePreview::setUpdateInterval(PreviewUpdateIntervalType interval, boo
 
 void UIMachinePreview::recalculatePreviewRectangle()
 {
-    /* Contents rectangle: */
-    QRect cr = contentsRect().toRect();
-    m_vRect = cr.adjusted( 21 * m_dRatio + m_iMargin,  21 * m_dRatio + m_iMargin,
-                          -21 * m_dRatio - m_iMargin, -21 * m_dRatio - m_iMargin);
+    m_vRect = contentsRect().toRect().adjusted(m_iPreviewPadding, m_iPreviewPadding,
+                                             -m_iPreviewPadding, -m_iPreviewPadding);
 }
 
 void UIMachinePreview::restart()
