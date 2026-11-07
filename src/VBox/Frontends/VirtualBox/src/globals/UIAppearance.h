@@ -89,6 +89,9 @@ public:
     /** Returns flat, palette-aware input and group-box styling. */
     static QString styleSheet(const QPalette &palette);
 
+    /** Returns the Manager styling for popup menus and dialog actions. */
+    static QString managerControlsStyleSheet(const QPalette &palette);
+
     /** Draws a rounded, opaque sheet in @a bounds. */
     static void paintSheet(QPainter &painter, const QRectF &bounds, const QPalette &palette);
 };

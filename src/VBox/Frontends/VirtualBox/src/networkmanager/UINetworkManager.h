@@ -203,6 +203,8 @@ private:
         void prepareToolBar();
         /** Prepares tab-widget. */
         void prepareTabWidget();
+        /** Creates a layout for @a pTab, flush with the Manager page edges when embedded. */
+        QVBoxLayout *createTabLayout(QWidget *pTab) const;
         /** Prepares host network tab. */
         void prepareTabHostNetwork();
         /** Prepares host network tree-widget. */

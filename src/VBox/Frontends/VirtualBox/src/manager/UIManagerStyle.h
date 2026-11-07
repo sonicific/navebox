@@ -63,7 +63,7 @@ public:
     static QString homePaneStyleSheet(const QPalette &palette);
     /** Returns the style sheet for the stacked Manager tool pages. */
     static QString toolPageStyleSheet(const QPalette &palette);
-    /** Returns the style sheet for the Manager's main toolbar. */
+    /** Returns the style sheet for the toolbar in the page header. */
     static QString toolBarStyleSheet(const QPalette &palette);
     /** Draws a navigation panel icon for the given state, layout direction and display scale. */
     static QIcon navigationToggleIcon(const QPalette &palette, bool fExpanded,

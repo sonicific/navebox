@@ -32,10 +32,9 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QStackedLayout>
+#include <QStyle>
+#include <QStylePainter>
 #include <QVBoxLayout>
-#ifndef VBOX_WS_MAC
-# include <QStyle>
-#endif
 
 /* GUI includes */
 #include "UICloudProfileManager.h"
@@ -71,6 +70,7 @@ UIToolPane::UIToolPane(QWidget *pParent, UIToolClass enmClass, UIActionPool *pAc
     , m_fActive(false)
     , m_pLayout(0)
     // Global tools
+    , m_pToolBar(0)
     , m_pPaneHome(0)
     , m_pPaneMachines(0)
     , m_pPanePhones(0)
@@ -124,6 +124,9 @@ bool UIToolPane::isToolOpened(UIToolType enmType) const
 
 void UIToolPane::openTool(UIToolType enmType)
 {
+    if (enmType == UIToolType_Phones)
+        phoneManager();
+
     /* Search through the stacked widgets: */
     int iActualIndex = -1;
     for (int iIndex = 0; iIndex < m_pLayout->count(); ++iIndex)
@@ -170,13 +173,6 @@ void UIToolPane::openTool(UIToolType enmType)
                     /* Add into layout: */
                     addToolWidget(m_pPaneMachines);
                 }
-                break;
-            }
-            case UIToolType_Phones:
-            {
-                m_pPanePhones = new UIPhoneManager(this);
-                m_pPanePhones->setProperty("ToolType", QVariant::fromValue(UIToolType_Phones));
-                addToolWidget(m_pPanePhones);
                 break;
             }
             case UIToolType_Extensions:
@@ -483,6 +479,25 @@ QString UIToolPane::currentHelpKeyword() const
     return uiCommon().helpKeyword(pCurrentToolWidget);
 }
 
+void UIToolPane::setToolBar(QWidget *pToolBar)
+{
+    AssertReturnVoid(m_enmClass == UIToolClass_Global && !m_pToolBar);
+    m_pToolBar = pToolBar;
+    updateToolBarPlacement();
+}
+
+UIPhoneManager *UIToolPane::phoneManager()
+{
+    AssertReturn(m_enmClass == UIToolClass_Global, 0);
+    if (!m_pPanePhones)
+    {
+        m_pPanePhones = new UIPhoneManager(this);
+        m_pPanePhones->setProperty("ToolType", QVariant::fromValue(UIToolType_Phones));
+        m_pLayout->addWidget(createToolCard(m_pPanePhones, UIToolType_Phones));
+    }
+    return m_pPanePhones;
+}
+
 UIMachineToolsWidget *UIToolPane::machineToolsWidget() const
 {
     return m_pPaneMachines;
@@ -579,6 +594,7 @@ void UIToolPane::prepare()
     {
         QVBoxLayout *pOuterLayout = new QVBoxLayout(this);
         pOuterLayout->setContentsMargins(0, 0, 0, 0);
+        pOuterLayout->setSpacing(0);
         pOuterLayout->addLayout(m_pLayout);
         setStyleSheet(UIManagerStyle::toolPageStyleSheet(QApplication::palette()));
         connect(m_pLayout, &QStackedLayout::currentChanged, this, [this, pOuterLayout]
@@ -587,6 +603,7 @@ void UIToolPane::prepare()
             const bool fCard = currentTool() != UIToolType_Home && currentTool() != UIToolType_Invalid;
             const int iInset = fCard ? UIManagerStyle::pageInset() : 0;
             pOuterLayout->setContentsMargins(iInset, fCard ? 12 : 0, iInset, iInset);
+            updateToolBarPlacement();
         });
     }
     else
@@ -625,6 +642,38 @@ void UIToolPane::addToolWidget(QWidget *pWidget)
     m_pLayout->setCurrentWidget(pWidget);
 }
 
+/** Draws one line of header text while retaining the full accessible label. */
+class UIToolHeaderLabel : public QLabel
+{
+public:
+    /** Constructs the label with the given @a pParent. */
+    explicit UIToolHeaderLabel(QWidget *pParent)
+        : QLabel(pParent)
+    {
+        setTextFormat(Qt::PlainText);
+        setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    }
+
+    /** Allows the toolbar and the text to share a narrow header. */
+    virtual QSize minimumSizeHint() const RT_OVERRIDE
+    {
+        const QSize size = sizeHint();
+        return QSize(qMin(size.width(), 12 * fontMetrics().averageCharWidth()), size.height());
+    }
+
+protected:
+    /** Draws the label with an ellipsis if the text exceeds the available width. */
+    virtual void paintEvent(QPaintEvent *) RT_OVERRIDE
+    {
+        QStylePainter painter(this);
+        painter.setFont(font());
+        const QRect bounds = contentsRect();
+        const QString strText = fontMetrics().elidedText(text(), Qt::ElideRight, bounds.width());
+        painter.drawItemText(bounds, QStyle::visualAlignment(layoutDirection(), alignment()),
+                             palette(), isEnabled(), strText, foregroundRole());
+    }
+};
+
 /** Returns the localized description of a Manager tool. */
 static QString uiToolPaneDescription(UIToolType enmType)
 {
@@ -647,37 +696,40 @@ QWidget *UIToolPane::createToolCard(QWidget *pTool, UIToolType enmType)
     pCard->setObjectName(QStringLiteral("managerToolCard"));
     pCard->setProperty("ToolType", QVariant::fromValue(enmType));
     QVBoxLayout *pLayout = new QVBoxLayout(pCard);
-    pLayout->setContentsMargins(20, 14, 20, 20);
-    pLayout->setSpacing(12);
+    pLayout->setContentsMargins(20, 10, 20, 20);
+    pLayout->setSpacing(8);
 
-    QHBoxLayout *pHeading = new QHBoxLayout;
+    QWidget *pHeader = new QWidget(pCard);
+    pHeader->setObjectName(QStringLiteral("managerPageHeader"));
+    QHBoxLayout *pHeading = new QHBoxLayout(pHeader);
+    pHeading->setContentsMargins(0, 0, 0, 0);
     pHeading->setSpacing(12);
-    QLabel *pIcon = new QLabel(pCard);
+    QLabel *pIcon = new QLabel(pHeader);
     pIcon->setObjectName(QStringLiteral("managerPageIcon"));
     pIcon->setFixedSize(42, 42);
     pIcon->setAlignment(Qt::AlignCenter);
     pIcon->setPixmap(UIToolsItem::typeToIcon(enmType).pixmap(QSize(24, 24), pCard->devicePixelRatioF()));
     pHeading->addWidget(pIcon, 0, Qt::AlignVCenter);
 
-    QLabel *pTitle = new QLabel(pCard);
+    QWidget *pText = new QWidget(pHeader);
+    QLabel *pTitle = new UIToolHeaderLabel(pText);
     pTitle->setObjectName(QStringLiteral("managerPageTitle"));
-    pTitle->setTextFormat(Qt::PlainText);
-    pTitle->setWordWrap(true);
-    QLabel *pDescription = new QLabel(pCard);
+    QLabel *pDescription = new UIToolHeaderLabel(pText);
     pDescription->setObjectName(QStringLiteral("managerPageDescription"));
-    pDescription->setTextFormat(Qt::PlainText);
-    pDescription->setWordWrap(true);
-    QVBoxLayout *pLabels = new QVBoxLayout;
-    pLabels->setSpacing(2);
+    QVBoxLayout *pLabels = new QVBoxLayout(pText);
+    pLabels->setContentsMargins(0, 0, 0, 0);
+    pLabels->setSpacing(0);
     pLabels->addWidget(pTitle);
     pLabels->addWidget(pDescription);
-    pHeading->addLayout(pLabels, 1);
-    pLayout->addLayout(pHeading);
+    pHeading->addWidget(pText, 1, Qt::AlignVCenter);
+    pLayout->addWidget(pHeader);
 
     const auto retranslateHeader = [pTitle, pDescription, enmType]
     {
         pTitle->setText(UIToolsItem::typeToName(enmType));
+        pTitle->setToolTip(pTitle->text());
         pDescription->setText(uiToolPaneDescription(enmType));
+        pDescription->setToolTip(pDescription->text());
     };
     connect(&translationEventListener(), &UITranslationEventListener::sigRetranslateUI, pCard, retranslateHeader);
     retranslateHeader();
@@ -688,6 +740,28 @@ QWidget *UIToolPane::createToolCard(QWidget *pTool, UIToolType enmType)
     pLayout->addWidget(pDivider);
     pLayout->addWidget(pTool, 1);
     return pCard;
+}
+
+void UIToolPane::updateToolBarPlacement()
+{
+    if (!m_pToolBar)
+        return;
+
+    QWidget *pPage = m_pLayout->currentWidget();
+    QWidget *pHeader = pPage ? pPage->findChild<QWidget*>(QStringLiteral("managerPageHeader"),
+                                                          Qt::FindDirectChildrenOnly) : 0;
+    if (pHeader)
+    {
+        if (pHeader->layout()->indexOf(m_pToolBar) < 0)
+            pHeader->layout()->addWidget(m_pToolBar);
+        m_pToolBar->show();
+    }
+    else
+    {
+        /* Park it outside the stack so removing the old page cannot delete it. */
+        m_pToolBar->hide();
+        m_pToolBar->setParent(this);
+    }
 }
 
 void UIToolPane::changeEvent(QEvent *pEvent)

@@ -133,7 +133,7 @@ QString UIManagerStyle::toolPageStyleSheet(const QPalette &palette)
     return QStringLiteral(
         "QFrame#managerToolCard { background: %1; border: 1px solid %2; border-radius: 16px; }"
         "QLabel#managerPageIcon { background: %7; border: 1px solid %2; border-radius: 11px; }"
-        "QLabel#managerPageTitle { color: %5; font-size: 17pt; font-weight: 600; }"
+        "QLabel#managerPageTitle { color: %5; font-size: 14pt; font-weight: 600; }"
         "QLabel#managerPageDescription { color: %8; }"
         "QFrame#managerPageDivider { background: %4; }"
         "QFrame#managerToolCard QTreeView, QFrame#managerToolCard QTableView {"
@@ -172,7 +172,7 @@ QString UIManagerStyle::toolBarStyleSheet(const QPalette &palette)
         "QFrame#managerToolBarSurface {"
         " background: qlineargradient(x1:0,y1:0,x2:0,y2:1,"
         " stop:0 %1,stop:1 %2); border: none; border-bottom: 1px solid %3; border-radius: 9px; }"
-        "QToolBar#managerToolBar { background: transparent; border: none; spacing: 4px; }"
+        "QToolBar#managerToolBar { background: transparent; border: none; spacing: 3px; }"
         "QToolBar#managerToolBar QToolButton {"
         " color: palette(button-text); background: transparent;"
         " border: 1px solid transparent; border-radius: 7px; padding: 4px 8px; }"
@@ -192,7 +192,7 @@ QString UIManagerStyle::toolBarStyleSheet(const QPalette &palette)
         " image: url(:/navebox-chevron-down-%6.png); width: 10px; height: 7px; }"
         "QToolBar#managerToolBar QToolButton::menu-indicator {"
         " subcontrol-position: right center; position: relative; right: 3px; }"
-        "QToolBar#managerToolBar QToolButton#qt_toolbar_ext_button { padding: 0px; }"
+        "QToolBar#managerToolBar QToolButton#qt_toolbar_ext_button { padding: 0; min-height: 26px; }"
         "QToolBar#managerToolBar::separator {"
         " background: %3; width: 1px; margin: 6px 4px; }")
         .arg(strSurface, strWindow, strDivider, colors.hover.name(), colors.pressed.name(),

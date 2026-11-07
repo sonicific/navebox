@@ -49,7 +49,7 @@
 
 /** @page pg_ui_home Home Pane
  *
- * Presents shortcuts to the manager's existing VM actions and help resources.
+ * Presents shortcuts to the manager's existing actions and help resources.
  * The first-run experience mode chooser sits below the shortcuts.
  */
 
@@ -80,6 +80,10 @@ namespace
           QT_TRANSLATE_NOOP("UIHomePane", "Add an existing virtual machine from disk"), HomeTask_Open, 0 },
         { ":/import_32px.png", QT_TRANSLATE_NOOP("UIHomePane", "Import a virtual machine"),
           QT_TRANSLATE_NOOP("UIHomePane", "Bring in a VM from an appliance file or the cloud"), HomeTask_Import, 0 },
+        { ":/export_32px.png", QT_TRANSLATE_NOOP("UIHomePane", "Export a virtual machine"),
+          QT_TRANSLATE_NOOP("UIHomePane", "Save one or more virtual machines as an appliance"), HomeTask_Export, 0 },
+        { ":/navebox_phone_32px.png", QT_TRANSLATE_NOOP("UIHomePane", "Open Android Phones"),
+          QT_TRANSLATE_NOOP("UIHomePane", "Create and manage Android virtual phones"), HomeTask_Phones, 0 },
         { ":/help_16px.png", QT_TRANSLATE_NOOP("UIHomePane", "Read the VirtualBox documentation"),
           QT_TRANSLATE_NOOP("UIHomePane", "Browse the online manual or press %1 for help"), HomeTask_Invalid,
           "https://docs.oracle.com/en/virtualization/virtualbox/index.html", true },
@@ -391,6 +395,7 @@ void UIHomePane::prepareActions(QVBoxLayout *pLayout)
 void UIHomePane::prepareExperienceMode(QVBoxLayout *pLayout)
 {
     m_pExperienceMode = new QWidget(m_pCard);
+    m_pExperienceMode->setProperty("managerActionBar", true);
     QVBoxLayout *pModeLayout = new QVBoxLayout(m_pExperienceMode);
     pModeLayout->setContentsMargins(0, 8, 0, 0);
     pLayout->addWidget(m_pExperienceMode);

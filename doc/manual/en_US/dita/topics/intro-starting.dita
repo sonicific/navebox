@@ -29,9 +29,10 @@
       </li>
     </ul>
     <p>When you start <ph conkeyref="vbox-conkeyref-phrases/product-name"/>, the <ph conkeyref="vbox-conkeyref-phrases/vbox-mgr"/> interface is shown. See <xref href="configuring-virtualbox.dita"/>. </p>
-    <p>The Manager uses the same toolbar, page spacing, and rounded cards
-      across its tools. Both the Manager and the slide-out
-      <b>Notifications</b> panel follow the light or dark application theme.
+    <p>Home presents its shortcuts as action rows. Other Manager pages show
+      their actions in a compact toolbar at the right of the page header.
+      Popup menus, dialog buttons, and the slide-out <b>Notifications</b>
+      panel follow the light or dark application theme.
       Select a notification to expand its details. The panel also includes
       controls for sorting and clearing finished notifications.</p>
     <p>Navebox opens with the navigation expanded and <b>Machines</b> selected
@@ -43,8 +44,9 @@
       menu. On Windows, the Manager menus are in the title bar beside the
       window controls.</p>
     <p>Use the action rows in <b>Home</b> to open global preferences, create
-      a virtual machine, add a saved machine, import an appliance, or open
-      the VirtualBox documentation and community website. Click a row or use
+      a virtual machine, add a saved machine, import or export an appliance,
+      open Android Phones, or visit the VirtualBox documentation and community
+      website. Click a row or use
       <b>Tab</b> and <b>Space</b> to activate it with the keyboard.</p>
     <p>The About dialog shows the product version, contact details, build
       information, and credits on one scrollable page. Use <b>Copy Build
@@ -55,8 +57,11 @@
     <section id="navebox-android-phones">
       <title>Android Phones in Navebox</title>
       <p>Select <b>Phones</b> in the main navigation next to <b>Machines</b>,
-        or choose <b>File</b>, then <b>Android Phones</b>. Use this page to
-        create and manage Android virtual phones with a separately installed Android SDK. Install
+        or choose <b>Phone</b>, then <b>Android Phones</b>. The <b>Phone</b>
+        menu also opens the creation and SDK settings dialogs. When the
+        Phones page is active, it includes actions for the selected phone.
+        Use this page to create and manage Android virtual phones with a
+        separately installed Android SDK. Install
         Android Emulator, Platform-Tools, Command-Line Tools and a stable phone
         image matching the host CPU (API 26 or newer) using the standalone SDK
         tools or Android Studio's SDK Manager. Android Studio is optional.

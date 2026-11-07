@@ -26,8 +26,8 @@
  */
 
 /* Qt includes: */
+#include <QApplication>
 #include <QGridLayout>
-#include <QHBoxLayout>
 
 /* GUI includes: */
 #include "UIChooser.h"
@@ -52,16 +52,6 @@ UIGlobalToolsWidget::UIGlobalToolsWidget(QWidget *pParent, UIActionPool *pAction
     , m_pPane(0)
 {
     prepare();
-}
-
-void UIGlobalToolsWidget::addToolBar(QWidget *pToolBar)
-{
-    AssertPtrReturnVoid(m_pLayout);
-    QHBoxLayout *pLayout = new QHBoxLayout;
-    const int iInset = UIManagerStyle::pageInset();
-    pLayout->setContentsMargins(iInset, 0, iInset, 0);
-    pLayout->addWidget(pToolBar);
-    m_pLayout->addLayout(pLayout, 0, 1);
 }
 
 UIToolPane *UIGlobalToolsWidget::toolPane() const
@@ -276,15 +266,39 @@ void UIGlobalToolsWidget::prepareWidgets()
         if (toolMenu())
         {
             /* Add into layout: */
-            m_pLayout->addWidget(toolMenu(), 0, 0, 2, 1);
+            m_pLayout->addWidget(toolMenu(), 0, 0);
         }
+
+        /* Mark the end of the sidebar before the page gutter. */
+        QWidget *pDivider = new QWidget(this);
+        pDivider->setFixedWidth(1);
+        pDivider->setAutoFillBackground(true);
+        m_pLayout->addWidget(pDivider, 0, 1);
+        pDivider->setVisible(!gEDataManager->isToolTextVisible());
+        connect(gEDataManager, &UIExtraDataManager::sigToolLabelsVisibilityChange, pDivider,
+                [pDivider](bool fExpanded) { pDivider->setVisible(!fExpanded); });
+
+        setAutoFillBackground(true);
+        const auto updateBackdrop = [this, pDivider]
+        {
+            const QPalette appPalette = QApplication::palette();
+            QPalette backdrop;
+            backdrop.setColor(QPalette::Window, UIManagerStyle::backdropColor(appPalette));
+            setPalette(backdrop);
+
+            QPalette divider;
+            divider.setColor(QPalette::Window, UIManagerStyle::borderColor(appPalette));
+            pDivider->setPalette(divider);
+        };
+        connect(&uiCommon(), &UICommon::sigThemeChange, pDivider, updateBackdrop);
+        updateBackdrop();
 
         /* Create tool-pane: */
         m_pPane = new UIToolPane(this, UIToolClass_Global, actionPool());
         if (toolPane())
         {
             /* Add into layout: */
-            m_pLayout->addWidget(toolPane(), 1, 1);
+            m_pLayout->addWidget(toolPane(), 0, 2);
         }
     }
 }

@@ -252,9 +252,8 @@ VBoxAboutDlg::VBoxAboutDlg(QWidget *pParent /* = 0 */, const QString &strVersion
     , m_fPolished(false)
     , m_strVersion(strVersion.isEmpty() ? QString::fromLatin1(RTBldCfgVersion()) : strVersion)
     , m_pVersion(0)
+    , m_pAttributionHeading(0)
     , m_pAttribution(0)
-    , m_pOverviewHeading(0)
-    , m_pOverviewIntroduction(0)
     , m_apPillarTitles{0, 0, 0, 0}
     , m_apPillarDescriptions{0, 0, 0, 0}
     , m_pContactHeading(0)
@@ -273,7 +272,7 @@ void VBoxAboutDlg::showEvent(QShowEvent *pEvent)
         m_fPolished = true;
         QWidget *pParent = m_pPseudoParent ? m_pPseudoParent : parentWidget();
         const QRect available = gpDesktop->availableGeometry(pParent);
-        resize(qMin(880, qMax(1, available.width() - 48)), qMin(600, qMax(1, available.height() - 72)));
+        resize(qMin(880, qMax(1, available.width() - 48)), qMin(520, qMax(1, available.height() - 72)));
         gpDesktop->centerWidget(this, pParent);
     }
 }
@@ -293,10 +292,6 @@ void VBoxAboutDlg::sltRetranslateUI()
     if (m_pVersion)
         m_pVersion->setText(tr("Version %1 | Qt %2 (%3)")
                             .arg(m_strVersion, QString::fromLatin1(qVersion()), QGuiApplication::platformName()));
-    if (m_pOverviewHeading)
-        m_pOverviewHeading->setText(tr("NAVE - The Virtualization Architecture"));
-    if (m_pOverviewIntroduction)
-        m_pOverviewIntroduction->setText(tr("FOUR PILLARS. ONE VIRTUAL WORLD."));
     const QStringList titles = QStringList() << tr("Network of Worlds") << tr("Architecture")
                                             << tr("Virtualization") << tr("Efficiency");
     const QStringList descriptions = QStringList()
@@ -331,9 +326,10 @@ void VBoxAboutDlg::sltRetranslateUI()
         m_pBuildInformation->setText(strBuildStatus.isEmpty() ? strBuildDetails
                                                             : strBuildStatus + QStringLiteral("  \u00b7  ") + strBuildDetails);
     }
+    if (m_pAttributionHeading)
+        m_pAttributionHeading->setText(tr("Built on the VirtualBox open-source platform."));
     if (m_pAttribution)
-        m_pAttribution->setText(tr("Built on the VirtualBox open-source platform.")
-                                + QStringLiteral("<br/>Copyright &copy; 2004-" VBOX_C_YEAR " " VBOX_VENDOR ".<br/>")
+        m_pAttribution->setText(QStringLiteral("Copyright &copy; 2004-" VBOX_C_YEAR " " VBOX_VENDOR ".<br/>")
                                 + tr("Distributed under the <a style=\"color:%1\" "
                                      "href=\"https://www.gnu.org/licenses/gpl-3.0.html\">"
                                      "GNU General Public License version 3</a>.").arg(uiAboutLinkColor(palette())));
@@ -408,9 +404,8 @@ void VBoxAboutDlg::updateAppearance()
         " background: rgba(219,235,255,45); border-radius: 11px; }"
         "QFrame#naveboxAboutHero QFrame#aboutDivider { background: #a9c9ff; }"
         "QDialog#naveboxAboutDialog QLabel[aboutSecondary=\"true\"] { color: %3; }"
-        "QDialog#naveboxAboutDialog QLabel#aboutOverviewEyebrow { color: %7; }"
         "QFrame#aboutPillar { background: %4; border: 1px solid %5; border-radius: 13px; }"
-        "QFrame#aboutSupport { background: %6; border-radius: 11px; }"
+        "QFrame#aboutSupport { background: %6; border: 1px solid %5; border-radius: 11px; }"
         "QFrame#aboutDivider { background: %5; border: none; }"
         "QDialog#naveboxAboutDialog QPushButton { color: %2; background: %4;"
         " border: 1px solid %5; border-radius: 14px; padding: 7px 15px; font-weight: 600; }"
@@ -421,8 +416,7 @@ void VBoxAboutDlg::updateAppearance()
         "QDialog#naveboxAboutDialog QPushButton#aboutClose:pressed { background: #1748a2; }"
         "QDialog#naveboxAboutDialog QPushButton#aboutClose:focus { border-color: #a9ceff; }")
         .arg(colors.backdrop.name(), colors.text.name(), colors.secondary.name(),
-             colors.surface.name(), colors.border.name(), colors.hover.name(),
-             colors.fLight ? QStringLiteral("#3d5d93") : QStringLiteral("#a8c3f5"));
+             colors.surface.name(), colors.border.name(), colors.hover.name());
     if (styleSheet() != strStyle)
         setStyleSheet(strStyle);
     sltRetranslateUI();
@@ -465,31 +459,11 @@ void VBoxAboutDlg::prepareHero(QWidget *pPage, QVBoxLayout *pLayout)
 
 void VBoxAboutDlg::prepareOverview(QWidget *pPage, QVBoxLayout *pLayout)
 {
-    QWidget *pOverview = new QWidget(pPage);
-    QVBoxLayout *pOverviewLayout = new QVBoxLayout(pOverview);
-    pOverviewLayout->setContentsMargins(0, 0, 0, 0);
-    pOverviewLayout->setSpacing(4);
-    m_pOverviewIntroduction = uiAboutLabel(QString(), pOverview, -1, true);
-    m_pOverviewIntroduction->setObjectName(QStringLiteral("aboutOverviewEyebrow"));
-    QFont eyebrowFont = m_pOverviewIntroduction->font();
-    eyebrowFont.setLetterSpacing(QFont::AbsoluteSpacing, 0.8);
-    m_pOverviewIntroduction->setFont(eyebrowFont);
-    pOverviewLayout->addWidget(m_pOverviewIntroduction);
-    QHBoxLayout *pHeadingRow = new QHBoxLayout;
-    pHeadingRow->setSpacing(12);
-    m_pOverviewHeading = uiAboutLabel(QString(), pOverview, 5, true);
-    pHeadingRow->addWidget(m_pOverviewHeading, 3);
-    QFrame *pHeadingRule = new QFrame(pOverview);
-    pHeadingRule->setObjectName(QStringLiteral("aboutDivider"));
-    pHeadingRule->setFixedHeight(1);
-    pHeadingRow->addWidget(pHeadingRule, 2, Qt::AlignVCenter);
-    pOverviewLayout->addLayout(pHeadingRow);
-    pOverviewLayout->addSpacing(5);
     QGridLayout *pPillars = new QGridLayout;
     pPillars->setSpacing(10);
     for (int i = 0; i < 4; ++i)
     {
-        QFrame *pCard = new QFrame(pOverview);
+        QFrame *pCard = new QFrame(pPage);
         pCard->setObjectName("aboutPillar");
         QHBoxLayout *pCardLayout = new QHBoxLayout(pCard);
         pCardLayout->setContentsMargins(13, 10, 13, 10);
@@ -511,8 +485,7 @@ void VBoxAboutDlg::prepareOverview(QWidget *pPage, QVBoxLayout *pLayout)
     }
     pPillars->setColumnStretch(0, 1);
     pPillars->setColumnStretch(1, 1);
-    pOverviewLayout->addLayout(pPillars);
-    pLayout->addWidget(pOverview);
+    pLayout->addLayout(pPillars);
 }
 
 void VBoxAboutDlg::prepareSupport(QWidget *pPage, QVBoxLayout *pLayout)
@@ -532,7 +505,11 @@ void VBoxAboutDlg::prepareSupport(QWidget *pPage, QVBoxLayout *pLayout)
     pContact->addStretch();
 
     QVBoxLayout *pCredits = uiAboutSupportCard(pPage, pDetails, 5, 3, fDpr);
-    m_pAttribution = uiAboutLabel(QString(), pCredits->parentWidget());
+    QWidget *pCreditsCard = pCredits->parentWidget();
+    m_pAttributionHeading = uiAboutLabel(QString(), pCreditsCard, 1, true);
+    pCredits->addWidget(m_pAttributionHeading);
+    m_pAttribution = uiAboutLabel(QString(), pCreditsCard);
+    m_pAttribution->setProperty("aboutSecondary", true);
     uiAboutEnableLinks(m_pAttribution);
     pCredits->addWidget(m_pAttribution);
     pCredits->addStretch();

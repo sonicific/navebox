@@ -362,6 +362,8 @@ private:
         void prepareIcon();
         /** Prepares menu-bar. */
         void prepareMenuBar();
+        /** Adds the Phone menu next to the Machine menu. */
+        void preparePhoneMenu();
         /** Updates the icon and accessible label for the sidebar action. */
         void updateNavigationToggle();
         /** Prepares status-bar. */

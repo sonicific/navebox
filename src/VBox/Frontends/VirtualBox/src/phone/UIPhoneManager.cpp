@@ -153,7 +153,12 @@ UIPhoneManager::UIPhoneManager(QWidget *pParent, const QString &strDataRoot)
 
 QList<QAction*> UIPhoneManager::toolbarActions() const
 {
-    return {m_pCreateAction, m_pSdkAction, m_pToolbarSeparator, m_pStart, m_pStop, m_pInstall, m_pRefresh, m_pMore};
+    return setupActions() << m_pToolbarSeparator << m_pStart << m_pStop << m_pInstall << m_pRefresh << m_pMore;
+}
+
+QList<QAction*> UIPhoneManager::setupActions() const
+{
+    return {m_pCreateAction, m_pSdkAction};
 }
 
 void UIPhoneManager::prepareActions()
@@ -791,6 +796,7 @@ void UIPhoneManager::applySdk()
 
 void UIPhoneManager::showCreateDialog()
 {
+    emit sigShowPage();
     m_pCreateNotice->hide();
     m_pName->setFocus();
     m_pCreateDialog->open();
@@ -799,6 +805,7 @@ void UIPhoneManager::showCreateDialog()
 
 void UIPhoneManager::showSdkSettings()
 {
+    emit sigShowPage();
     m_pSdkNotice->hide();
     m_pSdkPath->setFocus();
     m_pSdkDialog->open();

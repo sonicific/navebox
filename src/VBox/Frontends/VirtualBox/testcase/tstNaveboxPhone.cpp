@@ -686,6 +686,7 @@ static void tstPage(const QString &strRoot, const QString &strSdk, const QString
     RTTESTI_CHECK_RETV(pCreate && pStart && pSdk && pCreateDialog && pSdkDialog && actions.size() == 8);
     QAction *pNewAction = actions.at(0);
     QAction *pSdkAction = actions.at(1);
+    RTTESTI_CHECK(page.setupActions() == actions.mid(0, 2));
     RTTESTI_CHECK(actions.contains(pStart) && !pStart->icon().pixmap(32, 32).isNull());
     RTTESTI_CHECK(!page.findChild<QLabel*>("phoneHeading") && !page.findChild<QPushButton*>("phoneStart"));
     RTTESTI_CHECK(!pCreate->isEnabled() && !pStart->isEnabled());
@@ -693,6 +694,9 @@ static void tstPage(const QString &strRoot, const QString &strSdk, const QString
     QPushButton *pSdkDone = page.findChild<QPushButton*>("phoneSdkDone");
     QPushButton *pCancel = page.findChild<QPushButton*>("phoneCreateCancel");
     RTTESTI_CHECK_RETV(pSdkDone && pCancel && pSdkDialog->isHidden());
+    QObject::connect(&page, &UIPhoneManager::sigShowPage, &stack,
+                     [&stack, pCard] { stack.setCurrentWidget(pCard); });
+    stack.setCurrentWidget(pOtherPage);
     QApplication::processEvents();
     pNewAction->trigger();
     QApplication::processEvents();
@@ -721,9 +725,10 @@ static void tstPage(const QString &strRoot, const QString &strSdk, const QString
     pJava->setText(strJava);
     {
         const QRect frame = stack.frameGeometry();
+        stack.setCurrentWidget(pOtherPage);
         pSdkAction->trigger();
         QApplication::processEvents();
-        RTTESTI_CHECK(pSdkDialog->isVisible() && pSdkDialog->windowModality() == Qt::WindowModal);
+        RTTESTI_CHECK(page.isVisible() && pSdkDialog->isVisible() && pSdkDialog->windowModality() == Qt::WindowModal);
         RTTESTI_CHECK(stack.frameGeometry() == frame);
         foreach (QWidget *pControl, QList<QWidget*>() << pJava << pName << pImage << pCreate << pApply)
             RTTESTI_CHECK(pControl->height() == pSdk->height());

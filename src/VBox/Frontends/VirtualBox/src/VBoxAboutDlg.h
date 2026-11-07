@@ -98,12 +98,10 @@ private:
 
     /** Holds the product version in the header. */
     QLabel      *m_pVersion;
+    /** Holds the heading of the upstream credits card. */
+    QLabel      *m_pAttributionHeading;
     /** Holds the upstream attribution and license link. */
     QLabel      *m_pAttribution;
-    /** Holds the overview heading. */
-    QLabel      *m_pOverviewHeading;
-    /** Holds the overview introduction. */
-    QLabel      *m_pOverviewIntroduction;
     /** Holds the translated pillar titles. */
     QLabel      *m_apPillarTitles[4];
     /** Holds the translated pillar descriptions. */

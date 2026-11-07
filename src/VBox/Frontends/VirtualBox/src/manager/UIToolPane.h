@@ -128,11 +128,14 @@ public:
     /** Returns the help keyword of the current tool's widget. */
     QString currentHelpKeyword() const;
 
-    /** Returns the Android Phones page after it has been opened. */
-    UIPhoneManager *phoneManager() const { return m_pPanePhones; }
+    /** Prepares the Android Phones page on demand without switching to it. */
+    UIPhoneManager *phoneManager();
 
     /** @name Global tool stuff.
       * @{ */
+        /** Installs the shared @a pToolBar for the global pages. */
+        void setToolBar(QWidget *pToolBar);
+
         /** Returns the Machine Tools Widget instance. */
         UIMachineToolsWidget *machineToolsWidget() const;
 
@@ -177,6 +180,8 @@ private:
     void addToolWidget(QWidget *pWidget);
     /** Wraps @a pTool in a card with the header for @a enmType. */
     QWidget *createToolCard(QWidget *pTool, UIToolType enmType);
+    /** Moves the shared toolbar to the active page header or hides it. */
+    void updateToolBarPlacement();
     /** Cleanups all. */
     void cleanup();
 
@@ -196,6 +201,9 @@ private:
 
     /** @name Global tool stuff.
       * @{ */
+        /** Holds the shared toolbar surface. */
+        QWidget *m_pToolBar;
+
         /** Holds the Home pane instance. */
         UIHomePane *m_pPaneHome;
 

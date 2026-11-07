@@ -56,11 +56,17 @@ class UIPhoneManager : public QWidget
 {
     Q_OBJECT;
 
+signals:
+    /** Requests that the owning Manager show the Phones page before opening a setup dialog. */
+    void sigShowPage();
+
 public:
     /** Constructs the manager; an optional data root isolates regression tests. */
     explicit UIPhoneManager(QWidget *pParent = 0, const QString &strDataRoot = QString());
     /** Returns the page actions for the main window toolbar. */
     QList<QAction*> toolbarActions() const;
+    /** Returns the actions available without a selected phone. */
+    QList<QAction*> setupActions() const;
 
 protected:
     /** Updates all labels after a live language change. */

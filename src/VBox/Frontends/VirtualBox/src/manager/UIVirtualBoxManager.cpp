@@ -994,6 +994,9 @@ void UIVirtualBoxManager::sltExecuteHomeTask(HomeTask enmTask)
         case HomeTask_Export:
             sltOpenExportApplianceWizard();
             break;
+        case HomeTask_Phones:
+            actionPool()->action(UIActionIndexMN_M_File_S_AndroidPhones)->trigger();
+            break;
         default:
             break;
     }
@@ -2558,6 +2561,8 @@ void UIVirtualBoxManager::prepareMenuBar()
         }
 #endif
         menuBar()->addMenu(pMenu);
+        if (pMenu == actionPool()->action(UIActionIndexMN_M_Machine)->menu())
+            preparePhoneMenu();
     }
 #ifndef VBOX_WS_MAC
     /* Keep product information directly accessible next to Help. */
@@ -2575,6 +2580,27 @@ void UIVirtualBoxManager::prepareMenuBar()
 #ifdef VBOX_WS_WIN
     m_pTitleBar->prepareFrame();
 #endif
+}
+
+void UIVirtualBoxManager::preparePhoneMenu()
+{
+    QMenu *pMenu = new QMenu(menuBar());
+    QAction *pOpenPhones = actionPool()->action(UIActionIndexMN_M_File_S_AndroidPhones);
+    pMenu->setTitle(tr("&Phone"));
+    pMenu->addAction(pOpenPhones);
+    menuBar()->addMenu(pMenu);
+    connect(&translationEventListener(), &UITranslationEventListener::sigRetranslateUI, pMenu,
+            [pMenu] { pMenu->setTitle(tr("&Phone")); });
+    connect(pMenu, &QMenu::aboutToShow, this, [this, pMenu, pOpenPhones]
+    {
+        pMenu->clear();
+        pMenu->addAction(pOpenPhones);
+        if (m_pWidget)
+        {
+            pMenu->addSeparator();
+            pMenu->addActions(m_pWidget->phoneMenuActions());
+        }
+    });
 }
 
 void UIVirtualBoxManager::updateNavigationToggle()

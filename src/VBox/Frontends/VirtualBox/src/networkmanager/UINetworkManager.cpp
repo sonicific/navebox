@@ -1839,6 +1839,17 @@ void UINetworkManagerWidget::prepareTabWidget()
     }
 }
 
+QVBoxLayout *UINetworkManagerWidget::createTabLayout(QWidget *pTab) const
+{
+    QVBoxLayout *pLayout = new QVBoxLayout(pTab);
+    if (m_enmEmbedding == EmbedTo_Stack)
+    {
+        const QMargins margins = pLayout->contentsMargins();
+        pLayout->setContentsMargins(0, margins.top(), 0, margins.bottom());
+    }
+    return pLayout;
+}
+
 void UINetworkManagerWidget::prepareTabHostNetwork()
 {
     /* Prepare host network tab: */
@@ -1846,7 +1857,7 @@ void UINetworkManagerWidget::prepareTabHostNetwork()
     if (m_pTabHostNetwork)
     {
         /* Prepare host network layout: */
-        m_pLayoutHostNetwork = new QVBoxLayout(m_pTabHostNetwork);
+        m_pLayoutHostNetwork = createTabLayout(m_pTabHostNetwork);
         if (m_pLayoutHostNetwork)
             prepareTreeWidgetHostNetwork();
 
@@ -1908,7 +1919,7 @@ void UINetworkManagerWidget::prepareTabNATNetwork()
     if (m_pTabNATNetwork)
     {
         /* Prepare NAT network layout: */
-        m_pLayoutNATNetwork = new QVBoxLayout(m_pTabNATNetwork);
+        m_pLayoutNATNetwork = createTabLayout(m_pTabNATNetwork);
         if (m_pLayoutNATNetwork)
             prepareTreeWidgetNATNetwork();
 
@@ -1970,7 +1981,7 @@ void UINetworkManagerWidget::prepareTabCloudNetwork()
     if (m_pTabCloudNetwork)
     {
         /* Prepare cloud network layout: */
-        m_pLayoutCloudNetwork = new QVBoxLayout(m_pTabCloudNetwork);
+        m_pLayoutCloudNetwork = createTabLayout(m_pTabCloudNetwork);
         if (m_pLayoutCloudNetwork)
             prepareTreeWidgetCloudNetwork();
 

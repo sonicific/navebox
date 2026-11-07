@@ -174,12 +174,12 @@ static void tstAbout()
     QPushButton *pCopy = dialog.findChild<QPushButton*>(QStringLiteral("copyBuildInformationButton"));
     RTTESTI_CHECK(pScroll && pCopy);
     RTTESTI_CHECK(dialog.findChildren<QTabWidget*>().isEmpty());
+    RTTESTI_CHECK(!tstFindLabel(dialog, QStringLiteral("NAVE - The Virtualization Architecture")));
+    RTTESTI_CHECK(!tstFindLabel(dialog, QStringLiteral("FOUR PILLARS. ONE VIRTUAL WORLD.")));
     if (!pScroll || !pCopy)
         return;
 
     const QStringList messages = QStringList()
-        << QStringLiteral("NAVE - The Virtualization Architecture")
-        << QStringLiteral("FOUR PILLARS. ONE VIRTUAL WORLD.")
         << QStringLiteral("Network of Worlds") << QStringLiteral("Architecture")
         << QStringLiteral("Virtualization") << QStringLiteral("Efficiency")
         << QStringLiteral("Connect independent virtual machines in one workspace.")
@@ -187,6 +187,7 @@ static void tstAbout()
         << QStringLiteral("Create, run and manage multiple systems on one computer.")
         << QStringLiteral("Stay in control of compute, memory and storage resources.")
         << QStringLiteral("Contact")
+        << QStringLiteral("Built on the VirtualBox open-source platform.")
         << QStringLiteral("Version 7.2.97-test | Qt %1 (%2)")
             .arg(QString::fromLatin1(qVersion()), QGuiApplication::platformName());
     QList<QPointer<QLabel> > labels;

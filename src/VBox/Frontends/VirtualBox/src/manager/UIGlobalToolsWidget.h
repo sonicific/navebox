@@ -67,12 +67,6 @@ public:
       * @param  pActionPool  Brings the action-pool reference.  */
     UIGlobalToolsWidget(QWidget *pParent, UIActionPool *pActionPool);
 
-    /** @name Tool-bar stuff.
-      * @{ */
-        /** Adds tool-bar into grid layout. */
-        void addToolBar(QWidget *pToolBar);
-    /** @} */
-
     /** @name Tools pane stuff.
       * @{ */
         /** Returns tool-pane instance. */

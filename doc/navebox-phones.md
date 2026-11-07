@@ -3,8 +3,11 @@
 
 # Android virtual phones in Navebox
 
-Select **Phones** in the main navigation next to **Machines**. **File >
-Android Phones** and the **Phones** button on the Home toolbar open the same page.
+Select **Phones** in the main navigation next to **Machines**. The **Android
+Phones** item in the **Phone** or **File** menu and the **Open Android Phones**
+row in Home open the same page. The **Phone** menu also offers **Create Phone**
+and **SDK Settings** from any page. On the Phones page, the menu shows the
+same device actions as the header toolbar.
 Android phones use Android Emulator, independently of VirtualBox VMs. The
 emulator supplies touch input, rotation, volume, camera and other device
 controls in its own window. VirtualBox VM files and their public API do not
@@ -20,8 +23,9 @@ and a stable phone system image for API 26 or newer matching the host CPU.
 The initial qualification target is Windows x64 with an x86_64 image. Other
 host platforms require their own build and runtime qualification.
 
-In Android Phones, click **SDK Settings** in the main toolbar, then select the SDK directory and
-a compatible Java home. The Java home is the directory containing `bin/java`. It can be a compatible
+In Android Phones, click **SDK Settings** in the toolbar at the right of the page
+header, then select the SDK directory and a compatible Java home. The Java home
+is the directory containing `bin/java`. It can be a compatible
 standalone JDK, including a portable JDK, or Android Studio's bundled `jbr`.
 Click **Apply SDK**, then **Check Acceleration**, then **Done**.
 SDK Settings opens a modal centered over the manager. Applying an SDK keeps
@@ -51,8 +55,9 @@ check does not qualify every GPU driver or Android system image.
 
 ## Create and use a phone
 
-Click **Create Phone** in the main toolbar to open the creation dialog. Enter a name, choose an installed image, and set RAM,
-CPUs, data-partition capacity and a portrait device profile. Defaults are 2048 MB,
+Click **Create Phone** in the page header to open the creation dialog. Enter a
+name, choose an installed image, and set RAM, CPUs, data-partition capacity and a
+portrait device profile. Defaults are 2048 MB,
 up to two CPUs, an 8 GB data partition and 720 x 1280 pixels. Storage is a
 maximum partition capacity and can consume additional host space as apps
 and data accumulate. Leave enough RAM and disk space for the host and any

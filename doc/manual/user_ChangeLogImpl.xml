@@ -119,6 +119,25 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
+        <para>Navebox GUI: Moved the Manager toolbar to the right side of the
+          page header on tabs other than Home and reduced its height. Added
+          Export and Android Phones shortcuts to Home and a divider at the
+          edge of the sidebar</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox GUI: Increased the padding of toolbar buttons in page
+          headers and matched popup menus and dialog buttons to the Manager
+          theme</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox GUI: Added a Phone menu next to Machine, removed the
+          duplicate Home toolbar, aligned Media and Network tables with
+          their page content, and simplified the sidebar and About dialog</para>
+      </listitem>
+
+      <listitem>
         <para>Navebox GUI: Keep the Home backdrop across Manager tabs, contain
           toolbar hover fills, align menu chevrons, and soften scrollbar colors</para>
       </listitem>
@@ -133,8 +152,7 @@ Rules for adding a changelog entry to make them look more uniform:
       <listitem>
         <para>Navebox GUI: Redesigned Home with an illustrated header and
           keyboard-accessible rows for common VM actions and help resources.
-          Refined the light palette, softened dividers, and aligned the toolbar
-          with the Home card</para>
+          Refined the light palette and softened dividers</para>
       </listitem>
 
       <listitem>
