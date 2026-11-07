@@ -7499,7 +7499,7 @@ static uint32_t supR3HardenedWinFindAdversaries(void)
     SUP_DPRINTF(("supR3HardenedWinFindAdversaries: %#x\n", fFound));
     if (fFound & SUPHARDNT_ADVERSARY_SENTINEL_ONE)
         SUP_DPRINTF(("Warning! We detected the SentinalOne Agent driver. Should the process crash later during SELF_PURIFICATION\n"
-                     "         please try whitelisting the VirtualBoxVM.exe, VBoxHeadless.exe, VBoxNetDHCP.exe and VBoxNetNAT.exe\n"
+                     "         please try whitelisting the NaveboxVM.exe, VBoxHeadless.exe, VBoxNetDHCP.exe and VBoxNetNAT.exe\n"
                      "         processes. (See github issue 360.)\n"));
     return fFound;
 }

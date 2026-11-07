@@ -65,6 +65,9 @@ void UIMenuBar::paintEvent(QPaintEvent *pEvent)
         QPainter painter(this);
         painter.setClipRect(pEvent->rect());
         const double dDpr = UIDesktopWidgetWatchdog::devicePixelRatio(this);
-        painter.drawPixmap(s.width() - betaLabel.width() / dDpr - 10, (height() - betaLabel.height() / dDpr) / 2, betaLabel);
+        const QWidget *pCorner = cornerWidget(isRightToLeft() ? Qt::TopLeftCorner : Qt::TopRightCorner);
+        const int iReserved = pCorner ? pCorner->width() : 0;
+        painter.drawPixmap(s.width() - iReserved - betaLabel.width() / dDpr - 10,
+                           (height() - betaLabel.height() / dDpr) / 2, betaLabel);
     }
 }

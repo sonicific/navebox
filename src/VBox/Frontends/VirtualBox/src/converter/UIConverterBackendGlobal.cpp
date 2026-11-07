@@ -1697,6 +1697,7 @@ template<> SHARED_LIBRARY_STUFF QString UIConverter::toInternalString(const UITo
     {
         case UIToolType_Home:         strResult = "Home"; break;
         case UIToolType_Machines:     strResult = "Machines"; break;
+        case UIToolType_Phones:       strResult = "Phones"; break;
         case UIToolType_Extensions:   strResult = "Extensions"; break;
         case UIToolType_Media:        strResult = "Media"; break;
         case UIToolType_Network:      strResult = "Network"; break;
@@ -1724,6 +1725,8 @@ template<> SHARED_LIBRARY_STUFF UIToolType UIConverter::fromInternalString<UIToo
         return UIToolType_Home;
     if (strToolType.compare("Machines", Qt::CaseInsensitive) == 0)
         return UIToolType_Machines;
+    if (strToolType.compare("Phones", Qt::CaseInsensitive) == 0)
+        return UIToolType_Phones;
     if (strToolType.compare("Extensions", Qt::CaseInsensitive) == 0)
         return UIToolType_Extensions;
     if (strToolType.compare("Media", Qt::CaseInsensitive) == 0)

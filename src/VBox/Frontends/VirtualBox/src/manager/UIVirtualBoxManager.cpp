@@ -76,6 +76,7 @@
 #include "UIMediumTools.h"
 #include "UIMediumManager.h"
 #include "UIModalWindowManager.h"
+#include "UIManagerStyle.h"
 #include "UINetworkManager.h"
 #include "UINotificationCenter.h"
 #include "UIQObjectStuff.h"
@@ -101,6 +102,8 @@
 # include "UIWindowMenuManager.h"
 # include "UIVersion.h"
 # include "VBoxUtils-darwin.h"
+#elif defined(VBOX_WS_WIN)
+# include "UIManagerTitleBar.h"
 #else
 # include "UIMenuBar.h"
 #endif
@@ -648,6 +651,15 @@ bool UIVirtualBoxManager::eventFilter(QObject *pObject, QEvent *pEvent)
 }
 #endif /* VBOX_WS_MAC */
 
+#ifdef VBOX_WS_WIN
+bool UIVirtualBoxManager::nativeEvent(const QByteArray &strType, void *pMessage, qintptr *pResult)
+{
+    if (m_pTitleBar && m_pTitleBar->handleFrameEvent(strType, pMessage, pResult))
+        return true;
+    return QIMainWindow::nativeEvent(strType, pMessage, pResult);
+}
+#endif
+
 void UIVirtualBoxManager::sltRetranslateUI()
 {
     /* Set window title: */
@@ -660,6 +672,7 @@ void UIVirtualBoxManager::sltRetranslateUI()
              +  QString(" - " VBOX_BLEEDING_EDGE);
 #endif /* VBOX_BLEEDING_EDGE */
     setWindowTitle(strTitle);
+    updateNavigationToggle();
 }
 
 bool UIVirtualBoxManager::event(QEvent *pEvent)
@@ -980,6 +993,9 @@ void UIVirtualBoxManager::sltExecuteHomeTask(HomeTask enmTask)
             break;
         case HomeTask_Export:
             sltOpenExportApplianceWizard();
+            break;
+        case HomeTask_Phones:
+            actionPool()->action(UIActionIndexMN_M_File_S_AndroidPhones)->trigger();
             break;
         default:
             break;
@@ -2485,9 +2501,14 @@ void UIVirtualBoxManager::prepareIcon()
 
 void UIVirtualBoxManager::prepareMenuBar()
 {
-#ifndef VBOX_WS_MAC
+#ifdef VBOX_WS_WIN
+    m_pTitleBar = new UIManagerTitleBar(this);
+    setMenuBar(m_pTitleBar);
+#elif !defined(VBOX_WS_MAC)
     /* Create menu-bar: */
     setMenuBar(new UIMenuBar);
+#endif
+#ifndef VBOX_WS_MAC
     if (menuBar())
     {
         /* Make sure menu-bar fills own solid background: */
@@ -2508,7 +2529,23 @@ void UIVirtualBoxManager::prepareMenuBar()
     m_menuUpdateHandlers[UIActionIndexMN_M_Machine_M_Console] = &UIVirtualBoxManager::updateMenuMachineConsole;
     m_menuUpdateHandlers[UIActionIndexMN_M_Machine_M_Stop] = &UIVirtualBoxManager::updateMenuMachineClose;
 
+    m_pNavigationToggle = new QAction(menuBar());
+    m_pNavigationToggle->setObjectName(QStringLiteral("managerNavigationToggle"));
+    connect(m_pNavigationToggle, &QAction::triggered, this, []
+    {
+        gEDataManager->setToolTextVisible(!gEDataManager->isToolTextVisible());
+    });
+    connect(gEDataManager, &UIExtraDataManager::sigToolLabelsVisibilityChange,
+            this, &UIVirtualBoxManager::updateNavigationToggle);
+    connect(&uiCommon(), &UICommon::sigThemeChange, this, &UIVirtualBoxManager::updateNavigationToggle);
+    connect(qApp, &QGuiApplication::layoutDirectionChanged, this, &UIVirtualBoxManager::updateNavigationToggle);
+    connect(this, &UIVirtualBoxManager::sigWindowRemapped, this, &UIVirtualBoxManager::updateNavigationToggle);
+    updateNavigationToggle();
+
     /* Build menu-bar: */
+#ifndef VBOX_WS_MAC
+    menuBar()->addAction(m_pNavigationToggle);
+#endif
     foreach (QMenu *pMenu, actionPool()->menus())
     {
 #ifdef VBOX_WS_MAC
@@ -2517,11 +2554,15 @@ void UIVirtualBoxManager::prepareMenuBar()
         {
             /* Insert 'Window' menu: */
             UIWindowMenuManager::create();
-            menuBar()->addMenu(gpWindowMenuManager->createMenu(this));
+            QMenu *pWindowMenu = gpWindowMenuManager->createMenu(this);
+            pWindowMenu->addAction(m_pNavigationToggle);
+            menuBar()->addMenu(pWindowMenu);
             gpWindowMenuManager->addWindow(this);
         }
 #endif
         menuBar()->addMenu(pMenu);
+        if (pMenu == actionPool()->action(UIActionIndexMN_M_Machine)->menu())
+            preparePhoneMenu();
     }
 #ifndef VBOX_WS_MAC
     /* Keep product information directly accessible next to Help. */
@@ -2536,6 +2577,40 @@ void UIVirtualBoxManager::prepareMenuBar()
 
     /* Setup menu-bar policy: */
     menuBar()->setContextMenuPolicy(Qt::CustomContextMenu);
+#ifdef VBOX_WS_WIN
+    m_pTitleBar->prepareFrame();
+#endif
+}
+
+void UIVirtualBoxManager::preparePhoneMenu()
+{
+    QMenu *pMenu = new QMenu(menuBar());
+    QAction *pOpenPhones = actionPool()->action(UIActionIndexMN_M_File_S_AndroidPhones);
+    pMenu->setTitle(tr("&Phone"));
+    pMenu->addAction(pOpenPhones);
+    menuBar()->addMenu(pMenu);
+    connect(&translationEventListener(), &UITranslationEventListener::sigRetranslateUI, pMenu,
+            [pMenu] { pMenu->setTitle(tr("&Phone")); });
+    connect(pMenu, &QMenu::aboutToShow, this, [this, pMenu, pOpenPhones]
+    {
+        pMenu->clear();
+        pMenu->addAction(pOpenPhones);
+        if (m_pWidget)
+            pMenu->addActions(m_pWidget->phoneMenuActions());
+    });
+}
+
+void UIVirtualBoxManager::updateNavigationToggle()
+{
+    if (!m_pNavigationToggle)
+        return;
+    const bool fExpanded = gEDataManager->isToolTextVisible();
+    const QString strAction = fExpanded ? tr("Collapse sidebar") : tr("Expand sidebar");
+    m_pNavigationToggle->setText(strAction);
+    m_pNavigationToggle->setToolTip(strAction);
+    m_pNavigationToggle->setStatusTip(strAction);
+    m_pNavigationToggle->setIcon(UIManagerStyle::navigationToggleIcon(QApplication::palette(), fExpanded,
+                                                                    layoutDirection(), devicePixelRatioF()));
 }
 
 void UIVirtualBoxManager::prepareStatusBar()
@@ -2621,6 +2696,11 @@ void UIVirtualBoxManager::prepareConnections()
             this, &UIVirtualBoxManager::sltHandleMenuPrepare);
 
     /* 'File' menu connections: */
+    UIAction *pPhonesAction = actionPool()->action(UIActionIndexMN_M_File_S_AndroidPhones);
+    connect(pPhonesAction, &UIAction::triggered, this, [this, pPhonesAction]()
+    {
+        sltPerformSwitchToTool(pPhonesAction);
+    });
     connect(actionPool()->action(UIActionIndexMN_M_File_S_ImportAppliance), &UIAction::triggered,
             this, &UIVirtualBoxManager::sltOpenImportApplianceWizard);
     connect(actionPool()->action(UIActionIndexMN_M_File_S_ExportAppliance), &UIAction::triggered,

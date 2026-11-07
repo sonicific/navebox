@@ -3,7 +3,7 @@
         BackgroundColor="#edf4ff"
         ShowNameOnSquare150x150Logo="off"
         ForegroundText="dark"
-        Square150x150Logo="VirtualBox_150px.png"
-        Square70x70Logo="VirtualBox_70px.png"
+        Square150x150Logo="navebox-150.png"
+        Square70x70Logo="navebox-70.png"
         />
 </Application>

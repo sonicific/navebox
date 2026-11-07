@@ -59,7 +59,7 @@ LIBS_MSCOM     = $(PATH_MSCOM)/lib
 
 LIBS_DEPS = "Uuid.Lib" "Ole32.Lib" "OleAut32.Lib" "OleDlg.Lib"
 
-tstVBoxAPIWin_SOURCES  = $(LIBS_MSCOM)/VirtualBox_i.c
+tstVBoxAPIWin_SOURCES  = $(LIBS_MSCOM)/Navebox_i.c
 tstVBoxAPIWin_DEPS     = $(INCS_MSCOM)
 
 COMPILER_CMDLINE = /Zi /nologo /W3 /WX- /Od /Oy- /Gm /EHsc /RTC1 /GS /fp:precise /Gd /analyze- /errorReport:queue

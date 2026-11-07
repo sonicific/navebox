@@ -47,6 +47,7 @@
 #include "UIAddDiskEncryptionPasswordDialog.h"
 #include "UIAdvancedSettingsDialogSpecific.h"
 #include "UIBootFailureDialog.h"
+#include "UIBranding.h"
 #include "UICommon.h"
 #include "UIConverter.h"
 #include "UIDesktopWidgetWatchdog.h"
@@ -1814,7 +1815,8 @@ void UIMachineLogic::sltTakeScreenshot()
     uimachine()->acquireSettingsFilePath(strSettingsFilePath);
     const QFileInfo fi(strSettingsFilePath);
     const QString strCurrentTime = QDateTime::currentDateTime().toString("dd_MM_yyyy_hh_mm_ss");
-    const QString strFormatDefaultFileName = QString("VirtualBox").append("_").append(uimachine()->machineName()).append("_").append(strCurrentTime);
+    const QString strFormatDefaultFileName = QStringLiteral("%1_%2_%3")
+        .arg(UIBranding::name(), uimachine()->machineName(), strCurrentTime);
     const QString strDefaultFileName = QDir(fi.absolutePath()).absoluteFilePath(strFormatDefaultFileName);
 
     /* Formatting temporary filename for screenshot. It is saved in system temporary directory if available, else in VM folder: */

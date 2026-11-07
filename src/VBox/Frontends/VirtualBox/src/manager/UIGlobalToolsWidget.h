@@ -39,7 +39,6 @@
 
 /* Forward declarations: */
 class QGridLayout;
-class QIToolBar;
 class UIActionPool;
 class UIChooser;
 class UIMachineToolsWidget;
@@ -67,12 +66,6 @@ public:
     /** Constructs Global Tools Widget passing @a pParent to the base-class.
       * @param  pActionPool  Brings the action-pool reference.  */
     UIGlobalToolsWidget(QWidget *pParent, UIActionPool *pActionPool);
-
-    /** @name Tool-bar stuff.
-      * @{ */
-        /** Adds tool-bar into grid layout. */
-        void addToolBar(QIToolBar *pToolBar);
-    /** @} */
 
     /** @name Tools pane stuff.
       * @{ */

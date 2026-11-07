@@ -56,7 +56,7 @@ def stage_qt(data, binary, work, env):
     """Stage runtime/plugins without registering components or installing anything."""
     qt = data['qt_root']
     run_logged([str(qt / 'bin/windeployqt.exe'), '--release', '--no-compiler-runtime',
-                '--no-translations', '--dir', str(binary), str(binary / 'VirtualBox.exe'),
+                '--no-translations', '--dir', str(binary), str(binary / 'Navebox.exe'),
                 str(binary / 'UICommon.dll')], 'qt-deployment', work, env)
     plugins = ('platforms/qminimal.dll', 'platforms/qoffscreen.dll', 'platforms/qwindows.dll',
                'sqldrivers/qsqlite.dll', 'styles/qmodernwindowsstyle.dll', 'imageformats/qico.dll',

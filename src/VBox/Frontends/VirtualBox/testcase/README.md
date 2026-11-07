@@ -24,7 +24,7 @@ available via `QT_QPA_PLATFORM_PLUGIN_PATH`. The test selects offscreen unless
 settings. Clipboard assertions run only on offscreen platforms.
 
 Set `VBOX_GUI_TEST_SNAPSHOT_DIR` to a writable directory to export the real
-About pages in light and dark palettes for visual review. No images are
+About dialog in light and dark palettes for visual review. No images are
 written when this variable is absent. An offscreen platform without system
 font discovery can load a font file specified by `VBOX_GUI_TEST_FONT`. Make
 the image-format plugins available through the normal deployment layout or
@@ -39,3 +39,24 @@ screen-edge clamping. Run them with native Windows as well as scaled offscreen
 platforms. They are regression tests, not substitutes for native Windows
 UIAutomation, screen-reader, installer or hypervisor testing.
 See `doc/navebox-release.md` at the repository root for the release matrix.
+
+Build and run `tstNaveboxPhone` alongside `tstNaveboxGui` to exercise the
+Android phone SDK adapter and manager. It copies its own executable into a
+temporary mock SDK, runs actual asynchronous subprocesses, and verifies SDK
+validation, literal Unicode/metacharacter arguments, phone creation and boot
+state, scoped ADB commands, identity changes, failure handling and catalog
+containment. The UI checks open the phone page in a stack and verify that the
+catalog and selection survive navigation, that the toolbar opens modal dialogs,
+and that phone selection updates details and enables applicable actions. The test never connects to an
+actual ADB server or touches user AVDs.
+On Windows, stage the test executable and the matching frontend/Qt runtime
+DLLs together in a separate test runtime directory if the host loader does
+not search `PATH` for private DLLs. The mock tools copy these local DLLs into
+their temporary SDK tool directories.
+Set `VBOX_GUI_TEST_SNAPSHOT_DIR` to export SDK setup, the phone list with details,
+and the creation form.
+Set `VBOX_GUI_TEST_STYLE=Windows` and `VBOX_GUI_TEST_NO_APP_STYLE=1` to check
+phone-manager geometry without the shared application stylesheet. The default
+is Fusion with the shared stylesheet. These options affect only this test.
+See
+`doc/navebox-phones.md` for the separate real-Android qualification gate.

@@ -26,12 +26,17 @@
  */
 
 /* Qt includes: */
+#include <QHBoxLayout>
+#include <QLabel>
 #include <QVBoxLayout>
 
 /* GUI includes: */
+#include "UIBranding.h"
+#include "UIExtraDataManager.h"
 #include "UITools.h"
 #include "UIToolsModel.h"
 #include "UIToolsView.h"
+#include "UIVirtualBoxManager.h"
 
 /* Other VBox includes: */
 #include "iprt/assert.h"
@@ -118,9 +123,46 @@ void UITools::prepare()
         connect(m_pToolsModel, &UIToolsModel::sigSelectionChanged,
                 this, &UITools::sigSelectionChanged);
 
+        if (m_enmClass == UIToolClass_Global)
+            prepareNavigation();
+
         /* Init model finally: */
         m_pToolsModel->init();
     }
+}
+
+void UITools::prepareNavigation()
+{
+    QWidget *pBrandHeader = new QWidget(this);
+    pBrandHeader->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    QHBoxLayout *pBrand = new QHBoxLayout(pBrandHeader);
+    pBrand->setContentsMargins(8, 3, 8, 12);
+    pBrand->setSpacing(6);
+    m_pBrandIcon = new QLabel(pBrandHeader);
+    m_pBrandIcon->setFixedSize(24, 24);
+    m_pBrandIcon->setAlignment(Qt::AlignCenter);
+    m_pBrandIcon->setToolTip(UIBranding::name());
+    pBrand->addWidget(m_pBrandIcon, 0, Qt::AlignHCenter);
+    m_pBrandName = new QLabel(UIBranding::name(), pBrandHeader);
+    QFont font = m_pBrandName->font();
+    font.setBold(true);
+    if (font.pointSizeF() > 0)
+        font.setPointSizeF(font.pointSizeF() * 1.25);
+    else
+        font.setPixelSize(qRound(font.pixelSize() * 1.25));
+    m_pBrandName->setFont(font);
+    pBrand->addWidget(m_pBrandName, 1);
+    m_pMainLayout->insertWidget(0, pBrandHeader);
+
+    connect(gEDataManager, &UIExtraDataManager::sigToolLabelsVisibilityChange, this, &UITools::sltUpdateNavigation);
+    connect(gpManager, &UIVirtualBoxManager::sigWindowRemapped, this, &UITools::sltUpdateNavigation);
+    sltUpdateNavigation();
+}
+
+void UITools::sltUpdateNavigation()
+{
+    m_pBrandName->setVisible(gEDataManager->isToolTextVisible());
+    m_pBrandIcon->setPixmap(UIBranding::icon().pixmap(m_pBrandIcon->size(), devicePixelRatioF()));
 }
 
 void UITools::cleanup()

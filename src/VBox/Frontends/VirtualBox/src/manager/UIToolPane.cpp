@@ -27,10 +27,14 @@
 
 /* Qt includes: */
 #include <QApplication>
+#include <QEvent>
+#include <QFrame>
+#include <QHBoxLayout>
+#include <QLabel>
 #include <QStackedLayout>
-#ifndef VBOX_WS_MAC
-# include <QStyle>
-#endif
+#include <QStyle>
+#include <QStylePainter>
+#include <QVBoxLayout>
 
 /* GUI includes */
 #include "UICloudProfileManager.h"
@@ -42,10 +46,14 @@
 #include "UIGlobalSession.h"
 #include "UIHomePane.h"
 #include "UIMachineToolsWidget.h"
+#include "UIManagerStyle.h"
 #include "UIMediumManager.h"
 #include "UINetworkManager.h"
+#include "UIPhoneManager.h"
 #include "UISnapshotPane.h"
 #include "UIToolPane.h"
+#include "UIToolsItem.h"
+#include "UITranslationEventListener.h"
 #include "UIVirtualMachineItem.h"
 #include "UIVMActivityOverviewWidget.h"
 #include "UIVMActivityToolWidget.h"
@@ -62,8 +70,10 @@ UIToolPane::UIToolPane(QWidget *pParent, UIToolClass enmClass, UIActionPool *pAc
     , m_fActive(false)
     , m_pLayout(0)
     // Global tools
+    , m_pToolBar(0)
     , m_pPaneHome(0)
     , m_pPaneMachines(0)
+    , m_pPanePhones(0)
     , m_pPaneExtensions(0)
     , m_pPaneMedia(0)
     , m_pPaneNetwork(0)
@@ -114,6 +124,9 @@ bool UIToolPane::isToolOpened(UIToolType enmType) const
 
 void UIToolPane::openTool(UIToolType enmType)
 {
+    if (enmType == UIToolType_Phones)
+        phoneManager();
+
     /* Search through the stacked widgets: */
     int iActualIndex = -1;
     for (int iIndex = 0; iIndex < m_pLayout->count(); ++iIndex)
@@ -143,8 +156,7 @@ void UIToolPane::openTool(UIToolType enmType)
                     connect(m_pPaneHome, &UIHomePane::sigHomeTask, this, &UIToolPane::sigHomeTask);
 
                     /* Add into layout: */
-                    m_pLayout->addWidget(m_pPaneHome);
-                    m_pLayout->setCurrentWidget(m_pPaneHome);
+                    addToolWidget(m_pPaneHome);
                 }
                 break;
             }
@@ -157,14 +169,9 @@ void UIToolPane::openTool(UIToolType enmType)
                     /* Configure pane: */
                     m_pPaneMachines->setProperty("ToolType", QVariant::fromValue(UIToolType_Machines));
                     /// @todo connect!
-#ifndef VBOX_WS_MAC
-                    const int iMargin = qApp->style()->pixelMetric(QStyle::PM_LayoutLeftMargin) / 4;
-                    m_pPaneMachines->setContentsMargins(iMargin, 0, iMargin, 0);
-#endif
 
                     /* Add into layout: */
-                    m_pLayout->addWidget(m_pPaneMachines);
-                    m_pLayout->setCurrentWidget(m_pPaneMachines);
+                    addToolWidget(m_pPaneMachines);
                 }
                 break;
             }
@@ -176,14 +183,9 @@ void UIToolPane::openTool(UIToolType enmType)
                 {
                     /* Configure pane: */
                     m_pPaneExtensions->setProperty("ToolType", QVariant::fromValue(UIToolType_Extensions));
-#ifndef VBOX_WS_MAC
-                    const int iMargin = qApp->style()->pixelMetric(QStyle::PM_LayoutLeftMargin) / 4;
-                    m_pPaneExtensions->setContentsMargins(iMargin, 0, iMargin, 0);
-#endif
 
                     /* Add into layout: */
-                    m_pLayout->addWidget(m_pPaneExtensions);
-                    m_pLayout->setCurrentWidget(m_pPaneExtensions);
+                    addToolWidget(m_pPaneExtensions);
                 }
                 break;
             }
@@ -199,14 +201,9 @@ void UIToolPane::openTool(UIToolType enmType)
                             this, &UIToolPane::sigCreateMedium);
                     connect(m_pPaneMedia, &UIMediumManagerWidget::sigCopyMedium,
                             this, &UIToolPane::sigCopyMedium);
-#ifndef VBOX_WS_MAC
-                    const int iMargin = qApp->style()->pixelMetric(QStyle::PM_LayoutLeftMargin) / 4;
-                    m_pPaneMedia->setContentsMargins(iMargin, 0, iMargin, 0);
-#endif
 
                     /* Add into layout: */
-                    m_pLayout->addWidget(m_pPaneMedia);
-                    m_pLayout->setCurrentWidget(m_pPaneMedia);
+                    addToolWidget(m_pPaneMedia);
                 }
                 break;
             }
@@ -218,14 +215,9 @@ void UIToolPane::openTool(UIToolType enmType)
                 {
                     /* Configure pane: */
                     m_pPaneNetwork->setProperty("ToolType", QVariant::fromValue(UIToolType_Network));
-#ifndef VBOX_WS_MAC
-                    const int iMargin = qApp->style()->pixelMetric(QStyle::PM_LayoutLeftMargin) / 4;
-                    m_pPaneNetwork->setContentsMargins(iMargin, 0, iMargin, 0);
-#endif
 
                     /* Add into layout: */
-                    m_pLayout->addWidget(m_pPaneNetwork);
-                    m_pLayout->setCurrentWidget(m_pPaneNetwork);
+                    addToolWidget(m_pPaneNetwork);
                 }
                 break;
             }
@@ -237,14 +229,9 @@ void UIToolPane::openTool(UIToolType enmType)
                 {
                     /* Configure pane: */
                     m_pPaneCloud->setProperty("ToolType", QVariant::fromValue(UIToolType_Cloud));
-#ifndef VBOX_WS_MAC
-                    const int iMargin = qApp->style()->pixelMetric(QStyle::PM_LayoutLeftMargin) / 4;
-                    m_pPaneCloud->setContentsMargins(iMargin, 0, iMargin, 0);
-#endif
 
                     /* Add into layout: */
-                    m_pLayout->addWidget(m_pPaneCloud);
-                    m_pLayout->setCurrentWidget(m_pPaneCloud);
+                    addToolWidget(m_pPaneCloud);
                 }
                 break;
             }
@@ -259,14 +246,9 @@ void UIToolPane::openTool(UIToolType enmType)
                     connect(m_pPaneVMActivityOverview, &UIVMActivityOverviewWidget::sigSwitchToMachineActivityPane,
                             this, &UIToolPane::sigSwitchToMachineActivityPane);
                     m_pPaneVMActivityOverview->setCloudMachineItems(m_cloudItems);
-#ifndef VBOX_WS_MAC
-                    const int iMargin = qApp->style()->pixelMetric(QStyle::PM_LayoutLeftMargin) / 4;
-                    m_pPaneVMActivityOverview->setContentsMargins(iMargin, 0, iMargin, 0);
-#endif
 
                     /* Add into layout: */
-                    m_pLayout->addWidget(m_pPaneVMActivityOverview);
-                    m_pLayout->setCurrentWidget(m_pPaneVMActivityOverview);
+                    addToolWidget(m_pPaneVMActivityOverview);
                 }
                 break;
             }
@@ -284,8 +266,7 @@ void UIToolPane::openTool(UIToolType enmType)
 #endif
 
                     /* Add into layout: */
-                    m_pLayout->addWidget(m_pPaneError);
-                    m_pLayout->setCurrentWidget(m_pPaneError);
+                    addToolWidget(m_pPaneError);
                 }
                 break;
             }
@@ -303,8 +284,7 @@ void UIToolPane::openTool(UIToolType enmType)
                     m_pPaneDetails->setItems(m_items);
 
                     /* Add into layout: */
-                    m_pLayout->addWidget(m_pPaneDetails);
-                    m_pLayout->setCurrentWidget(m_pPaneDetails);
+                    addToolWidget(m_pPaneDetails);
                 }
                 break;
             }
@@ -325,8 +305,7 @@ void UIToolPane::openTool(UIToolType enmType)
 #endif
 
                     /* Add into layout: */
-                    m_pLayout->addWidget(m_pPaneSnapshots);
-                    m_pLayout->setCurrentWidget(m_pPaneSnapshots);
+                    addToolWidget(m_pPaneSnapshots);
                 }
                 break;
             }
@@ -347,8 +326,7 @@ void UIToolPane::openTool(UIToolType enmType)
 #endif
 
                     /* Add into layout: */
-                    m_pLayout->addWidget(m_pPaneLogViewer);
-                    m_pLayout->setCurrentWidget(m_pPaneLogViewer);
+                    addToolWidget(m_pPaneLogViewer);
                 }
                 break;
             }
@@ -370,8 +348,7 @@ void UIToolPane::openTool(UIToolType enmType)
 #endif
 
                     /* Add into layout: */
-                    m_pLayout->addWidget(m_pPaneVMActivityTool);
-                    m_pLayout->setCurrentWidget(m_pPaneVMActivityTool);
+                    addToolWidget(m_pPaneVMActivityTool);
                 }
                 break;
             }
@@ -396,8 +373,7 @@ void UIToolPane::openTool(UIToolType enmType)
 #endif
 
                     /* Add into layout: */
-                    m_pLayout->addWidget(m_pPaneFileManager);
-                    m_pLayout->setCurrentWidget(m_pPaneFileManager);
+                    addToolWidget(m_pPaneFileManager);
                 }
                 break;
             }
@@ -426,6 +402,7 @@ void UIToolPane::closeTool(UIToolType enmType)
         {
             case UIToolType_Home:        m_pPaneHome = 0; break;
             case UIToolType_Machines:    m_pPaneMachines = 0; break;
+            case UIToolType_Phones:      m_pPanePhones = 0; break;
             case UIToolType_Extensions:  m_pPaneExtensions = 0; break;
             case UIToolType_Media:       m_pPaneMedia = 0; break;
             case UIToolType_Network:     m_pPaneNetwork = 0; break;
@@ -459,6 +436,9 @@ QString UIToolPane::currentHelpKeyword() const
             break;
         case UIToolType_Machines:
             pCurrentToolWidget = m_pPaneMachines;
+            break;
+        case UIToolType_Phones:
+            pCurrentToolWidget = m_pPanePhones;
             break;
         case UIToolType_Extensions:
             pCurrentToolWidget = m_pPaneExtensions;
@@ -497,6 +477,25 @@ QString UIToolPane::currentHelpKeyword() const
             break;
     }
     return uiCommon().helpKeyword(pCurrentToolWidget);
+}
+
+void UIToolPane::setToolBar(QWidget *pToolBar)
+{
+    AssertReturnVoid(m_enmClass == UIToolClass_Global && !m_pToolBar);
+    m_pToolBar = pToolBar;
+    updateToolBarPlacement();
+}
+
+UIPhoneManager *UIToolPane::phoneManager()
+{
+    AssertReturn(m_enmClass == UIToolClass_Global, 0);
+    if (!m_pPanePhones)
+    {
+        m_pPanePhones = new UIPhoneManager(this);
+        m_pPanePhones->setProperty("ToolType", QVariant::fromValue(UIToolType_Phones));
+        m_pLayout->addWidget(createToolCard(m_pPanePhones, UIToolType_Phones));
+    }
+    return m_pPanePhones;
 }
 
 UIMachineToolsWidget *UIToolPane::machineToolsWidget() const
@@ -589,7 +588,26 @@ void UIToolPane::sltDetachToolPane()
 void UIToolPane::prepare()
 {
     /* Create stacked-layout: */
-    m_pLayout = new QStackedLayout(this);
+    m_pLayout = new QStackedLayout;
+    m_pLayout->setContentsMargins(0, 0, 0, 0);
+    if (m_enmClass == UIToolClass_Global)
+    {
+        QVBoxLayout *pOuterLayout = new QVBoxLayout(this);
+        pOuterLayout->setContentsMargins(0, 0, 0, 0);
+        pOuterLayout->setSpacing(0);
+        pOuterLayout->addLayout(m_pLayout);
+        setStyleSheet(UIManagerStyle::toolPageStyleSheet(QApplication::palette()));
+        connect(m_pLayout, &QStackedLayout::currentChanged, this, [this, pOuterLayout]
+        {
+            /* Home applies the same gutter inside its scroll area. */
+            const bool fCard = currentTool() != UIToolType_Home && currentTool() != UIToolType_Invalid;
+            const int iInset = fCard ? UIManagerStyle::pageInset() : 0;
+            pOuterLayout->setContentsMargins(iInset, fCard ? 12 : 0, iInset, iInset);
+            updateToolBarPlacement();
+        });
+    }
+    else
+        setLayout(m_pLayout);
 
     /* Open default tools: */
     switch (m_enmClass)
@@ -612,6 +630,149 @@ void UIToolPane::prepare()
         }
         default:
             break;
+    }
+}
+
+void UIToolPane::addToolWidget(QWidget *pWidget)
+{
+    const UIToolType enmType = pWidget->property("ToolType").value<UIToolType>();
+    if (m_enmClass == UIToolClass_Global && enmType != UIToolType_Home)
+        pWidget = createToolCard(pWidget, enmType);
+    m_pLayout->addWidget(pWidget);
+    m_pLayout->setCurrentWidget(pWidget);
+}
+
+/** Draws one line of header text while retaining the full accessible label. */
+class UIToolHeaderLabel : public QLabel
+{
+public:
+    /** Constructs the label with the given @a pParent. */
+    explicit UIToolHeaderLabel(QWidget *pParent)
+        : QLabel(pParent)
+    {
+        setTextFormat(Qt::PlainText);
+        setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    }
+
+    /** Allows the toolbar and the text to share a narrow header. */
+    virtual QSize minimumSizeHint() const RT_OVERRIDE
+    {
+        const QSize size = sizeHint();
+        return QSize(qMin(size.width(), 12 * fontMetrics().averageCharWidth()), size.height());
+    }
+
+protected:
+    /** Draws the label with an ellipsis if the text exceeds the available width. */
+    virtual void paintEvent(QPaintEvent *) RT_OVERRIDE
+    {
+        QStylePainter painter(this);
+        painter.setFont(font());
+        const QRect bounds = contentsRect();
+        const QString strText = fontMetrics().elidedText(text(), Qt::ElideRight, bounds.width());
+        painter.drawItemText(bounds, QStyle::visualAlignment(layoutDirection(), alignment()),
+                             palette(), isEnabled(), strText, foregroundRole());
+    }
+};
+
+/** Returns the localized description of a Manager tool. */
+static QString uiToolPaneDescription(UIToolType enmType)
+{
+    switch (enmType)
+    {
+        case UIToolType_Machines:   return UIToolPane::tr("Manage virtual machines, snapshots and settings.");
+        case UIToolType_Phones:     return UIToolPane::tr("Create and manage your Android virtual devices.");
+        case UIToolType_Extensions: return UIToolPane::tr("View and manage installed extension packs.");
+        case UIToolType_Media:      return UIToolPane::tr("Manage virtual hard disks, optical images and floppy disks.");
+        case UIToolType_Network:    return UIToolPane::tr("Manage host-only, NAT and cloud networks.");
+        case UIToolType_Cloud:      return UIToolPane::tr("Manage profiles that connect to your cloud providers.");
+        case UIToolType_Resources:  return UIToolPane::tr("Monitor host resources and virtual machine activity.");
+        default:                   return QString();
+    }
+}
+
+QWidget *UIToolPane::createToolCard(QWidget *pTool, UIToolType enmType)
+{
+    QFrame *pCard = new QFrame(this);
+    pCard->setObjectName(QStringLiteral("managerToolCard"));
+    pCard->setProperty("ToolType", QVariant::fromValue(enmType));
+    QVBoxLayout *pLayout = new QVBoxLayout(pCard);
+    pLayout->setContentsMargins(20, 10, 20, 20);
+    pLayout->setSpacing(8);
+
+    QWidget *pHeader = new QWidget(pCard);
+    pHeader->setObjectName(QStringLiteral("managerPageHeader"));
+    QHBoxLayout *pHeading = new QHBoxLayout(pHeader);
+    pHeading->setContentsMargins(0, 0, 0, 0);
+    pHeading->setSpacing(12);
+    QLabel *pIcon = new QLabel(pHeader);
+    pIcon->setObjectName(QStringLiteral("managerPageIcon"));
+    pIcon->setFixedSize(42, 42);
+    pIcon->setAlignment(Qt::AlignCenter);
+    pIcon->setPixmap(UIToolsItem::typeToIcon(enmType).pixmap(QSize(24, 24), pCard->devicePixelRatioF()));
+    pHeading->addWidget(pIcon, 0, Qt::AlignVCenter);
+
+    QWidget *pText = new QWidget(pHeader);
+    QLabel *pTitle = new UIToolHeaderLabel(pText);
+    pTitle->setObjectName(QStringLiteral("managerPageTitle"));
+    QLabel *pDescription = new UIToolHeaderLabel(pText);
+    pDescription->setObjectName(QStringLiteral("managerPageDescription"));
+    QVBoxLayout *pLabels = new QVBoxLayout(pText);
+    pLabels->setContentsMargins(0, 0, 0, 0);
+    pLabels->setSpacing(0);
+    pLabels->addWidget(pTitle);
+    pLabels->addWidget(pDescription);
+    pHeading->addWidget(pText, 1, Qt::AlignVCenter);
+    pLayout->addWidget(pHeader);
+
+    const auto retranslateHeader = [pTitle, pDescription, enmType]
+    {
+        pTitle->setText(UIToolsItem::typeToName(enmType));
+        pTitle->setToolTip(pTitle->text());
+        pDescription->setText(uiToolPaneDescription(enmType));
+        pDescription->setToolTip(pDescription->text());
+    };
+    connect(&translationEventListener(), &UITranslationEventListener::sigRetranslateUI, pCard, retranslateHeader);
+    retranslateHeader();
+
+    QFrame *pDivider = new QFrame(pCard);
+    pDivider->setObjectName(QStringLiteral("managerPageDivider"));
+    pDivider->setFixedHeight(1);
+    pLayout->addWidget(pDivider);
+    pLayout->addWidget(pTool, 1);
+    return pCard;
+}
+
+void UIToolPane::updateToolBarPlacement()
+{
+    if (!m_pToolBar)
+        return;
+
+    QWidget *pPage = m_pLayout->currentWidget();
+    QWidget *pHeader = pPage ? pPage->findChild<QWidget*>(QStringLiteral("managerPageHeader"),
+                                                          Qt::FindDirectChildrenOnly) : 0;
+    if (pHeader)
+    {
+        if (pHeader->layout()->indexOf(m_pToolBar) < 0)
+            pHeader->layout()->addWidget(m_pToolBar);
+        m_pToolBar->show();
+    }
+    else
+    {
+        /* Park it outside the stack so removing the old page cannot delete it. */
+        m_pToolBar->hide();
+        m_pToolBar->setParent(this);
+    }
+}
+
+void UIToolPane::changeEvent(QEvent *pEvent)
+{
+    QWidget::changeEvent(pEvent);
+    if (   m_enmClass == UIToolClass_Global
+        && (pEvent->type() == QEvent::PaletteChange || pEvent->type() == QEvent::ApplicationPaletteChange))
+    {
+        const QString strStyle = UIManagerStyle::toolPageStyleSheet(QApplication::palette());
+        if (styleSheet() != strStyle)
+            setStyleSheet(strStyle);
     }
 }
 

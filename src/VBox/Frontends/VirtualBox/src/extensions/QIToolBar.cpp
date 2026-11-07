@@ -64,11 +64,8 @@ void QIToolBar::setUseTextLabels(bool fEnable)
 
 bool QIToolBar::useTextLabels() const
 {
-    /* Depending on parent, return the style: */
-    if (m_pMainWindow)
-        return m_pMainWindow->toolButtonStyle() == Qt::ToolButtonTextUnderIcon;
-    else
-        return toolButtonStyle() == Qt::ToolButtonTextUnderIcon;
+    const Qt::ToolButtonStyle enmStyle = m_pMainWindow ? m_pMainWindow->toolButtonStyle() : toolButtonStyle();
+    return enmStyle == Qt::ToolButtonTextUnderIcon || enmStyle == Qt::ToolButtonTextBesideIcon;
 }
 
 #ifdef VBOX_WS_MAC

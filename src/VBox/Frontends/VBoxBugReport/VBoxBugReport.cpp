@@ -620,7 +620,12 @@ static void createBugReport(BugReport* report, const char *pszHome, MachineInfoL
         pcszSvcLogFile = HomeDir.next();
     }
 
-    report->addItem(new BugReportFile(PathJoin(pszHome, "VirtualBox.xml"), "VirtualBox.xml"));
+#ifdef RT_OS_WINDOWS
+    const char *pszSettings = RTFileExists(PathJoin(pszHome, "Navebox.xml")) ? "Navebox.xml" : "VirtualBox.xml";
+#else
+    const char *pszSettings = "VirtualBox.xml";
+#endif
+    report->addItem(new BugReportFile(PathJoin(pszHome, pszSettings), pszSettings));
     report->addItem(new BugReportCommand("HostUsbDevices", g_pszVBoxManage, "list", "usbhost", NULL));
     report->addItem(new BugReportCommand("HostUsbFilters", g_pszVBoxManage, "list", "usbfilters", NULL));
 

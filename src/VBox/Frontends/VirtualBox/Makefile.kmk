@@ -69,6 +69,7 @@ ifdef VBOX_WITH_HARDENING
  VirtualBoxHardenedVM_TEMPLATE = VBoxR3HardenedExe
  VirtualBoxHardenedVM_INST.darwin = $(INST_VIRTUALBOX)Contents/Resources/VirtualBoxVM.app/Contents/MacOS/
  VirtualBoxHardenedVM_NAME = VirtualBoxVM
+ VirtualBoxHardenedVM_NAME.win = NaveboxVM
  VirtualBoxHardenedVM_DEFS += $(if $(VBOX_WITH_DRIVERLESS_NEM_FALLBACK),VBOX_WITH_DRIVERLESS_NEM_FALLBACK,)
  VirtualBoxHardenedVM_SOURCES = src/hardenedmain.cpp
  VirtualBoxHardenedVM_LDFLAGS.win = /SUBSYSTEM:$(if-expr "$(KBUILD_TYPE)" != "release",console,windows)
@@ -106,6 +107,7 @@ endif
 #
 VirtualBox_TEMPLATE      := VBoxQtGuiExe
 VirtualBox_NAME           = VirtualBox
+VirtualBox_NAME.win       = Navebox
 VirtualBox_DEPS           = $(UICommon_0_OUTDIR)/include/COMWrappers
 VirtualBox_SDKS.win       = ReorderCompilerIncs $(VBOX_WINPSDK) $(VBOX_WINDDK)
 VirtualBox_DEFS           =
@@ -168,6 +170,7 @@ endif
 #
 VirtualBoxVM_TEMPLATE       := $(if $(VBOX_WITH_HARDENING),VBoxQtGuiDll,VBoxQtGuiSignedExe)
 VirtualBoxVM_NAME           = VirtualBoxVM
+VirtualBoxVM_NAME.win       = NaveboxVM
 ifndef VBOX_WITH_HARDENING
  VirtualBoxVM_INST.darwin   = $(INST_VIRTUALBOX)Contents/Resources/VirtualBoxVM.app/Contents/MacOS/
 endif
@@ -340,6 +343,7 @@ VBOX_GUI_INC_DIRS += \
 	./src/manager/chooser \
 	./src/manager/details \
 	./src/manager/tools \
+	./src/phone \
 	./src/activity \
 	./src/activity/overview \
 	./src/activity/vmactivity
@@ -491,7 +495,8 @@ VirtualBox_LIBS.win = \
 	$(PATH_SDK_$(VBOX_WINPSDK)_LIB)/Htmlhelp.Lib
 VirtualBox_LIBS.win += \
 	$(PATH_SDK_$(VBOX_WINPSDK)_LIB)/ddraw.lib \
-	$(PATH_SDK_$(VBOX_WINPSDK)_LIB)/dxguid.lib
+	$(PATH_SDK_$(VBOX_WINPSDK)_LIB)/dxguid.lib \
+	$(PATH_SDK_$(VBOX_WINPSDK)_LIB)/dwmapi.lib
 
 # VBox keyboard shared library for X11 hosts:
 if1of ($(KBUILD_TARGET), freebsd linux netbsd openbsd solaris)
@@ -563,6 +568,8 @@ endif
 # Headers containing definitions of classes that use the Q_OBJECT macro.
 #
 VirtualBox_QT_MOCHDRS = \
+	src/phone/UIPhoneBackend.h \
+	src/phone/UIPhoneManager.h \
 	src/cloud/UICloudMachineManager.h \
 	src/cloud/consolemanager/UICloudConsoleDetailsWidget.h \
 	src/cloud/consolemanager/UICloudConsoleManager.h \
@@ -1103,6 +1110,8 @@ VBOX_GH_SOURCES := \
 #
 VirtualBox_SOURCES = \
 	src/main.cpp \
+	src/phone/UIPhoneBackend.cpp \
+	src/phone/UIPhoneManager.cpp \
 	src/cloud/UICloudMachineManager.cpp \
 	src/cloud/consolemanager/UICloudConsoleDetailsWidget.cpp \
 	src/cloud/consolemanager/UICloudConsoleManager.cpp \
@@ -1225,6 +1234,7 @@ if1of ($(KBUILD_TARGET), freebsd linux netbsd openbsd solaris) # U*nix
 endif
 
 VirtualBox_SOURCES.win += \
+	src/manager/UIManagerTitleBar.cpp \
 	src/platform/win/UIDesktopServices_win.cpp
 
 $(call VBOX_SET_VER_INFO_EXE,VirtualBox,Navebox,$(VBOX_WINDOWS_ICON_FILE),Navebox.exe)
@@ -1308,7 +1318,7 @@ if1of ($(KBUILD_TARGET), freebsd linux netbsd openbsd solaris) # U*nix
 endif
 
 ifdef VBOX_WITH_HARDENING
- $(call VBOX_SET_VER_INFO_DLL,VirtualBoxVM,VirtualBox Virtual Machine (dll),$(VBOX_WINDOWS_ICON_FILE))
+ $(call VBOX_SET_VER_INFO_DLL,VirtualBoxVM,Navebox Virtual Machine (dll),$(VBOX_WINDOWS_ICON_FILE))
 else
  $(call VBOX_SET_VER_INFO_EXE,VirtualBoxVM,Navebox Virtual Machine,$(VBOX_WINDOWS_ICON_FILE))
 endif
@@ -1699,8 +1709,19 @@ $(VBOX_VIRTUALBOX_OUT_DIR)/VirtualBoxBrand.qrc_RCCFLAGS = -name BRAND
 
 
 # Import the translation source from VBoxUI.pro and add the qt_xx_YY counterparts
-VirtualBox_QT_TRANSLATIONS := $(TRANSLATIONS) \
+VBOX_GUI_TRANSLATION_SOURCES := $(TRANSLATIONS) \
 	$(patsubst nls/VirtualBox_%.ts,nls/qt_%.ts, $(filter nls/VirtualBox_%.ts,$(TRANSLATIONS)))
+VirtualBox_QT_TRANSLATIONS := $(VBOX_GUI_TRANSLATION_SOURCES)
+ifeq ($(KBUILD_TARGET),win)
+ # Qt names each .qm after its input. Keep the source catalogs for lupdate.
+ VBOX_GUI_BRANDED_NLS_DIR := $(VBOX_VIRTUALBOX_OUT_DIR)/nls
+ BLDDIRS += $(VBOX_GUI_BRANDED_NLS_DIR)/
+ VirtualBox_QT_TRANSLATIONS := $(patsubst nls/VirtualBox_%.ts,$(VBOX_GUI_BRANDED_NLS_DIR)/Navebox_%.ts,$(VBOX_GUI_TRANSLATION_SOURCES))
+ VirtualBox_CLEAN += $(filter $(VBOX_GUI_BRANDED_NLS_DIR)/%,$(VirtualBox_QT_TRANSLATIONS))
+
+ $(filter $(VBOX_GUI_BRANDED_NLS_DIR)/%,$(VirtualBox_QT_TRANSLATIONS)): $(VBOX_GUI_BRANDED_NLS_DIR)/Navebox_%.ts: $(PATH_SUB_CURRENT)/nls/VirtualBox_%.ts | $$(dir $$@)
+	$(CP) --changed -f -- $< $@
+endif
 # Compress the translation units.
 VirtualBox_LRCFLAGS = -silent
 # Where to install the translations (a separate install target, VirtualBox-nls-inst is created).
@@ -1853,24 +1874,13 @@ ifeq ($(KBUILD_TARGET),win)
  #
  # Install the visual manifest and associated PNGs.
  #
- INSTALLS.win += VirtualBoxManifest
- VirtualBoxManifest_INST = $(INST_VIRTUALBOX)
- VirtualBoxManifest_DEFPATH = $(VBOX_NAVEBOX_BRAND_DIR)/
- VirtualBoxManifest_SOURCES := \
- 	navebox-70.png=>VirtualBox_70px.png \
- 	navebox-150.png=>VirtualBox_150px.png \
- 	$(PATH_SUB_CURRENT)/src/platform/win/VirtualBox.VisualElementsManifest.xml \
- 	$(PATH_SUB_CURRENT)/src/platform/win/VirtualBox.VisualElementsManifest.xml=>Navebox.VisualElementsManifest.xml
-
- #
- # Branded entry point, alongside the internal compatibility executable.
- #
- TEMPLATE_VBoxNaveboxLauncher = Navebox launcher installation
- TEMPLATE_VBoxNaveboxLauncher_INST = $(INST_VIRTUALBOX)
- TEMPLATE_VBoxNaveboxLauncher_MODE = 755
- INSTALLS.win += NaveboxLauncher
- NaveboxLauncher_TEMPLATE = VBoxNaveboxLauncher
- NaveboxLauncher_SOURCES = $(VirtualBox_1_TARGET)=>Navebox.exe
+ INSTALLS.win += NaveboxManifest
+ NaveboxManifest_INST = $(INST_VIRTUALBOX)
+ NaveboxManifest_DEFPATH = $(VBOX_NAVEBOX_BRAND_DIR)/
+ NaveboxManifest_SOURCES := \
+	navebox-70.png \
+	navebox-150.png \
+	$(PATH_SUB_CURRENT)/src/platform/win/Navebox.VisualElementsManifest.xml
 
 endif
 
@@ -2013,6 +2023,37 @@ ifdef VBOX_WITH_TESTCASES
   tstNaveboxGui_LIBS += $(PATH_STAGE_DLL)/UICommon$(VBOX_SUFF_DLL)
  endif
 
+#
+# Android phone SDK adapter and dialog tests use an isolated executable mock SDK.
+#
+PROGRAMS += tstNaveboxPhone
+tstNaveboxPhone_TEMPLATE = VBoxQtGuiExe
+tstNaveboxPhone_INST = $(INST_TESTCASE)
+tstNaveboxPhone_INCS = $(VBOX_GUI_INC_DIRS) $(UICommon_0_OUTDIR)/include
+tstNaveboxPhone_DEFS.win = VBOX_WS_WIN
+tstNaveboxPhone_DEFS.darwin = VBOX_WS_MAC
+tstNaveboxPhone_DEFS.linux = VBOX_WS_NIX
+tstNaveboxPhone_DEFS.freebsd = VBOX_WS_NIX
+tstNaveboxPhone_DEFS.solaris = VBOX_WS_NIX
+tstNaveboxPhone_QT_MOCHDRS = \
+	src/phone/UIPhoneBackend.h \
+	src/phone/UIPhoneManager.h
+tstNaveboxPhone_SOURCES = \
+	testcase/tstNaveboxPhone.cpp \
+	src/globals/UIAppearance.cpp \
+	src/manager/UIManagerStyle.cpp \
+	src/phone/UIPhoneBackend.cpp \
+	src/phone/UIPhoneManager.cpp
+tstNaveboxPhone_QT_MODULES = Core Gui Widgets
+tstNaveboxPhone_CXXFLAGS.win = /permissive-
+tstNaveboxPhone_LIBS = $(LIB_RUNTIME)
+ ifeq ($(KBUILD_TARGET),win)
+tstNaveboxPhone_LIBS += $(PATH_STAGE_LIB)/UICommon$(VBOX_SUFF_LIB)
+tstNaveboxPhone_LDFLAGS.win = /SUBSYSTEM:console
+ else
+tstNaveboxPhone_LIBS += $(PATH_STAGE_DLL)/UICommon$(VBOX_SUFF_DLL)
+ endif
+
  # Testcase for the darwin keyboard routines.
  PROGRAMS.darwin += tstDarwinKeyboard
  tstDarwinKeyboard_TEMPLATE = VBoxR3TstExe
@@ -2151,7 +2192,7 @@ include $(FILE_KBUILD_SUB_FOOTER)
 #VirtualBox_QT_TRANSLATIONS = nls/VirtualBox_de.ts
 checknls::
         # Check for missing :/ in image paths
-	grep -i "src=[^:%]" $(filter-out nls/qt_%.ts,$(VirtualBox_QT_TRANSLATIONS))
+	grep -i "src=[^:%]" $(filter-out nls/qt_%.ts,$(VBOX_GUI_TRANSLATION_SOURCES))
 
 updatenls:: makeallnls nls/VirtualBox_en.ts
 
@@ -2163,7 +2204,7 @@ makeallnls:: \
 		$^ \
 		-locations none \
 		-ts \
-		$(filter-out nls/VirtualBox_en.ts,$(filter-out nls/qt_%.ts,$(VirtualBox_QT_TRANSLATIONS))) \
+		$(filter-out nls/VirtualBox_en.ts,$(filter-out nls/qt_%.ts,$(VBOX_GUI_TRANSLATION_SOURCES))) \
 		nls/VirtualBox_xx_YY.ts
 
 # Create the English translation file. This is something special cause it will

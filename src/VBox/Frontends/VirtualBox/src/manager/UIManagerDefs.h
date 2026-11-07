@@ -40,6 +40,7 @@ enum HomeTask
     HomeTask_Open,
     HomeTask_Import,
     HomeTask_Export,
+    HomeTask_Phones,
 };
 
 /** Virtual machine item types. */

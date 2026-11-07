@@ -33,7 +33,7 @@
 
 /* Qt includes: */
 #include <QIcon>
-#include <QMap>
+#include <QList>
 #include <QWidget>
 
 /* GUI includes: */
@@ -41,9 +41,11 @@
 #include "UIManagerDefs.h"
 
 /* Forward declarations: */
-class QAbstractButton;
+class QFrame;
 class QLabel;
-class QIRichTextLabel;
+class QPushButton;
+class QVBoxLayout;
+class UIHomeActionButton;
 
 /** QWidget subclass holding Home information about VirtualBox. */
 class UIHomePane : public QWidget
@@ -65,13 +67,10 @@ protected:
     /** Handles any Qt @a pEvent. */
     virtual bool event(QEvent *pEvent) RT_OVERRIDE;
 
+    /** Hides the decorative artwork when the pane is narrow. */
+    virtual void resizeEvent(QResizeEvent *pEvent) RT_OVERRIDE;
+
 private slots:
-
-    /** Handles activated @a urlLink. */
-    void sltHandleLinkActivated(const QUrl &urlLink);
-
-    /** Handles @a pButton click. */
-    void sltHandleButtonClicked(QAbstractButton *pButton);
 
     /** Handles translation event. */
     void sltRetranslateUI();
@@ -80,23 +79,41 @@ private:
 
     /** Prepares all. */
     void prepare();
+    /** Adds the branded header to @a pLayout. */
+    void prepareHeader(QVBoxLayout *pLayout);
+    /** Adds the quick actions to @a pLayout. */
+    void prepareActions(QVBoxLayout *pLayout);
+    /** Adds the first-run experience mode chooser to @a pLayout. */
+    void prepareExperienceMode(QVBoxLayout *pLayout);
+    /** Applies and saves the selected experience mode. */
+    void chooseExperienceMode(bool fExpertMode);
+    /** Updates the panel and row colors to match the current palette. */
+    void updateAppearance();
+    /** Refreshes the artwork and icons for the current device pixel ratio. */
+    void updatePixmaps();
 
-    /** Updates pixmap. */
-    void updatePixmap();
-    /** Updates text labels. */
-    void updateTextLabels();
-
-    /** Holds the icon instance. */
-    QIcon  m_icon;
-
-    /** Holds the greetings label instance. */
-    QIRichTextLabel              *m_pLabelGreetings;
-    /** Holds the mode label instance. */
-    QIRichTextLabel              *m_pLabelMode;
-    /** Holds a list of experience mode button instances. */
-    QMap<bool, QAbstractButton*>  m_buttons;
-    /** Holds the icon label instance. */
-    QLabel                       *m_pLabelIcon;
+    /** Holds the main Home card. */
+    QFrame                   *m_pCard;
+    /** Holds the product icon label. */
+    QLabel                   *m_pLabelIcon;
+    /** Holds the welcome title. */
+    QLabel                   *m_pLabelTitle;
+    /** Holds the welcome subtitle. */
+    QLabel                   *m_pLabelSubtitle;
+    /** Holds the decorative banner artwork. */
+    QLabel                   *m_pLabelArtwork;
+    /** Holds the product icon. */
+    QIcon                     m_iconBrand;
+    /** Holds the action rows in display order. */
+    QList<UIHomeActionButton*> m_actionButtons;
+    /** Holds the first-run experience mode section, if needed. */
+    QWidget                  *m_pExperienceMode;
+    /** Holds the explanation of experience modes. */
+    QLabel                   *m_pLabelMode;
+    /** Holds the Basic mode button. */
+    QPushButton              *m_pButtonBasic;
+    /** Holds the Expert mode button. */
+    QPushButton              *m_pButtonExpert;
 };
 
 #endif /* !FEQT_INCLUDED_SRC_manager_UIHomePane_h */

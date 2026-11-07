@@ -627,7 +627,7 @@ void UIChooserItemMachine::updatePixmap()
     QSize pixmapSize;
     QPixmap pixmap = cache()->osPixmap(&pixmapSize);
     /* Keep guest OS artwork recognizable without dominating the machine row. */
-    const int iIconMetric = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) * 3 / 2;
+    const int iIconMetric = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) * 7 / 4;
     if (pixmapSize.width() > iIconMetric || pixmapSize.height() > iIconMetric)
     {
         const qreal dRatio = pixmap.devicePixelRatio();

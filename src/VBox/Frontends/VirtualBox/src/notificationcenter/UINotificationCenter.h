@@ -46,7 +46,7 @@
 
 /* Forward declarations: */
 class QHBoxLayout;
-class QPainter;
+class QLabel;
 class QStateMachine;
 class QTimer;
 class QVBoxLayout;
@@ -260,11 +260,6 @@ private:
     /** Cleanups everything. */
     void cleanup();
 
-    /** Paints background using pre-configured @a pPainter. */
-    void paintBackground(QPainter *pPainter);
-    /** Paints frame using pre-configured @a pPainter. */
-    void paintFrame(QPainter *pPainter);
-
     /** Defines whether notification-center is in @a fExtended mode. */
     void setExtendedMode(bool fExtended);
     /** Returns whether notification-center is in extended mode. */
@@ -302,6 +297,8 @@ private:
     QHBoxLayout  *m_pLayoutButtons;
     /** Holds the open button instance. */
     QIToolButton *m_pButtonOpen;
+    /** Holds the heading beside the notification bell. */
+    QLabel *m_pLabelTitle;
     /** Holds the toggle-sorting button instance. */
     QIToolButton *m_pButtonToggleSorting;
 #ifdef VBOX_NOTIFICATION_CENTER_WITH_KEEP_BUTTON

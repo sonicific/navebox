@@ -60,7 +60,7 @@ Run `tstNaveboxGui` from the platform's `bin/testcase` output, with the matching
 The test defaults to Qt's offscreen platform and never creates a COM session,
 registers a VM or reads a user's VM configuration. It checks mouse-state
 distinctions through the installed icon loader at multiple sizes/scales,
-custom-icon fallback, live About translations, tab preservation, palette
+custom-icon fallback, live About translations, scroll preservation, palette
 changes, build-info copying, repeated destruction/accessibility-cache cleanup
 and styled spinbox geometry. It also checks owned/ownerless dialog frame
 centering for normal, maximized and oversized owners, and the neutral
@@ -138,15 +138,22 @@ upstream meanings. An upgrade may reuse an existing installation directory.
 The EXE and MSI therefore still require upgrade/coexistence qualification.
 
 Build the normal installer targets in a release environment with the required
-WiX tools and signing credentials. `NaveboxLauncher` and `VirtualBoxManifest`
-are installation targets in the frontend makefile. A standalone developer
-build of only selected executables must also build these targets before
-packaging. Retain `VirtualBox.exe` and its file associations for compatibility;
-the desktop/Start-menu entries and post-install launch use `Navebox.exe`.
+WiX tools and signing credentials. The frontend targets produce `Navebox.exe`
+and `NaveboxVM.exe`, plus `NaveboxVM.dll` for hardened builds.
+`NaveboxManifest` stages the Windows visual manifest and its icons. File
+associations, shortcuts and post-install launch all use `Navebox.exe`.
+The verifier rejects any installed filename containing `VirtualBox`.
+
+Windows builds use `Navebox.xml` for global settings. Existing profiles can
+read `VirtualBox.xml` until Navebox saves the settings under the new name.
+New profiles use `.Navebox` under the user's home directory unless
+`VBOX_USER_HOME` specifies a different path. Windows SDK consumers must use
+`Navebox.h`, `Navebox.idl`, `Navebox_i.c` and `Navebox.tlb` with the existing
+COM interfaces and identifiers.
 
 ### Moving the application to another computer
 
-`Navebox.exe` is an entry point into a complete VirtualBox installation. Copying
+`Navebox.exe` is an entry point into a complete Navebox installation. Copying
 that executable alone does not produce a portable application. The destination
 needs the matching frontend/backend DLLs, COM registration and VBoxSDS service,
 plus the Qt libraries/plugins and firmware payloads required by the selected
@@ -179,7 +186,7 @@ sequence in the prepared developer shell is:
 
 ```text
 kmk KBUILD_TYPE=release
-kmk KBUILD_TYPE=release NaveboxLauncher VirtualBoxManifest
+kmk KBUILD_TYPE=release NaveboxManifest
 kmk KBUILD_TYPE=release packing
 ```
 
@@ -288,8 +295,9 @@ these system registrations on startup.
   screen reader; check child indexing, stale providers and process lifetime.
 - Verify all five mouse status states and all host-key capture/pressed states.
   Check light/dark/high-contrast palettes, selected rows and disabled controls.
-- Change language and theme with About already open; keep the active tab and
-  scroll position. Test keyboard operation and Copy Build Information.
+- Change language and theme with About already open. Verify the unified page
+  keeps its scroll position and that Contact, credits, and Copy Build Information
+  are reachable by keyboard on a small screen.
 - Test 100%, 125%, 150%, 175%, 200% and higher supported scaling, including
   moving windows between monitors. The preview frame no longer requires
   legacy bitmap resolutions.
@@ -314,7 +322,23 @@ after process/host interruption. Check disk integrity and host/guest isolation.
 Use disposable fixtures and known data; never use customer VMs as crash-test
 fixtures. Record the exact coverage and any remaining exclusions.
 
+Qualify Android Phones separately using the [phone validation matrix](navebox-phones.md#validation-and-release-gate).
+Test the installed package with an unmodified supported Android SDK, including
+two-device isolation, supported APK installation and snapshots. If fleet usage
+is supported, measure creation throughput, concurrent starts and status/action
+latency at the advertised capacity. Record the host RAM, disk and GPU budgets
+and test recovery when they are exhausted.
+
 ## Release decision and operations
+
+The 2026-11-06 Windows development build passed the phone, GUI and package
+source regressions. The existing MSI and setup executable are older than this
+build and signed with a local test certificate outside the normal trust chain.
+Their manifest records revision 0 and `release_qualified: false`. A clean-host
+install and upgrade with the current payload remain required. The Android
+two-device run also exposed intermittent GPU Auto failures. Software Graphics
+passed the two-device check, with larger concurrent and soak workloads still
+to qualify. See [Android results](navebox-phones.md#multi-phone-checks-2026-11-06).
 
 Do not promote a development folder or an unsigned local build to a qualified
 distribution. Require a clean build, passing regression matrix, validated

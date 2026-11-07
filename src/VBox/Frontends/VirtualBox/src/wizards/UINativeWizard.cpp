@@ -505,6 +505,7 @@ void UINativeWizard::prepare()
         QWidget *pWidgetBottom = new QWidget(this);
         if (pWidgetBottom)
         {
+            pWidgetBottom->setProperty("managerActionBar", true);
 #ifndef VBOX_WS_MAC
             /* Adjust palette a bit on Windows/X11 for native purposes: */
             pWidgetBottom->setAutoFillBackground(true);

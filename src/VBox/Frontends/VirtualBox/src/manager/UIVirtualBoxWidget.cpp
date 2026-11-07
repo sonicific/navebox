@@ -27,6 +27,8 @@
 
 /* Qt includes: */
 #include <QApplication>
+#include <QFrame>
+#include <QHBoxLayout>
 #include <QStyle>
 #include <QToolButton>
 #include <QVBoxLayout>
@@ -43,6 +45,7 @@
 #include "UIMachineToolsWidget.h"
 #include "UIManagerStyle.h"
 #include "UINotificationCenter.h"
+#include "UIPhoneManager.h"
 #include "UIToolPane.h"
 #include "UIVirtualBoxEventHandler.h"
 #include "UIVirtualBoxManager.h"
@@ -216,6 +219,19 @@ UIToolType UIVirtualBoxWidget::toolsTypeGlobal() const
     return globalToolsWidget()->menuToolType();
 }
 
+QList<QAction*> UIVirtualBoxWidget::phoneMenuActions()
+{
+    UIPhoneManager *pPhones = globalToolPane()->phoneManager();
+    connect(pPhones, &UIPhoneManager::sigShowPage, this, &UIVirtualBoxWidget::showPhonePage, Qt::UniqueConnection);
+    return currentGlobalTool() == UIToolType_Phones ? pPhones->toolbarActions() : pPhones->setupActions();
+}
+
+void UIVirtualBoxWidget::showPhonePage()
+{
+    if (currentGlobalTool() != UIToolType_Phones)
+        setToolsTypeGlobal(UIToolType_Phones);
+}
+
 void UIVirtualBoxWidget::setToolsTypeMachine(UIToolType enmType)
 {
     AssertPtrReturnVoid(machineToolsWidget());
@@ -291,7 +307,7 @@ void UIVirtualBoxWidget::sltHandleToolBarContextMenuRequest(const QPoint &positi
     if (pShowToolBarText)
     {
         pShowToolBarText->setCheckable(true);
-        pShowToolBarText->setChecked(m_pToolBar->toolButtonStyle() == Qt::ToolButtonTextUnderIcon);
+        pShowToolBarText->setChecked(m_pToolBar->useTextLabels());
         actions << pShowToolBarText;
     }
 
@@ -308,6 +324,7 @@ void UIVirtualBoxWidget::sltHandleToolBarContextMenuRequest(const QPoint &positi
     if (pResult == pShowToolBarText)
     {
         m_pToolBar->setUseTextLabels(pResult->isChecked());
+        sltUpdateToolbarStyle();
         gEDataManager->setSelectorWindowToolBarTextVisible(pResult->isChecked());
     }
 }
@@ -333,11 +350,24 @@ void UIVirtualBoxWidget::sltUpdateToolbar()
 void UIVirtualBoxWidget::sltUpdateToolbarStyle()
 {
     if (m_pToolBar)
-        m_pToolBar->setStyleSheet(UIManagerStyle::toolBarStyleSheet(m_pToolBar->palette()));
+    {
+        QWidget *pSurface = m_pToolBar->parentWidget();
+        const int iIconSize = m_pToolBar->style()->pixelMetric(QStyle::PM_SmallIconSize);
+        m_pToolBar->setIconSize(QSize(iIconSize, iIconSize));
+        if (m_pToolBar->useTextLabels())
+            m_pToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        const QString strStyle = UIManagerStyle::toolBarStyleSheet(QApplication::palette());
+        if (pSurface->styleSheet() != strStyle)
+            pSurface->setStyleSheet(strStyle);
+    }
 }
 
 void UIVirtualBoxWidget::prepare()
 {
+    /* Start with the navigation expanded; the toggle can collapse it for this session. */
+    if (!gEDataManager->isToolTextVisible())
+        gEDataManager->setToolTextVisible(true);
+
     /* Prepare everything: */
     prepareWidgets();
     prepareConnections();
@@ -365,17 +395,20 @@ void UIVirtualBoxWidget::prepareWidgets()
         }
 
         /* Create Main toolbar: */
-        m_pToolBar = new QIToolBar(this);
+        QFrame *pToolBarSurface = new QFrame(this);
+        pToolBarSurface->setObjectName(QStringLiteral("managerToolBarSurface"));
+        pToolBarSurface->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+        QHBoxLayout *pToolBarLayout = new QHBoxLayout(pToolBarSurface);
+        pToolBarLayout->setContentsMargins(6, 2, 6, 2);
+        m_pToolBar = new QIToolBar(pToolBarSurface);
         if (m_pToolBar)
         {
             /* Configure toolbar: */
-            const int iIconMetric = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) * 3 / 2;
-            m_pToolBar->setIconSize(QSize(iIconMetric, iIconMetric));
-            m_pToolBar->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
+            m_pToolBar->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
             m_pToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
             m_pToolBar->setUseTextLabels(true);
             m_pToolBar->setObjectName("managerToolBar");
-            sltUpdateToolbarStyle();
+            pToolBarLayout->addWidget(m_pToolBar);
 
             /* Check whether we should show Dev Preview tag: */
             bool fShowDevPreviewTag = false;
@@ -403,8 +436,8 @@ void UIVirtualBoxWidget::prepareWidgets()
                                            74 /* width of BETA label */);
             }
 
-            /* Add toolbar into layout: */
-            m_pGlobalToolsWidget->addToolBar(m_pToolBar);
+            /* Place the shared toolbar on the current page: */
+            globalToolPane()->setToolBar(pToolBarSurface);
         }
     }
 
@@ -481,6 +514,7 @@ void UIVirtualBoxWidget::loadSettings()
     /* Make sure stuff exists: */
     AssertPtrReturnVoid(m_pToolBar);
     m_pToolBar->setUseTextLabels(gEDataManager->selectorWindowToolBarTextVisible());
+    sltUpdateToolbarStyle();
 }
 
 void UIVirtualBoxWidget::updateToolbar()
@@ -509,19 +543,22 @@ void UIVirtualBoxWidget::updateToolbar()
             break;
     }
     AssertReturnVoid(enmType != UIToolType_Invalid);
+    sltUpdateToolbarStyle();
 
     /* Populate toolbar depending on actual tool-type: */
     switch (enmType)
     {
-        case UIToolType_Home:
+        case UIToolType_Phones:
         {
-            m_pToolBar->addAction(actionPool()->action(UIActionIndexMN_M_Home_S_New));
-            m_pToolBar->addAction(actionPool()->action(UIActionIndexMN_M_Home_S_Add));
-            m_pToolBar->addSeparator();
-            m_pToolBar->addAction(actionPool()->action(UIActionIndex_M_Application_S_Preferences));
-            m_pToolBar->addSeparator();
-            m_pToolBar->addAction(actionPool()->action(UIActionIndexMN_M_File_S_ImportAppliance));
-            m_pToolBar->addAction(actionPool()->action(UIActionIndexMN_M_File_S_ExportAppliance));
+            const UIPhoneManager *pPhones = globalToolPane()->phoneManager();
+            if (pPhones)
+                for (QAction *pAction : pPhones->toolbarActions())
+                {
+                    m_pToolBar->addAction(pAction);
+                    if (pAction->menu())
+                        if (QToolButton *pButton = qobject_cast<QToolButton*>(m_pToolBar->widgetForAction(pAction)))
+                            pButton->setPopupMode(QToolButton::InstantPopup);
+                }
             break;
         }
         case UIToolType_Details:

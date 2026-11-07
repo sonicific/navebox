@@ -226,7 +226,7 @@ VBOX_MAIN_DEFS += VBOX_WITH_NEW_SYS_V_KEYGEN
 VBOX_MAIN_DEFS += \
 	$(if $(VBOX_WITH_PLUGIN_CRYPT),VBOX_WITH_PLUGIN_CRYPT,)
 
-VBOX_IDL_FILE.MSCOM    = $(VBOX_PATH_SDK)/bindings/mscom/idl/VirtualBox.idl
+VBOX_IDL_FILE.MSCOM    = $(VBOX_PATH_SDK)/bindings/mscom/idl/Navebox.idl
 VBOX_IDL_FILE.XPCOM    = $(VBOX_PATH_SDK)/bindings/xpcom/idl/VirtualBox_XPCOM.idl
 
 VBOX_IDL_TYPELIB.XPCOM = $(PATH_STAGE_BIN)/components/VirtualBox_XPCOM.xpt
@@ -242,14 +242,14 @@ if "$(KBUILD_TARGET)" == "win" || (defined(VBOX_ONLY_SDK) && !defined(VBOX_ONLY_
  INSTALLS += VBox-mscom-bindings-include VBox-mscom-bindings-lib
  VBox-mscom-bindings-include_INST = $(INST_SDK)bindings/mscom/include/
  VBox-mscom-bindings-include_MODE = a+r,u+w
- VBox-mscom-bindings-include_SOURCES = $(VBoxCOM_0_OUTDIR)/VirtualBox.h
- VBox-mscom-bindings-include_CLEAN = $(VBoxCOM_0_OUTDIR)/VirtualBox.h
+ VBox-mscom-bindings-include_SOURCES = $(VBoxCOM_0_OUTDIR)/Navebox.h
+ VBox-mscom-bindings-include_CLEAN = $(VBoxCOM_0_OUTDIR)/Navebox.h
  VBox-mscom-bindings-lib_INST = $(INST_SDK)bindings/mscom/lib/
  VBox-mscom-bindings-lib_MODE = a+r,u+w
- VBox-mscom-bindings-lib_SOURCES = $(VBoxCOM_0_OUTDIR)/VirtualBox_i.c \
- 	$(VBoxCOM_0_OUTDIR)/VirtualBox.tlb
- VBox-mscom-bindings-lib_CLEAN = $(VBoxCOM_0_OUTDIR)/VirtualBox_i.c \
- 	$(VBoxCOM_0_OUTDIR)/VirtualBox.tlb
+ VBox-mscom-bindings-lib_SOURCES = $(VBoxCOM_0_OUTDIR)/Navebox_i.c \
+ 	$(VBoxCOM_0_OUTDIR)/Navebox.tlb
+ VBox-mscom-bindings-lib_CLEAN = $(VBoxCOM_0_OUTDIR)/Navebox_i.c \
+ 	$(VBoxCOM_0_OUTDIR)/Navebox.tlb
 
  BLDDIRS += $(VBOX_PATH_SDK)/bindings/mscom/idl
 endif
@@ -421,7 +421,11 @@ endif # !VBOX_ONLY_SDK
 INSTALLS += VBox-main-xidl
 VBox-main-xidl_INST = $(INST_SDK)bindings/
 VBox-main-xidl_MODE = a+r,u+w
-VBox-main-xidl_SOURCES = $(VBOX_XIDL_FILE_SRC)
+ifeq ($(KBUILD_TARGET),win)
+ VBox-main-xidl_SOURCES = $(VBOX_XIDL_FILE_SRC)=>Navebox.xidl
+else
+ VBox-main-xidl_SOURCES = $(VBOX_XIDL_FILE_SRC)
+endif
 
 if !defined(VBOX_ONLY_SDK) && !defined(VBOX_ONLY_EXTPACKS) # Note this goes on for *very* long
 
@@ -1416,7 +1420,7 @@ if !defined(VBOX_ONLY_SDK) && !defined(VBOX_ONLY_EXTPACKS) # Note this goes on f
  	$(if $(VBOX_WITH_OPENSSL_FIPS), VBOX_OPENSSL_FIPS,)
 
 
- src-client/win/VBoxC.rc_DEPS = $(VBoxC_0_OUTDIR)/VBoxC.rgs $(VBoxCOM_0_OUTDIR)/VirtualBox.tlb
+ src-client/win/VBoxC.rc_DEPS = $(VBoxC_0_OUTDIR)/VBoxC.rgs $(VBoxCOM_0_OUTDIR)/Navebox.tlb
  VBoxC_CLEAN.win            += $(VBoxC_0_OUTDIR)/VBoxC.rgs
  $(call KB_FN_AUTO_CMD_DEPS,$(VBoxC_0_OUTDIR)/VBoxC.rgs)
  $(VBoxC_0_OUTDIR)/VBoxC.rgs: $(VBOX_PATH_MAIN_SRC)/src-all/win/VirtualBox_rgs.xsl $(VBOX_XIDL_FILE) | $$(dir $$@)
@@ -1494,7 +1498,7 @@ if !defined(VBOX_ONLY_SDK) && !defined(VBOX_ONLY_EXTPACKS) # Note this goes on f
 
   src-client/win/VBoxClient-x86.rc_DEPS = \
   	$(VBoxClient-x86_0_OUTDIR)/VBoxClient-x86.rgs \
-  	$(VBoxCOM-x86_0_OUTDIR)/VirtualBox-x86.tlb
+  	$(VBoxCOM-x86_0_OUTDIR)/Navebox-x86.tlb
 
   $(call KB_FN_AUTO_CMD_DEPS,$(VBoxClient-x86_0_OUTDIR)/VBoxClient-x86.rgs)
   $(VBoxClient-x86_0_OUTDIR)/VBoxClient-x86.rgs: \
@@ -1570,19 +1574,19 @@ ifeq ($(KBUILD_TARGET),win)
  VBoxCOM_DEFS.amd64    = _WIN32_WINNT=0x0510
  VBoxCOM_DEFS.arm64    = _WIN32_WINNT=0x0510
  VBoxCOM_SOURCES      += \
- 	$(VBoxCOM_0_OUTDIR)/VirtualBox_i.c
+ 	$(VBoxCOM_0_OUTDIR)/Navebox_i.c
  VBoxCOM_CLEAN         = \
- 	$(VBoxCOM_0_OUTDIR)/VirtualBox_i.c \
- 	$(VBoxCOM_0_OUTDIR)/VirtualBox_p.c \
+ 	$(VBoxCOM_0_OUTDIR)/Navebox_i.c \
+ 	$(VBoxCOM_0_OUTDIR)/Navebox_p.c \
  	$(VBoxCOM_0_OUTDIR)/dlldata.c \
- 	$(VBoxCOM_0_OUTDIR)/VirtualBox.h \
- 	$(VBoxCOM_0_OUTDIR)/VirtualBox.tlb
+ 	$(VBoxCOM_0_OUTDIR)/Navebox.h \
+ 	$(VBoxCOM_0_OUTDIR)/Navebox.tlb
  VBoxCOM_CLEAN       += \
- 	$(VBoxCOM_0_OUTDIR)/legacy/VirtualBox_i.c \
- 	$(VBoxCOM_0_OUTDIR)/legacy/VirtualBox_p.c \
+ 	$(VBoxCOM_0_OUTDIR)/legacy/Navebox_i.c \
+ 	$(VBoxCOM_0_OUTDIR)/legacy/Navebox_p.c \
  	$(VBoxCOM_0_OUTDIR)/legacy/dlldata.c \
- 	$(VBoxCOM_0_OUTDIR)/legacy/VirtualBox.h \
- 	$(VBoxCOM_0_OUTDIR)/legacy/VirtualBox.tlb
+ 	$(VBoxCOM_0_OUTDIR)/legacy/Navebox.h \
+ 	$(VBoxCOM_0_OUTDIR)/legacy/Navebox.tlb
  VBoxCOM_BLDDIRS     = $(VBoxCOM_0_OUTDIR)/legacy/
 else # !win
  VBoxCOM_SOURCES      += \
@@ -1610,11 +1614,11 @@ ifndef VBOX_ONLY_SDK
   VBoxCOM-x86_EXTENDS = VBoxCOM
   ifeq ($(KBUILD_TARGET),win)
    VBoxCOM-x86_CLEAN  = \
-   	$(VBoxCOM-x86_0_OUTDIR)/VirtualBox_i.c \
-   	$(VBoxCOM-x86_0_OUTDIR)/VirtualBox_p.c \
+   	$(VBoxCOM-x86_0_OUTDIR)/Navebox_i.c \
+   	$(VBoxCOM-x86_0_OUTDIR)/Navebox_p.c \
    	$(VBoxCOM-x86_0_OUTDIR)/dlldata.c \
-   	$(VBoxCOM-x86_0_OUTDIR)/VirtualBox.h \
-   	$(VBoxCOM-x86_0_OUTDIR)/VirtualBox-x86.tlb
+   	$(VBoxCOM-x86_0_OUTDIR)/Navebox.h \
+   	$(VBoxCOM-x86_0_OUTDIR)/Navebox-x86.tlb
   endif
  endif
 
@@ -1682,13 +1686,13 @@ if defined(VBOX_WITH_MIDL_PROXY_STUB) && "$(KBUILD_TARGET)" == "win" && !defined
  VBoxProxyStub_DEFPATH  = $(VBoxCOM_0_OUTDIR)/# Hack to workaround drive letter in $(VBoxCOM_0_OUTDIR)/ for CFLAGS hack below.
  VBoxProxyStub_INCS     = $(VBoxCOM_0_OUTDIR)/
  VBoxProxyStub_SOURCES := \
- 	VirtualBox_p.c \
- 	VirtualBox_i.c \
+ 	Navebox_p.c \
+ 	Navebox_i.c \
  	$(PATH_SUB_CURRENT)/src-all/win/VBoxProxyStub.def \
  	$(PATH_SUB_CURRENT)/src-all/win/VBoxProxyStub.rc \
  	$(PATH_SUB_CURRENT)/src-all/win/VBoxProxyStub.c
- src-all/win/VBoxProxyStub.rc_DEPS = $(VBoxCOM_0_OUTDIR)/VirtualBox.tlb
- VBoxProxyStub_VirtualBox_p.c_CFLAGS.x86 = /Gz # Workaround for incorrect ObjectStublessClient* prototypes in SDK v7.1.
+ src-all/win/VBoxProxyStub.rc_DEPS = $(VBoxCOM_0_OUTDIR)/Navebox.tlb
+ VBoxProxyStub_Navebox_p.c_CFLAGS.x86 = /Gz # Workaround for incorrect ObjectStublessClient* prototypes in SDK v7.1.
 
  ifdef VBOX_WITH_32_ON_64_MAIN_API
   DLLS += VBoxProxyStub-x86
@@ -1697,12 +1701,12 @@ if defined(VBOX_WITH_MIDL_PROXY_STUB) && "$(KBUILD_TARGET)" == "win" && !defined
   VBoxProxyStub-x86_DEFS     = $(VBoxProxyStub_DEFS) VBOX_PROXY_STUB_32_ON_64 WIN32
   VBoxProxyStub-x86_INCS     = $(VBoxCOM-x86_0_OUTDIR)/
   VBoxProxyStub-x86_SOURCES  = \
-  	$(VBoxCOM-x86_0_OUTDIR)/VirtualBox_p.c \
-  	$(VBoxCOM-x86_0_OUTDIR)/VirtualBox_i.c \
+  	$(VBoxCOM-x86_0_OUTDIR)/Navebox_p.c \
+  	$(VBoxCOM-x86_0_OUTDIR)/Navebox_i.c \
   	src-all/win/VBoxProxyStub.c \
   	src-all/win/VBoxProxyStub-x86.rc \
   	src-all/win/VBoxProxyStub.def
-  src-all/win/VBoxProxyStub-x86.rc_DEPS = $(VBoxCOM-x86_0_OUTDIR)/VirtualBox-x86.tlb
+  src-all/win/VBoxProxyStub-x86.rc_DEPS = $(VBoxCOM-x86_0_OUTDIR)/Navebox-x86.tlb
  endif
 endif
 
@@ -1715,7 +1719,18 @@ ifdef VBOX_WITH_MAIN_NLS
 
  PROGRAMS += VirtualBoxAPI
  VirtualBoxAPI_TEMPLATE = VBoxNLS
- VirtualBoxAPI_QT_TRANSLATIONS = $(addsuffix .ts,$(addprefix $(VBOX_PATH_MAIN_SRC)/nls/VirtualBoxAPI_,$(VBOX_APPROVED_MAIN_LANGUAGES)))
+ VBOX_MAIN_TRANSLATION_SOURCES := $(addsuffix .ts,$(addprefix $(VBOX_PATH_MAIN_SRC)/nls/VirtualBoxAPI_,$(VBOX_APPROVED_MAIN_LANGUAGES)))
+ VirtualBoxAPI_QT_TRANSLATIONS := $(VBOX_MAIN_TRANSLATION_SOURCES)
+ ifeq ($(KBUILD_TARGET),win)
+  # Qt names each .qm after its input. Keep the source catalogs for lupdate.
+  VBOX_MAIN_BRANDED_NLS_DIR := $(PATH_TARGET)/NaveboxAPI-nls
+  BLDDIRS += $(VBOX_MAIN_BRANDED_NLS_DIR)/
+  VirtualBoxAPI_QT_TRANSLATIONS := $(addsuffix .ts,$(addprefix $(VBOX_MAIN_BRANDED_NLS_DIR)/NaveboxAPI_,$(VBOX_APPROVED_MAIN_LANGUAGES)))
+  VirtualBoxAPI_CLEAN += $(VirtualBoxAPI_QT_TRANSLATIONS)
+
+  $(VirtualBoxAPI_QT_TRANSLATIONS): $(VBOX_MAIN_BRANDED_NLS_DIR)/NaveboxAPI_%.ts: $(VBOX_PATH_MAIN_SRC)/nls/VirtualBoxAPI_%.ts | $$(dir $$@)
+	$(CP) --changed -f -- $< $@
+ endif
  VirtualBoxAPI_VBOX_ALL_NLS_SOURCES = $(wildcard \
  		$(VBOX_PATH_MAIN_SRC)/include/*.h \
  		$(VBOX_PATH_MAIN_SRC)/src-all/*.cpp \
@@ -1733,7 +1748,7 @@ ifdef VBOX_WITH_MAIN_NLS
 		$^ \
 		-locations none \
 		-ts \
-		$(filter-out nls/VirtualBoxAPI_en.ts, $(VirtualBoxAPI_QT_TRANSLATIONS)) \
+		$(filter-out $(VBOX_PATH_MAIN_SRC)/nls/VirtualBoxAPI_en.ts,$(VBOX_MAIN_TRANSLATION_SOURCES)) \
 		$(VBOX_PATH_MAIN_SRC)/nls/VirtualBoxAPI_xx_YY.ts
 
  #fake-main-nls:
@@ -1815,8 +1830,8 @@ ifdef VBOX_WITH_XPCOM
  testidl: $(VBOX_IDL_FILE.XPCOM) $(VBOX_IDL_TYPELIB.XPCOM) $(VBoxCOM_0_OUTDIR)/VirtualBox_XPCOM_i.c
  testidlhdr: $(VBOX_IDL_HEADER.XPCOM)
 else
- testidl: $(VBOX_IDL_FILE.MSCOM) $(VBoxCOM_0_OUTDIR)/VirtualBox_i.c \
- 		$(if $(VBOX_WITH_32_ON_64_MAIN_API),$(VBoxCOM-x86_0_OUTDIR)/VirtualBox_i.c,)
+ testidl: $(VBOX_IDL_FILE.MSCOM) $(VBoxCOM_0_OUTDIR)/Navebox_i.c \
+ 		$(if $(VBOX_WITH_32_ON_64_MAIN_API),$(VBoxCOM-x86_0_OUTDIR)/Navebox_i.c,)
 endif
 
 
@@ -1830,11 +1845,11 @@ if "$(KBUILD_TARGET)" == "win" || (defined(VBOX_ONLY_SDK) && !defined(VBOX_ONLY_
  #       The output is different and hopefully more efficient, at least memory wise (using more helpers in OLE32).
  # Note! We're checking for win.amd64 below when setting the target because of the SDK build which happens on linux.amd64
  #       but with a 32-bit Wine.
- $(call KB_FN_AUTO_CMD_DEPS,$(VBoxCOM_0_OUTDIR)/VirtualBox_i.c)
- $(VBoxCOM_0_OUTDIR)/VirtualBox_i.c \
- $(if $(VBOX_WITH_MIDL_PROXY_STUB), + $(VBoxCOM_0_OUTDIR)/VirtualBox_p.c + $(VBoxCOM_0_OUTDIR)/dlldata.c,) \
- + $(VBoxCOM_0_OUTDIR)/VirtualBox.h \
- + $(VBoxCOM_0_OUTDIR)/VirtualBox.tlb: $(VBOX_IDL_FILE.MSCOM) | $$(dir $$@)
+ $(call KB_FN_AUTO_CMD_DEPS,$(VBoxCOM_0_OUTDIR)/Navebox_i.c)
+ $(VBoxCOM_0_OUTDIR)/Navebox_i.c \
+ $(if $(VBOX_WITH_MIDL_PROXY_STUB), + $(VBoxCOM_0_OUTDIR)/Navebox_p.c + $(VBoxCOM_0_OUTDIR)/dlldata.c,) \
+ + $(VBoxCOM_0_OUTDIR)/Navebox.h \
+ + $(VBoxCOM_0_OUTDIR)/Navebox.tlb: $(VBOX_IDL_FILE.MSCOM) | $$(dir $$@)
 	$(call KB_FN_AUTO_CMD_DEPS_COMMANDS)
 	$(VBOX_MIDL_REDIRECT) $(VBOX_WIN_MIDL) /nologo /W4 \
 		/env $(if-expr "$(KBUILD_TARGET).$(KBUILD_TARGET_ARCH)" == "win.amd64" ,amd64,$(if-expr "$(KBUILD_TARGET).$(KBUILD_TARGET_ARCH)" == "win.arm64" ,arm64,win32)) \
@@ -1844,21 +1859,21 @@ if "$(KBUILD_TARGET)" == "win" || (defined(VBOX_ONLY_SDK) && !defined(VBOX_ONLY_
 		$(foreachfile dir,$(SDK_$(VBOX_WINPSDK)_INCS),/I $(call VBOX_FN_MAKE_WIN_PATH,$(dir))) \
 		/I idl \
 		$(call VBOX_FN_MAKE_WIN_PATH,$(VBOX_IDL_FILE.MSCOM))
-	$(call def_VBoxMidlOutputDisableMscWarnings,$(VBoxCOM_0_OUTDIR)/VirtualBox.h)
-	$(call def_VBoxMidlOutputDisableMscWarnings,$(VBoxCOM_0_OUTDIR)/VirtualBox_i.c)
-	$(call def_VBoxMidlOutputDisableMscWarnings,$(VBoxCOM_0_OUTDIR)/VirtualBox_p.c)
+	$(call def_VBoxMidlOutputDisableMscWarnings,$(VBoxCOM_0_OUTDIR)/Navebox.h)
+	$(call def_VBoxMidlOutputDisableMscWarnings,$(VBoxCOM_0_OUTDIR)/Navebox_i.c)
+	$(call def_VBoxMidlOutputDisableMscWarnings,$(VBoxCOM_0_OUTDIR)/Navebox_p.c)
 
  if defined(VBOX_WITH_MIDL_PROXY_STUB)
   # -Windows Server 2003 AMD64 SP1 does not like the result when using '/protocol all' and '/target NT51'.
   # -Vista AMD64 SP1 and Windows Server 2008 AMD64 seems to have some objections as well, but it seemed
   #  that using an older MIDL compiler (v7.00.0499 instead of v7.00.0555) helps. But the W2K3 fix also works.
   # To avoid 32-bit vs. 64-bit differences, we do the same for 32-bit windows versions.
-  $(call KB_FN_AUTO_CMD_DEPS,$(VBoxCOM_0_OUTDIR)/legacy/VirtualBox_i.c)
-  $(VBoxCOM_0_OUTDIR)/legacy/VirtualBox_i.c \
-  + $(VBoxCOM_0_OUTDIR)/legacy/VirtualBox_p.c \
+  $(call KB_FN_AUTO_CMD_DEPS,$(VBoxCOM_0_OUTDIR)/legacy/Navebox_i.c)
+  $(VBoxCOM_0_OUTDIR)/legacy/Navebox_i.c \
+  + $(VBoxCOM_0_OUTDIR)/legacy/Navebox_p.c \
   + $(VBoxCOM_0_OUTDIR)/legacy/dlldata.c \
-  + $(VBoxCOM_0_OUTDIR)/legacy/VirtualBox.h \
-  + $(VBoxCOM_0_OUTDIR)/legacy/VirtualBox.tlb: $(VBOX_IDL_FILE.MSCOM) | $$(dir $$@)
+  + $(VBoxCOM_0_OUTDIR)/legacy/Navebox.h \
+  + $(VBoxCOM_0_OUTDIR)/legacy/Navebox.tlb: $(VBOX_IDL_FILE.MSCOM) | $$(dir $$@)
 	$(call KB_FN_AUTO_CMD_DEPS_COMMANDS)
 	$(VBOX_MIDL_REDIRECT) $(VBOX_WIN_MIDL) /nologo /W4 \
 		$(if-expr "$(KBUILD_TARGET).$(KBUILD_TARGET_ARCH)" == "win.amd64" \
@@ -1869,30 +1884,30 @@ if "$(KBUILD_TARGET)" == "win" || (defined(VBOX_ONLY_SDK) && !defined(VBOX_ONLY_
 		$(foreachfile dir,$(SDK_$(VBOX_WINPSDK)_INCS),/I $(call VBOX_FN_MAKE_WIN_PATH,$(dir))) \
 		/I idl \
 		$(call VBOX_FN_MAKE_WIN_PATH,$(VBOX_IDL_FILE.MSCOM))
-	$(call def_VBoxMidlOutputDisableMscWarnings,$(VBoxCOM_0_OUTDIR)/legacy/VirtualBox.h)
-	$(call def_VBoxMidlOutputDisableMscWarnings,$(VBoxCOM_0_OUTDIR)/legacy/VirtualBox_i.c)
-	$(call def_VBoxMidlOutputDisableMscWarnings,$(VBoxCOM_0_OUTDIR)/legacy/VirtualBox_p.c)
+	$(call def_VBoxMidlOutputDisableMscWarnings,$(VBoxCOM_0_OUTDIR)/legacy/Navebox.h)
+	$(call def_VBoxMidlOutputDisableMscWarnings,$(VBoxCOM_0_OUTDIR)/legacy/Navebox_i.c)
+	$(call def_VBoxMidlOutputDisableMscWarnings,$(VBoxCOM_0_OUTDIR)/legacy/Navebox_p.c)
  endif
 
  if defined(VBOX_WITH_32_ON_64_MAIN_API) && !defined(VBOX_ONLY_EXTPACKS)
   # The XP targetted 32-bit proxy stub works with all versions of windows.
-  $(call KB_FN_AUTO_CMD_DEPS,$(VBoxCOM-x86_0_OUTDIR)/VirtualBox_i.c)
-  $(VBoxCOM-x86_0_OUTDIR)/VirtualBox_i.c \
-  $(if $(VBOX_WITH_MIDL_PROXY_STUB), + $(VBoxCOM-x86_0_OUTDIR)/VirtualBox_p.c + $(VBoxCOM-x86_0_OUTDIR)/dlldata.c,) \
-  + $(VBoxCOM-x86_0_OUTDIR)/VirtualBox.h \
-  + $(VBoxCOM-x86_0_OUTDIR)/VirtualBox-x86.tlb: $(VBOX_IDL_FILE.MSCOM) | $$(dir $$@)
+  $(call KB_FN_AUTO_CMD_DEPS,$(VBoxCOM-x86_0_OUTDIR)/Navebox_i.c)
+  $(VBoxCOM-x86_0_OUTDIR)/Navebox_i.c \
+  $(if $(VBOX_WITH_MIDL_PROXY_STUB), + $(VBoxCOM-x86_0_OUTDIR)/Navebox_p.c + $(VBoxCOM-x86_0_OUTDIR)/dlldata.c,) \
+  + $(VBoxCOM-x86_0_OUTDIR)/Navebox.h \
+  + $(VBoxCOM-x86_0_OUTDIR)/Navebox-x86.tlb: $(VBOX_IDL_FILE.MSCOM) | $$(dir $$@)
 	$(call KB_FN_AUTO_CMD_DEPS_COMMANDS)
 	$(VBOX_MIDL_REDIRECT_X86) $(VBOX_WIN_MIDL) /nologo /W4 \
 		/env win32 /target NT51 /robust /protocol all  \
 		/out $(call VBOX_FN_MAKE_WIN_PATH,$(VBoxCOM-x86_0_OUTDIR)) \
-		/tlb $(call VBOX_FN_MAKE_WIN_PATH,$(VBoxCOM-x86_0_OUTDIR)/VirtualBox-x86.tlb) \
+		/tlb $(call VBOX_FN_MAKE_WIN_PATH,$(VBoxCOM-x86_0_OUTDIR)/Navebox-x86.tlb) \
 		/cpp_cmd $(VBOX_MIDL_CPP_CMD_X86) \
 		$(foreachfile dir,$(SDK_$(VBOX_WINPSDK)_INCS),/I $(call VBOX_FN_MAKE_WIN_PATH,$(dir))) \
 		/I idl \
 		$(call VBOX_FN_MAKE_WIN_PATH,$(VBOX_IDL_FILE.MSCOM))
-	$(call def_VBoxMidlOutputDisableMscWarnings,$(VBoxCOM-x86_0_OUTDIR)/VirtualBox.h)
-	$(call def_VBoxMidlOutputDisableMscWarnings,$(VBoxCOM-x86_0_OUTDIR)/VirtualBox_i.c)
-	$(call def_VBoxMidlOutputDisableMscWarnings,$(VBoxCOM-x86_0_OUTDIR)/VirtualBox_p.c)
+	$(call def_VBoxMidlOutputDisableMscWarnings,$(VBoxCOM-x86_0_OUTDIR)/Navebox.h)
+	$(call def_VBoxMidlOutputDisableMscWarnings,$(VBoxCOM-x86_0_OUTDIR)/Navebox_i.c)
+	$(call def_VBoxMidlOutputDisableMscWarnings,$(VBoxCOM-x86_0_OUTDIR)/Navebox_p.c)
  endif
 
 endif # "$(KBUILD_TARGET)" == "win" || (defined(VBOX_ONLY_SDK) && !defined(VBOX_ONLY_SDK_ON_HOST) && !defined(VBOX_ONLY_SDK_IN_VM))

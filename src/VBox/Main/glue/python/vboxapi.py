@@ -85,7 +85,7 @@ sys.path.append(g_sVBoxBinDir)
 #
 # Import the generated VirtualBox constants.
 #
-from .VirtualBox_constants import VirtualBoxReflectionInfo
+from .Navebox_constants import VirtualBoxReflectionInfo
 
 
 class PerfCollector(object):

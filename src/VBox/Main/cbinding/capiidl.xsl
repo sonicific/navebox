@@ -163,7 +163,7 @@
 #ifdef WIN32
 # include "ObjBase.h"
 # include "oaidl.h"
-# include "VirtualBox.h"
+# include "Navebox.h"
 
 #ifndef __cplusplus
 /* Skip this in the C++ case as there's already a definition for CBSTR. */

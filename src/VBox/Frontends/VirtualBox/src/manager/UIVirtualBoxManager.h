@@ -44,10 +44,14 @@
 #include "UIManagerDefs.h"
 
 /* Forward declarations: */
+class QAction;
 class QMenu;
 class QIManagerDialog;
 class UIAction;
 class UIActionPool;
+#ifdef VBOX_WS_WIN
+class UIManagerTitleBar;
+#endif
 class UINativeWizard;
 struct UIUnattendedInstallData;
 class UIVirtualBoxWidget;
@@ -98,6 +102,10 @@ protected:
 #ifdef VBOX_WS_MAC
         /** Mac OS X: Preprocesses any @a pEvent for passed @a pObject. */
         virtual bool eventFilter(QObject *pObject, QEvent *pEvent) RT_OVERRIDE;
+#endif
+#ifdef VBOX_WS_WIN
+        /** Forwards Windows caption messages to the Manager title bar. */
+        virtual bool nativeEvent(const QByteArray &strType, void *pMessage, qintptr *pResult) RT_OVERRIDE;
 #endif
 
         /** Handles any Qt @a pEvent. */
@@ -354,6 +362,10 @@ private:
         void prepareIcon();
         /** Prepares menu-bar. */
         void prepareMenuBar();
+        /** Adds the Phone menu next to the Machine menu. */
+        void preparePhoneMenu();
+        /** Updates the icon and accessible label for the sidebar action. */
+        void updateNavigationToggle();
         /** Prepares status-bar. */
         void prepareStatusBar();
         /** Prepares toolbar. */
@@ -509,6 +521,12 @@ private:
 
     /** Holds the action-pool instance. */
     UIActionPool *m_pActionPool;
+    /** Holds the sidebar action placed before File. */
+    QAction *m_pNavigationToggle = 0;
+#ifdef VBOX_WS_WIN
+    /** Holds the Windows menu bar and native caption integration. */
+    UIManagerTitleBar *m_pTitleBar = 0;
+#endif
     /** Holds the map of menu update-handlers. */
     QMap<int, MenuUpdateHandler> m_menuUpdateHandlers;
 

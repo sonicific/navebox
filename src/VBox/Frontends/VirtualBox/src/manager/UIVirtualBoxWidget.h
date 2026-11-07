@@ -189,6 +189,9 @@ public:
         /** Returns Global tools type. */
         UIToolType toolsTypeGlobal() const;
 
+        /** Returns the Phone menu actions for the current page. */
+        QList<QAction*> phoneMenuActions();
+
         /** Defines Machine tools @a enmType. */
         void setToolsTypeMachine(UIToolType enmType);
         /** Returns Machine tools type. */
@@ -250,7 +253,7 @@ private slots:
       * @{ */
         /** Updates tool-bar. */
         void sltUpdateToolbar();
-        /** Updates the main toolbar's appearance after a theme change. */
+        /** Applies the toolbar appearance for the current page and theme. */
         void sltUpdateToolbarStyle();
     /** @} */
 
@@ -269,6 +272,8 @@ private:
 
         /** Updates toolbar. */
         void updateToolbar();
+        /** Switches to Phones before opening one of its dialogs. */
+        void showPhonePage();
 
         /** Cleanups connections. */
         void cleanupConnections();

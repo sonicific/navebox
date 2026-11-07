@@ -60,7 +60,16 @@ class NaveboxPackagingTests(unittest.TestCase):
         executable = product + '.exe'
         self.assertIn(executable, names)
         self.assertIn(product + '.VisualElementsManifest.xml', names)
-        self.assertIn('VirtualBox.exe', names)
+        self.assertIn(product + 'VM.exe', names)
+        self.assertIn(product + 'VM.dll', names)
+        self.assertFalse([name for name in names if 'virtualbox' in name.casefold()])
+        for verb in files.findall('.//w:Verb', WIX_NS):
+            if verb.get('Id') == 'open':
+                self.assertEqual(verb.get('TargetFile'), 'file_' + executable)
+        manifest = ET.parse(GUI_DIR / 'src/platform/win' / (product + '.VisualElementsManifest.xml'))
+        elements = manifest.getroot().find('VisualElements')
+        self.assertIn(elements.get('Square70x70Logo'), names)
+        self.assertIn(elements.get('Square150x150Logo'), names)
 
         package = ET.parse(installer / 'VirtualBox.wxs')
         shortcuts = [node for node in package.findall('.//w:Shortcut', WIX_NS)
@@ -142,7 +151,7 @@ class NaveboxPackagingTests(unittest.TestCase):
         """All catalogues expose current About messages; finished placeholders survive."""
         sources = about_sources()
         self.assertIn('Copy Build Information', sources)
-        self.assertIn('Overview', sources)
+        self.assertIn('Contact', sources)
         for path in sorted((GUI_DIR / 'nls').glob('VirtualBox_*.ts')):
             if path.name == 'VirtualBox_en.ts':  # English intentionally contains plural forms only.
                 continue

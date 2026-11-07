@@ -40,6 +40,7 @@
 #include <QTimerEvent>
 
 /* GUI includes: */
+#include "UIAppearance.h"
 #include "UIGraphicsButton.h"
 #include "UIGraphicsScrollBar.h"
 #include "UIIconPool.h"
@@ -158,37 +159,16 @@ QSizeF UIGraphicsScrollBarToken::minimumSizeHint() const
 
 void UIGraphicsScrollBarToken::paint(QPainter *pPainter, const QStyleOptionGraphicsItem *pOptions, QWidget *)
 {
-    /* Save painter: */
     pPainter->save();
-
-    /* Prepare color: */
-    const QPalette pal = QApplication::palette();
-
-#ifdef VBOX_WS_MAC
-
-    /* Draw background: */
-    QColor backgroundColor = pal.color(QPalette::Active, QPalette::Window).darker(190);
-    QRectF actualRectangle = pOptions->rect;
-    actualRectangle.setLeft(pOptions->rect.left() + .22 * pOptions->rect.width());
-    actualRectangle.setRight(pOptions->rect.right() - .22 * pOptions->rect.width());
-    const double dRadius = actualRectangle.width() / 2;
-    QPainterPath painterPath = QPainterPath(QPoint(actualRectangle.x(), actualRectangle.y() + dRadius));
-    painterPath.arcTo(QRectF(actualRectangle.x(), actualRectangle.y(), 2 * dRadius, 2 * dRadius), 180, -180);
-    painterPath.lineTo(actualRectangle.x() + 2 * dRadius, actualRectangle.y() + actualRectangle.height() - dRadius);
-    painterPath.arcTo(QRectF(actualRectangle.x(), actualRectangle.y() + actualRectangle.height() - 2 * dRadius, 2 * dRadius, 2 * dRadius), 0, -180);
-    painterPath.closeSubpath();
-    pPainter->setClipPath(painterPath);
-    pPainter->fillRect(actualRectangle, backgroundColor);
-
-#else
-
-    /* Draw background: */
-    QColor backgroundColor = pal.color(QPalette::Active, QPalette::Window).darker(140);
-    pPainter->fillRect(pOptions->rect, backgroundColor);
-
-#endif
-
-    /* Restore painter: */
+    const UIAppearance::PaneColors colors(QApplication::palette());
+    const QRectF rectangle = pOptions->rect;
+    const QRectF thumb = m_enmOrientation == Qt::Vertical
+                       ? rectangle.adjusted(3, 1, -3, -1)
+                       : rectangle.adjusted(1, 3, -1, -3);
+    pPainter->setRenderHint(QPainter::Antialiasing);
+    pPainter->setPen(Qt::NoPen);
+    pPainter->setBrush(colors.scrollHover);
+    pPainter->drawRoundedRect(thumb, 5, 5);
     pPainter->restore();
 }
 
@@ -999,13 +979,13 @@ void UIGraphicsScrollBar::paintBackground(QPainter *pPainter, const QRect &recta
     pPainter->save();
 
     /* Prepare color: */
-    const QPalette pal = QApplication::palette();
+    const UIAppearance::PaneColors colors(QApplication::palette());
 
 #ifdef VBOX_WS_MAC
 
     /* Draw background if necessary: */
     pPainter->save();
-    QColor windowColor = pal.color(QPalette::Active, QPalette::Window);
+    QColor windowColor = colors.row;
     if (m_fAutoHideMode)
         windowColor.setAlpha(255 * ((double)m_iHoveringValue / 100));
     pPainter->fillRect(rectangle, windowColor);
@@ -1013,10 +993,9 @@ void UIGraphicsScrollBar::paintBackground(QPainter *pPainter, const QRect &recta
 
     /* Draw frame if necessary: */
     pPainter->save();
-    QColor frameColor = pal.color(QPalette::Active, QPalette::Window);
+    QColor frameColor = colors.divider;
     if (m_fAutoHideMode)
         frameColor.setAlpha(255 * ((double)m_iHoveringValue / 100));
-    frameColor = frameColor.darker(120);
     pPainter->setPen(frameColor);
     pPainter->drawLine(rectangle.topLeft(), rectangle.bottomLeft());
     pPainter->restore();
@@ -1024,9 +1003,8 @@ void UIGraphicsScrollBar::paintBackground(QPainter *pPainter, const QRect &recta
     /* Emulate token when necessary: */
     if (m_iHoveringValue < 100)
     {
-        QColor tokenColor = pal.color(QPalette::Active, QPalette::Window);
+        QColor tokenColor = colors.scrollThumb;
         tokenColor.setAlpha(255 * ((double)m_iRevealingValue / 100));
-        tokenColor = tokenColor.darker(190);
         QRectF tokenRectangle = QRect(actualTokenPosition(), QSize(m_iExtent, 2 * m_iExtent));
         QRectF actualRectangle = tokenRectangle;
         if (m_fAutoHideMode)
@@ -1039,32 +1017,38 @@ void UIGraphicsScrollBar::paintBackground(QPainter *pPainter, const QRect &recta
             actualRectangle.setLeft(tokenRectangle.left() + .22 * tokenRectangle.width());
             actualRectangle.setRight(tokenRectangle.right() - .22 * tokenRectangle.width() - 1);
         }
-        const double dRadius = actualRectangle.width() / 2;
-        QPainterPath painterPath = QPainterPath(QPoint(actualRectangle.x(), actualRectangle.y() + dRadius));
-        painterPath.arcTo(QRectF(actualRectangle.x(), actualRectangle.y(), 2 * dRadius, 2 * dRadius), 180, -180);
-        painterPath.lineTo(actualRectangle.x() + 2 * dRadius, actualRectangle.y() + actualRectangle.height() - dRadius);
-        painterPath.arcTo(QRectF(actualRectangle.x(), actualRectangle.y() + actualRectangle.height() - 2 * dRadius, 2 * dRadius, 2 * dRadius), 0, -180);
-        painterPath.closeSubpath();
-        pPainter->setClipPath(painterPath);
-        pPainter->fillRect(actualRectangle, tokenColor);
+        pPainter->setRenderHint(QPainter::Antialiasing);
+        pPainter->setPen(Qt::NoPen);
+        pPainter->setBrush(tokenColor);
+        pPainter->drawRoundedRect(actualRectangle, 5, 5);
     }
 
 #else
 
     /* Draw background: */
-    QColor backgroundColor = pal.color(QPalette::Active, QPalette::Window);
+    QColor backgroundColor = colors.row;
     backgroundColor.setAlpha(50 + (double)m_iHoveringValue / 100 * 150);
-    QRect actualRectangle = rectangle;
-    actualRectangle.setLeft(actualRectangle.left() + .85 * actualRectangle.width() * ((double)100 - m_iHoveringValue) / 100);
-    pPainter->fillRect(actualRectangle, backgroundColor);
+    QRectF track = rectangle;
+    const double dInset = .7 * (100 - m_iHoveringValue) / 100;
+    if (m_enmOrientation == Qt::Vertical)
+        track.setLeft(track.left() + dInset * track.width());
+    else
+        track.setTop(track.top() + dInset * track.height());
+    pPainter->setRenderHint(QPainter::Antialiasing);
+    pPainter->setPen(Qt::NoPen);
+    pPainter->setBrush(backgroundColor);
+    pPainter->drawRoundedRect(track, 6, 6);
 
     /* Emulate token when necessary: */
     if (m_iHoveringValue < 100)
     {
-        QColor tokenColor = pal.color(QPalette::Active, QPalette::Window).darker(140);
-        QRect tokenRectangle = QRect(actualTokenPosition(), QSize(m_iExtent, m_iExtent));
-        tokenRectangle.setLeft(tokenRectangle.left() + .85 * tokenRectangle.width() * ((double)100 - m_iHoveringValue) / 100);
-        pPainter->fillRect(tokenRectangle, tokenColor);
+        QRectF thumb(actualTokenPosition(), QSize(m_iExtent, m_iExtent));
+        if (m_enmOrientation == Qt::Vertical)
+            thumb.setLeft(thumb.left() + dInset * thumb.width());
+        else
+            thumb.setTop(thumb.top() + dInset * thumb.height());
+        pPainter->setBrush(colors.scrollThumb);
+        pPainter->drawRoundedRect(thumb, 5, 5);
     }
 
 #endif

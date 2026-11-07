@@ -124,10 +124,10 @@ ifndef VBOX_ONLY_SDK
  	VBoxCAPIGlue.c
  ifdef VBOX_WITH_XPCOM
   VBoxCAPIGlue_SOURCES += \
-  	$(VBOX_PATH_SDK)/bindings/xpcom/lib/VirtualBox_i.c
+	$(VBOX_PATH_SDK)/bindings/xpcom/lib/VirtualBox_i.c
  else
   VBoxCAPIGlue_SOURCES += \
-  	$(VBOX_PATH_SDK)/bindings/mscom/lib/VirtualBox_i.c
+  	$(VBOX_PATH_SDK)/bindings/mscom/lib/Navebox_i.c
  endif
  VBoxCAPIGlue_INCS = \
  	$(VBOX_PATH_SDK)/bindings/c/include \
@@ -165,7 +165,7 @@ ifndef VBOX_ONLY_SDK
   tstCAPIGlue_INTERMEDIATES = \
   	$(VBOX_PATH_SDK)/bindings/c/glue/VBoxCAPIGlue.h \
   	$(VBOX_PATH_SDK)/bindings/c/include/VBoxCAPI_v$(VBOX_API_VERSION).h \
-  	$(if-expr !defined(VBOX_WITH_XPCOM),$(VBOX_PATH_SDK)/bindings/mscom/include/VirtualBox.h,)
+  	$(if-expr !defined(VBOX_WITH_XPCOM),$(VBOX_PATH_SDK)/bindings/mscom/include/Navebox.h,)
   tstCAPIGlue_SOURCES = \
   	tstCAPIGlue.c
   tstCAPIGlue_LIBS = \

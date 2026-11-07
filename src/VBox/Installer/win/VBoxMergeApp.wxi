@@ -97,7 +97,7 @@
         <File Id="VBoxC" Name="VBoxC.dll" Source="$(env.PATH_OUT)\bin\VBoxC.dll" KeyPath="$(var.Property_VBoxCDllAsTypelib)" />
 <?endif?>
         <!-- Include the auto-generated TypeLib block -->
-        <?include $(env.PATH_TARGET)\VirtualBox_TypeLib.wxi ?>
+        <?include $(env.PATH_TARGET)\Navebox_TypeLib.wxi ?>
 
 <?if $(env.VBOX_WITH_SDS) = "yes" ?>
         <File Id="VBoxSDS" Name="VBoxSDS.exe" Vital="yes" Source="$(env.PATH_OUT)\bin\VBoxSDS.exe" KeyPath="yes" />
@@ -234,12 +234,11 @@
 
 <?if $(env.VBOX_WITH_QTGUI) = "yes" ?>
         <!-- Qt frontend -->
-        <File Id="file_VirtualBox.exe" Name="VirtualBox.exe" Source="$(env.PATH_OUT)\bin\VirtualBox.exe" />
         <File Id="file_Navebox.exe" Name="Navebox.exe" Source="$(env.PATH_OUT)\bin\Navebox.exe" />
-        <File Id="file_VirtualBoxVM.exe" Name="VirtualBoxVM.exe" Source="$(env.PATH_OUT)\bin\VirtualBoxVM.exe" />
+        <File Id="file_NaveboxVM.exe" Name="NaveboxVM.exe" Source="$(env.PATH_OUT)\bin\NaveboxVM.exe" />
         <File Id="file_UICommon.dll" Name="UICommon.dll" Source="$(env.PATH_OUT)\bin\UICommon.dll" />
     <?if $(env.VBOX_WITH_HARDENING) = "yes" ?>
-        <File Id="file_VirtualBoxVM.dll" Name="VirtualBoxVM.dll" Source="$(env.PATH_OUT)\bin\VirtualBoxVM.dll" />
+        <File Id="file_NaveboxVM.dll" Name="NaveboxVM.dll" Source="$(env.PATH_OUT)\bin\NaveboxVM.dll" />
     <?endif?>
     <?if $(env.VBOX_WITH_ORACLE_QT) = "yes" or $(env.VBOX_WITH_QT_PAYLOAD) = "yes" ?>
         <File Id="file_Qt6Core$(var.VBOX_QT_INFIX).dll" Name="Qt6Core$(var.VBOX_QT_INFIX).dll" Source="$(env.PATH_OUT)\bin\Qt6Core$(var.VBOX_QT_INFIX).dll" />
@@ -255,10 +254,9 @@
         <File Id="file_Qt6Svg$(var.VBOX_QT_INFIX).dll" Name="Qt6Svg$(var.VBOX_QT_INFIX).dll" Source="$(env.PATH_OUT)\bin\Qt6Svg$(var.VBOX_QT_INFIX).dll" />
         <?endif?>
     <?endif?>
-        <File Id="file_VirtualBox.VisualElementsManifest.xml" Name="VirtualBox.VisualElementsManifest.xml" Source="$(env.PATH_OUT)\bin\VirtualBox.VisualElementsManifest.xml" />
         <File Id="file_Navebox.VisualElementsManifest.xml" Name="Navebox.VisualElementsManifest.xml" Source="$(env.PATH_OUT)\bin\Navebox.VisualElementsManifest.xml" />
-        <File Id="file_VirtualBox_70px.png" Name="VirtualBox_70px.png" Source="$(env.PATH_OUT)\bin\VirtualBox_70px.png" />
-        <File Id="file_VirtualBox_150px.png" Name="VirtualBox_150px.png" Source="$(env.PATH_OUT)\bin\VirtualBox_150px.png" />
+        <File Id="file_navebox_70px.png" Name="navebox-70.png" Source="$(env.PATH_OUT)\bin\navebox-70.png" />
+        <File Id="file_navebox_150px.png" Name="navebox-150.png" Source="$(env.PATH_OUT)\bin\navebox-150.png" />
     <!-- Register file extensions. Note: Extension IDs *must not* be changed! These specify the actual
          file extension to handle. Also, here would be the place to add more fancy DDE stuff later.
          Important: The IDs in "IconIndex" *must* be matching "Resources\resource.h"
@@ -267,22 +265,22 @@
                Otherwise the MSI validation will fail.  -->
     <ProgId Id="progId_VirtualBox.Shell.vbox" Description="Navebox Machine Definition" Icon="file_VBoxRes.dll" IconIndex="-201">
         <Extension Id="vbox" ContentType="application/x-virtualbox-vbox">
-            <Verb Id="open" Command="Open" TargetFile="file_VirtualBox.exe" Argument="&quot;%1&quot;" />
+            <Verb Id="open" Command="Open" TargetFile="file_Navebox.exe" Argument="&quot;%1&quot;" />
         </Extension>
     </ProgId>
     <ProgId Id="progId_VirtualBox.Shell.vbox-extpack" Description="VirtualBox Extension Pack" Icon="file_VBoxRes.dll" IconIndex="-202">
         <Extension Id="vbox-extpack" ContentType="application/x-virtualbox-vbox-extpack">
-            <Verb Id="open" Command="Open" TargetFile="file_VirtualBox.exe" Argument="&quot;%1&quot;" />
+            <Verb Id="open" Command="Open" TargetFile="file_Navebox.exe" Argument="&quot;%1&quot;" />
         </Extension>
     </ProgId>
     <ProgId Id="progId_VirtualBox.Shell.ovf" Description="Open Virtualization Format" Icon="file_VBoxRes.dll" IconIndex="-301">
         <Extension Id="ovf" ContentType="application/x-virtualbox-ovf">
-            <Verb Id="open" Command="Open" TargetFile="file_VirtualBox.exe" Argument="&quot;%1&quot;" />
+            <Verb Id="open" Command="Open" TargetFile="file_Navebox.exe" Argument="&quot;%1&quot;" />
         </Extension>
     </ProgId>
     <ProgId Id="progId_VirtualBox.Shell.ova" Description="Open Virtualization Format Archive" Icon="file_VBoxRes.dll" IconIndex="-302">
         <Extension Id="ova" ContentType="application/x-virtualbox-ova">
-            <Verb Id="open" Command="Open" TargetFile="file_VirtualBox.exe" Argument="&quot;%1&quot;" />
+            <Verb Id="open" Command="Open" TargetFile="file_Navebox.exe" Argument="&quot;%1&quot;" />
         </Extension>
     </ProgId>
     <ProgId Id="progId_VirtualBox.Shell.vdi" Description="Virtual Disk Image" Icon="file_VBoxRes.dll" IconIndex="-303">

@@ -96,6 +96,10 @@ public:
         QString name() const { return m_strName; }
         /** Defines item @a strName. */
         void setName(const QString &strName);
+        /** Returns the translated name for @a enmType. */
+        static QString typeToName(UIToolType enmType);
+        /** Returns the icon for @a enmType. */
+        static QIcon typeToIcon(UIToolType enmType);
 
         /** Returns item description. */
         QString description() const { return m_strDescription; }
@@ -179,9 +183,6 @@ private:
 
     /** @name Item stuff.
       * @{ */
-        /** Retuns icon for @a enmType specified. */
-        static QIcon typeToIcon(UIToolType enmType);
-
         /** Returns abstractly stored data value for certain @a iKey. */
         QVariant data(int iKey) const;
     /** @} */

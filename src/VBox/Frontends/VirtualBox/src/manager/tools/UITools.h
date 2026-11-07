@@ -38,6 +38,7 @@
 #include "UIExtraDataDefs.h"
 
 /* Forward declarations: */
+class QLabel;
 class QVBoxLayout;
 class UIToolsModel;
 class UIToolsView;
@@ -86,6 +87,8 @@ private:
       * @{ */
         /** Prepares all. */
         void prepare();
+        /** Adds the brand to the global navigation. */
+        void prepareNavigation();
         /** Cleanups all. */
         void cleanup();
     /** @} */
@@ -104,7 +107,16 @@ private:
         UIToolsModel *m_pToolsModel;
         /** Holds the Tools-view instance. */
         UIToolsView  *m_pToolsView;
+        /** Holds the product icon at the top of the global navigation. */
+        QLabel *m_pBrandIcon = 0;
+        /** Holds the product name, visible when navigation is expanded. */
+        QLabel *m_pBrandName = 0;
     /** @} */
+
+private slots:
+
+    /** Updates the brand for the current display scale and navigation state. */
+    void sltUpdateNavigation();
 };
 
 #endif /* !FEQT_INCLUDED_SRC_manager_tools_UITools_h */

@@ -30,5 +30,5 @@
 
 #include "../../../Artwork/win/TemplateDll.rc"
 
-1 TYPELIB "VirtualBox.tlb"
+1 TYPELIB "Navebox.tlb"
 

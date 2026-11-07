@@ -35,6 +35,7 @@
 #include "UIDetailsItem.h"
 #include "UIDetailsModel.h"
 #include "UIDetailsView.h"
+#include "UIManagerStyle.h"
 #include "UITranslationEventListener.h"
 
 /* Other VBox includes: */
@@ -316,10 +317,7 @@ void UIDetailsView::prepareThis()
 
 void UIDetailsView::preparePalette()
 {
-    QPalette pal = QApplication::palette();
-    pal.setColor(QPalette::Active, QPalette::Base, pal.color(QPalette::Active, QPalette::Window));
-    pal.setColor(QPalette::Inactive, QPalette::Base, pal.color(QPalette::Inactive, QPalette::Window));
-    setPalette(pal);
+    setBackgroundBrush(UIManagerStyle::surfaceColor(QApplication::palette()));
 }
 
 void UIDetailsView::updateSceneRect()

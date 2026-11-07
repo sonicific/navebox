@@ -661,7 +661,11 @@ void UICommon::loadColorTheme(bool fAnyway /* = false */)
 
 #endif /* Linux, BSD, Solaris */
 
-    qApp->setStyleSheet(UIAppearance::styleSheet(qApp->palette()));
+    const QPalette palette = qApp->palette();
+    QString strStyle = UIAppearance::styleSheet(palette);
+    if (uiType() == UIType_ManagerUI)
+        strStyle += UIAppearance::managerControlsStyleSheet(palette);
+    qApp->setStyleSheet(strStyle);
 
     /* Notifiy listeners ater all: */
     emit sigThemeChange();

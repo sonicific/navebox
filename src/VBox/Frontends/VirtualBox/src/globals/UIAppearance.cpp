@@ -25,6 +25,9 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+/* Qt includes: */
+#include <QPainter>
+
 /* GUI includes: */
 #include "UIAppearance.h"
 
@@ -68,4 +71,42 @@ QString UIAppearance::styleSheet(const QPalette &palette)
         " left: 10px; padding: 0 4px; }"
         "QToolTip { color: palette(tool-tip-text); background: palette(tool-tip-base);"
         " border: 1px solid %1; padding: 4px 6px; }").arg(strBorder, strDisabledBorder, strArrowTheme);
+}
+
+/* static */
+QString UIAppearance::managerControlsStyleSheet(const QPalette &palette)
+{
+    const PaneColors colors(palette);
+    return QStringLiteral(
+        "QMenu { background: %1; color: %2; border: 1px solid %3; padding: 4px; }"
+        "QMenu::item { padding: 5px 9px; border-radius: 5px; }"
+        "QMenu::item:selected:enabled { background: %4; color: %2; }"
+        "QMenu::item:disabled { color: palette(mid); }"
+        "QMenu::separator { background: %5; height: 1px; margin: 4px 6px; }"
+        "QDialogButtonBox QPushButton, QWidget[managerActionBar=\"true\"] QPushButton {"
+        " background: %1; color: %2; border: 1px solid %3; border-radius: 6px; padding: 5px 12px; }"
+        "QDialogButtonBox QPushButton:default, QWidget[managerActionBar=\"true\"] QPushButton:default {"
+        " background: %4; border-color: palette(highlight); }"
+        "QDialogButtonBox QPushButton:hover:enabled, QWidget[managerActionBar=\"true\"] QPushButton:hover:enabled {"
+        " background: %4; }"
+        "QDialogButtonBox QPushButton:pressed, QWidget[managerActionBar=\"true\"] QPushButton:pressed {"
+        " background: %6; }"
+        "QDialogButtonBox QPushButton:focus, QWidget[managerActionBar=\"true\"] QPushButton:focus {"
+        " border-color: palette(highlight); }"
+        "QDialogButtonBox QPushButton:disabled, QWidget[managerActionBar=\"true\"] QPushButton:disabled {"
+        " background: %7; border-color: %3; color: palette(mid); }")
+        .arg(colors.surface.name(), colors.text.name(), colors.border.name(), colors.hover.name(),
+             colors.divider.name(), colors.pressed.name(), colors.row.name());
+}
+
+/* static */
+void UIAppearance::paintSheet(QPainter &painter, const QRectF &bounds, const QPalette &palette)
+{
+    const PaneColors colors(palette);
+    painter.save();
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(colors.border);
+    painter.setBrush(colors.surface);
+    painter.drawRoundedRect(bounds.adjusted(0.5, 0.5, -0.5, -0.5), 14, 14);
+    painter.restore();
 }

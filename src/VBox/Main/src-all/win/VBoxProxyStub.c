@@ -39,7 +39,7 @@
 #include <iprt/win/shlwapi.h>
 #include <stdio.h>
 
-#include "VirtualBox.h"
+#include "Navebox.h"
 #include <VBox/cdefs.h>                 /* for VBOX_STRICT */
 #include <VBox/log.h>
 #include <iprt/alloca.h>
@@ -118,12 +118,12 @@ CStdPSFactoryBuffer         g_ProxyStubFactory =                                
     NULL,
     0
 };
-/** Reference to VirtualBox_p.c structure. */
-EXTERN_PROXY_FILE(VirtualBox)                                                                        /* see generated dlldata.c */
+/** Reference to Navebox_p.c structure. */
+EXTERN_PROXY_FILE(Navebox)                                                                           /* see generated dlldata.c */
 /** For NdrXxx and for returning. */
 static const ProxyFileInfo *g_apProxyFiles[] =
 {
-    REFERENCE_PROXY_FILE(VirtualBox),
+    REFERENCE_PROXY_FILE(Navebox),
     NULL /* terminator */
 };
 /** The class ID for this proxy stub factory (see Makefile). */
@@ -269,7 +269,7 @@ HRESULT STDAPICALLTYPE DllCanUnloadNow(void)
 
 
 /**
- * Release call that could be referenced by VirtualBox_p.c via
+ * Release call that could be referenced by Navebox_p.c via
  * CStdStubBuffer_METHODS.
  *
  * @returns New reference count.
@@ -284,7 +284,7 @@ ULONG STDMETHODCALLTYPE CStdStubBuffer_Release(IRpcStubBuffer *pThis)           
 
 
 /**
- * Release call referenced by VirtualBox_p.c via
+ * Release call referenced by Navebox_p.c via
  * CStdStubBuffer_DELEGATING_METHODS.
  *
  * @returns New reference count.
@@ -299,7 +299,7 @@ ULONG WINAPI CStdStubBuffer2_Release(IRpcStubBuffer *pThis)                     
 
 
 /**
- * Pure virtual method implementation referenced by VirtualBox_p.c
+ * Pure virtual method implementation referenced by Navebox_p.c
  */
 void __cdecl _purecall(void)                                                              /* see DLLDUMMYPURECALL in RpcProxy.h */
 {

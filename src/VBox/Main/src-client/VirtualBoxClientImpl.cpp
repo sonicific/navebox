@@ -259,7 +259,12 @@ HRESULT VirtualBoxClient::init()
         char szNlsPath[RTPATH_MAX];
         vrc = RTPathAppPrivateNoArch(szNlsPath, sizeof(szNlsPath));
         if (RT_SUCCESS(vrc))
-            vrc = RTPathAppend(szNlsPath, sizeof(szNlsPath), "nls" RTPATH_SLASH_STR "VirtualBoxAPI");
+            vrc = RTPathAppend(szNlsPath, sizeof(szNlsPath),
+#ifdef RT_OS_WINDOWS
+                              "nls" RTPATH_SLASH_STR "NaveboxAPI");
+#else
+                              "nls" RTPATH_SLASH_STR "VirtualBoxAPI");
+#endif
 
         if (RT_SUCCESS(vrc))
         {

@@ -47,6 +47,7 @@ enum UIActionIndexMN
     UIActionIndexMN_M_File = UIActionIndex_Max + 1,
     UIActionIndexMN_M_File_S_ImportAppliance,
     UIActionIndexMN_M_File_S_ExportAppliance,
+    UIActionIndexMN_M_File_S_AndroidPhones,
     UIActionIndexMN_M_File_M_Tools,
     UIActionIndexMN_M_File_M_Tools_T_HomeScreen,
     UIActionIndexMN_M_File_M_Tools_T_ExtensionPackManager,

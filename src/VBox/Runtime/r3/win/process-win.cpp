@@ -1641,7 +1641,7 @@ static int rtProcWinCreateAsUser2(PRTUTF16 pwszUser, PRTUTF16 pwszPassword, PRTU
 #ifdef VBOX             /* The explorer entry is a fallback in case GA aren't installed. */
                         { "VBoxTray.exe" },
 # ifndef IN_GUEST
-                        { "VirtualBox.exe" },
+                        { "Navebox.exe" },
 # endif
 #endif
                         { "explorer.exe" },

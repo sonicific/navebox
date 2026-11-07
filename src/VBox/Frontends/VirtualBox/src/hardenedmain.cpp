@@ -137,5 +137,9 @@ int main(int argc, char **argv, char **envp)
             fFlags |= SUPSECMAIN_FLAGS_DRIVERLESS;
     }
 
+#ifdef RT_OS_WINDOWS
+    return SUPR3HardenedMain("NaveboxVM", fFlags, argc, argv, envp);
+#else
     return SUPR3HardenedMain("VirtualBoxVM", fFlags, argc, argv, envp);
+#endif
 }

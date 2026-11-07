@@ -80,6 +80,88 @@ Rules for adding a changelog entry to make them look more uniform:
     <itemizedlist>
 
       <listitem>
+        <para>Navebox GUI: Added a Phones page beside Machines for creating private
+          Android SDK virtual devices, checking acceleration, starting and
+          stopping phones, monitoring boot completion, and installing APKs.
+          The main toolbar opens Create Phone and SDK Settings dialogs and
+          enables device actions based on the selected phone. Each phone has an
+          icon and state in the list, with configuration displayed beside it.
+          Phone creation offers display and hardware profile variation for
+          testing and a software-rendered cold boot. Phone actions can interrupt
+          a status refresh.</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox GUI: Open the manager with expanded navigation and select
+          Machines when available. Refine icons, spacing, and details panels
+          in the Machines and Phones views.</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox for Windows: Branded the installed executables, VM
+          library, translations, SDK files and global settings filename.
+          Updated file associations and retained access to existing settings</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox GUI: Unified the appearance of Manager pages and
+          refreshed the Notifications, menu bar, and status bar sheets</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox GUI: Fixed a crash when opening Phones and restored the
+          navigation colors used before the Manager page refresh</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox GUI: Added consistent page headers, refined tables and
+          tabs, and rounded scrollbars to the Manager</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox GUI: Moved the Manager toolbar to the right side of the
+          page header on tabs other than Home and reduced its height. Added
+          Export and Android Phones shortcuts to Home and a divider at the
+          edge of the sidebar</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox GUI: Increased the padding of toolbar buttons in page
+          headers and matched popup menus and dialog buttons to the Manager
+          theme</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox GUI: Added a Phone menu next to Machine and moved the
+          Android Phones shortcut out of the Machine menu. Removed the
+          duplicate Home toolbar, aligned Media and Network tables with
+          their page content, and simplified the sidebar and About dialog</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox GUI: Keep the Home backdrop across Manager tabs, contain
+          toolbar hover fills, align menu chevrons, and soften scrollbar colors</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox GUI: Place Manager menus and colored window controls in
+          the Windows title bar and move the product identity into the sidebar.
+          Toggle the compact sidebar from the icon before File and view
+          product and build information in the refreshed About dialog</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox GUI: Redesigned Home with an illustrated header and
+          keyboard-accessible rows for common VM actions and help resources.
+          Refined the light palette and softened dividers</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox GUI: Combined About, contact details, build information,
+          and credits in one scrollable dialog.</para>
+      </listitem>
+
+      <listitem>
         <para>Building the OSE Edition: Implemented a new configure.py script which
           unifies the ./configure (non-Windows) and configure.vbs (Windows) scripts
           Please adjust your building process accordingly, as the compatibility wrapper
@@ -131,6 +213,10 @@ Rules for adding a changelog entry to make them look more uniform:
           centered dialogs within the visible owner or screen area and showed
           startup errors in a separate centered window instead of displaying
           About behind the error</para>
+      </listitem>
+
+      <listitem>
+        <para>Navebox GUI: Center dialogs using their own window frame.</para>
       </listitem>
 
       <listitem>

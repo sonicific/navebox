@@ -47,10 +47,10 @@ name comes from `VBOX_PRODUCT`, and distributor display from
 `VBOX_BRAND_WIN_INST_PUBLISHER`. Original license/copyright text is retained.
 
 Product name, slogan and contact data are centralized in
-`src/globals/UIBranding.h`. Windows builds install `Navebox.exe` alongside the
-internal compatibility executable. The two entry points share the same code,
-resource icon and visible identity. Internal API, service and VM-file names
-are retained for compatibility. Upstream attribution remains in About.
+`src/globals/UIBranding.h`. Windows builds install `Navebox.exe` as the
+manager and `NaveboxVM.exe` as the VM frontend. The manager's visual manifest
+uses the branded 70 and 150 pixel images. Upstream attribution is available
+in About.
 
 The same utility creates four small chevrons for flat dropdown and spinbox
 buttons. Light and dark variants retain a visible arrow after native button

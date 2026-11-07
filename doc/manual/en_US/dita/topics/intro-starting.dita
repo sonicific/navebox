@@ -29,12 +29,67 @@
       </li>
     </ul>
     <p>When you start <ph conkeyref="vbox-conkeyref-phrases/product-name"/>, the <ph conkeyref="vbox-conkeyref-phrases/vbox-mgr"/> interface is shown. See <xref href="configuring-virtualbox.dita"/>. </p>
-    <p>The main toolbar, machine selection, and rounded details cards use
-      the application color theme. Selected machines use the theme's highlight
-      and matching text colors in both light and dark modes.</p>
-    <p>The About dialog includes a Copy Build Information button for support
-      requests. It copies product and platform versions, build type, and source
-      revision, without including VM configuration or host file paths.</p>
+    <p>Home presents its shortcuts as action rows. Other Manager pages show
+      their actions in a compact toolbar at the right of the page header.
+      Popup menus, dialog buttons, and the slide-out <b>Notifications</b>
+      panel follow the light or dark application theme.
+      Select a notification to expand its details. The panel also includes
+      controls for sorting and clearing finished notifications.</p>
+    <p>Navebox opens with the navigation expanded and <b>Machines</b> selected
+      when machines are available. With an empty machine list, it opens
+      <b>Home</b>.</p>
+    <p>The Navebox logo and name are at the top of the navigation pane. Use
+      the sidebar icon before <b>File</b> to switch between icon-only navigation
+      and full labels. On macOS, use the sidebar action in the <b>Window</b>
+      menu. On Windows, the Manager menus are in the title bar beside the
+      window controls.</p>
+    <p>Use the action rows in <b>Home</b> to open global preferences, create
+      a virtual machine, add a saved machine, import or export an appliance,
+      open Android Phones, or visit the VirtualBox documentation and community
+      website. Click a row or use
+      <b>Tab</b> and <b>Space</b> to activate it with the keyboard.</p>
+    <p>The About dialog shows the product version, contact details, build
+      information, and credits on one scrollable page. Use <b>Copy Build
+        Information</b> to copy the product and platform versions, build type,
+      and source revision for a support request.</p>
+    <p>Dialogs center their window frame within the visible part of the
+      parent window or the available screen area.</p>
+    <section id="navebox-android-phones">
+      <title>Android Phones in Navebox</title>
+      <p>Select <b>Phones</b> in the main navigation next to <b>Machines</b>,
+        or choose <b>Phone</b>, then <b>Android Phones</b>. The <b>Phone</b>
+        menu also opens the creation and SDK settings dialogs. When the
+        Phones page is active, it includes actions for the selected phone.
+        Use this page to create and manage Android virtual phones with a
+        separately installed Android SDK. Install
+        Android Emulator, Platform-Tools, Command-Line Tools and a stable phone
+        image matching the host CPU (API 26 or newer) using the standalone SDK
+        tools or Android Studio's SDK Manager. Android Studio is optional.
+        Click <b>SDK Settings</b> in the main toolbar, select the SDK and a compatible Java home in the phone
+        manager, click <b>Apply SDK</b>, then <b>Check Acceleration</b>, then
+        <b>Done</b>.</p>
+      <p>SDK Settings opens a modal. Applying an SDK keeps setup open for the
+        acceleration check. Click <b>Done</b> to close it.</p>
+      <p>Click <b>Create Phone</b> in the main toolbar to open the creation dialog. Choose a name, image, memory, CPUs, storage and
+        device profile. <b>Vary for testing</b> selects a supported hardware
+        profile and display at creation. Phones with the same image can share
+        the Android build fingerprint. After creation, the new phone is selected in the list.
+        Each phone is listed with its icon, name and status. Select a phone on
+        the left to view its configuration on the right. Click <b>Start</b> in
+        the toolbar to launch the selected stopped phone. The emulator opens in its own window. When its status is
+        <b>Ready</b>, use <b>Install APK</b> or the navigation actions under <b>More</b>.
+        <b>More</b>, then <b>Cold Boot</b>, skips loading a snapshot without deleting phone data.
+        If GPU Auto fails, <b>Cold Boot with Software Graphics</b> uses a
+        software renderer for the session on supported SDK versions.
+        <b>Stop</b> shuts down the selected emulator.</p>
+      <p>Phone data is stored in a separate Phones directory under the
+        application's local data directory. Android Studio's device catalog is
+        not modified. Phones keep running when you switch pages or close Navebox.
+        Return to <b>Phones</b> to refresh the list. Use <b>More</b>, then <b>Open Log</b>, to inspect a
+        startup failure. Navebox does not install SDK packages, accept SDK
+        licenses, or change host virtualization settings. APK compatibility
+        depends on the selected Android image and its supported CPU ABI.</p>
+    </section>
   </body>
   
 </topic>

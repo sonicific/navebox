@@ -125,7 +125,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define VBOX_GLOBAL_SETTINGS_FILE "VirtualBox.xml"
+#ifdef RT_OS_WINDOWS
+# define VBOX_GLOBAL_SETTINGS_FILE "Navebox.xml"
+#else
+# define VBOX_GLOBAL_SETTINGS_FILE "VirtualBox.xml"
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -578,15 +582,25 @@ HRESULT VirtualBox::init()
 
         i_reportDriverVersions();
 
-        /* compose the VirtualBox.xml file name */
+        /* Compose the active settings path and check for a legacy file on Windows. */
         unconst(m->strSettingsFilePath) = Utf8StrFmt("%s%c%s",
                                                      m->strHomeDir.c_str(),
                                                      RTPATH_DELIMITER,
                                                      VBOX_GLOBAL_SETTINGS_FILE);
-        // load and parse VirtualBox.xml; this will throw on XML or logic errors
+        Utf8Str strReadPath = m->strSettingsFilePath;
+#ifdef RT_OS_WINDOWS
+        RTFSOBJINFO objInfo;
+        if (RTPathQueryInfo(strReadPath.c_str(), &objInfo, RTFSOBJATTRADD_NOTHING) == VERR_FILE_NOT_FOUND)
+        {
+            const Utf8Str strLegacyPath = Utf8StrFmt("%s%cVirtualBox.xml", m->strHomeDir.c_str(), RTPATH_DELIMITER);
+            if (RTPathQueryInfo(strLegacyPath.c_str(), &objInfo, RTFSOBJATTRADD_NOTHING) != VERR_FILE_NOT_FOUND)
+                strReadPath = strLegacyPath;
+        }
+#endif
+        /* Saving always uses the branded path, leaving any old settings file available for recovery. */
         try
         {
-            m->pMainConfigFile = new settings::MainConfigFile(&m->strSettingsFilePath);
+            m->pMainConfigFile = new settings::MainConfigFile(&strReadPath);
         }
         catch (xml::EIPRTFailure &e)
         {
@@ -665,7 +679,12 @@ HRESULT VirtualBox::init()
             char szNlsPath[RTPATH_MAX];
             int vrc = RTPathAppPrivateNoArch(szNlsPath, sizeof(szNlsPath));
             if (RT_SUCCESS(vrc))
-                vrc = RTPathAppend(szNlsPath, sizeof(szNlsPath), "nls" RTPATH_SLASH_STR "VirtualBoxAPI");
+                vrc = RTPathAppend(szNlsPath, sizeof(szNlsPath),
+#ifdef RT_OS_WINDOWS
+                                  "nls" RTPATH_SLASH_STR "NaveboxAPI");
+#else
+                                  "nls" RTPATH_SLASH_STR "VirtualBoxAPI");
+#endif
 
             if (RT_SUCCESS(vrc))
             {

@@ -63,7 +63,7 @@
 
 #include <stdio.h>
 #include <iprt/win/windows.h>  /* Avoid -Wall warnings. */
-#include "VirtualBox.h"
+#include "Navebox.h"
 
 #define SAFE_RELEASE(x) \
     if (x) { \

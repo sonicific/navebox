@@ -273,7 +273,7 @@ void UISession::acquireUserMachineIcon(QIcon &icon)
     if (machineIcon.isNull())
         machineIcon = generalIconPool().guestOSTypeIcon(osTypeId());
     if (machineIcon.isNull())
-        machineIcon = QIcon(":/VirtualBox_48px.png");
+        machineIcon = QIcon(":/navebox-48.png");
     if (!machineIcon.isNull())
         icon = machineIcon;
 }

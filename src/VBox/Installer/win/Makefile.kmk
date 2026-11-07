@@ -244,16 +244,16 @@ BLDDIRS += \
 	$(VBOX_WIN_INST_REPACK_DIR)/ \
 	$(foreach lang,$(VBOX_INSTALLER_LANGUAGES), \
 		$(VBOX_WIN_INST_OUT_DIR)/$(lang)/ \
-		$(VBOX_WIN_INST_REPACK_DIR)/files-VirtualBox_$(lang)/ ) \
+		$(VBOX_WIN_INST_REPACK_DIR)/files-Navebox_$(lang)/ ) \
 	$(VBOX_WIN_INST_OUT_DIR)/NLS/
 
 OTHER_CLEAN += \
-	$(VBOX_WIN_INST_OUT_DIR)/VirtualBox.wix \
-	$(VBOX_WIN_INST_REPACK_DIR)/VirtualBox.wix \
-	$(VBOX_WIN_INST_OUT_DIR)/VirtualBox.msi.dep \
-	$(VBOX_WIN_INST_OUT_DIR)/VirtualBox_TypeLib.wxi \
-	$(VBOX_WIN_INST_OUT_DIR)/VirtualBox_TypeLib_x86.wxi \
-	$(VBOX_WIN_INST_OUT_DIR)/VirtualBox_ProxyStub.wxi \
+	$(VBOX_WIN_INST_OUT_DIR)/Navebox.wix \
+	$(VBOX_WIN_INST_REPACK_DIR)/Navebox.wix \
+	$(VBOX_WIN_INST_OUT_DIR)/Navebox.msi.dep \
+	$(VBOX_WIN_INST_OUT_DIR)/Navebox_TypeLib.wxi \
+	$(VBOX_WIN_INST_OUT_DIR)/Navebox_TypeLib_x86.wxi \
+	$(VBOX_WIN_INST_OUT_DIR)/Navebox_ProxyStub.wxi \
 	$(if $(VBOX_WITH_QTGUI),$(VBOX_WIN_INST_OUT_DIR)/VBoxGuiNLS.wxi) \
 	$(VBOX_WIN_INST_OUT_DIR)/VBoxKey.wxi \
 	$(VBOX_WIN_INST_OUT_DIR)/VBoxUnattendedTemplateComponent.wxi \
@@ -263,13 +263,13 @@ OTHER_CLEAN += \
 		$(VBOX_WIN_INST_OUT_DIR)/$(lang)/$(lang).mst \
 		$(VBOX_WIN_INST_OUT_DIR)/$(lang)/$(PACKAGE_NAME_LANG)_$(lang).wixpdb \
 		$(VBOX_WIN_INST_OUT_DIR)/$(lang)/$(PACKAGE_NAME_LANG)_$(lang).msi \
-		$(VBOX_WIN_INST_OUT_DIR)/$(lang)/VirtualBox_$(lang).wix \
-		$(VBOX_WIN_INST_OUT_DIR)/$(lang)/VirtualBox_$(lang).msi.dep \
-		$(VBOX_WIN_INST_REPACK_DIR)/VirtualBox_$(lang).wix \
-		$(VBOX_WIN_INST_REPACK_DIR)/VirtualBox_$(lang).files \
+		$(VBOX_WIN_INST_OUT_DIR)/$(lang)/Navebox_$(lang).wix \
+		$(VBOX_WIN_INST_OUT_DIR)/$(lang)/Navebox_$(lang).msi.dep \
+		$(VBOX_WIN_INST_REPACK_DIR)/Navebox_$(lang).wix \
+		$(VBOX_WIN_INST_REPACK_DIR)/Navebox_$(lang).files \
 		$(VBOX_WIN_INST_REPACK_DIR)/1-build-$(PACKAGE_NAME_LANG).cmd \
-		$(VBOX_WIN_INST_REPACK_DIR)/files-VirtualBox_$(lang)/Language_$(lang).wxl \
-		$(VBOX_WIN_INST_REPACK_DIR)/files-VirtualBox_$(lang)/License_$(lang).wxl ) \
+		$(VBOX_WIN_INST_REPACK_DIR)/files-Navebox_$(lang)/Language_$(lang).wxl \
+		$(VBOX_WIN_INST_REPACK_DIR)/files-Navebox_$(lang)/License_$(lang).wxl ) \
 	$(VBOX_WIN_INST_OUT_DIR)/DirComponentsAndFiles_DTrace.wxi \
 	$(VBOX_WIN_INST_OUT_DIR)/Files_Main.wxi \
 	$(VBOX_WIN_INST_OUT_DIR)/Files_Doc.wxi \
@@ -587,7 +587,7 @@ else  # VBOX_WIN_ATTESTATION_SIGNING
 	$(call MSG_L1,Submitting drivers ($<) for attestation signing (=> $@))
 	$(TIME_EXT) $(REDIRECT_EXT) -C "$(@D)" \
 		-- $(VBOX_RETRY) $(VBOX_WIN_ATTESTATION_SIGNING_EXE) \
-		"VirtualBox Base drivers $(KBUILD_TARGET_ARCH) $(VBOX_VERSION_MAJOR).$(VBOX_VERSION_MINOR).$(VBOX_VERSION_BUILD)r$(VBOX_SVN_REV)" \
+		"Navebox Base drivers $(KBUILD_TARGET_ARCH) $(VBOX_VERSION_MAJOR).$(VBOX_VERSION_MINOR).$(VBOX_VERSION_BUILD)r$(VBOX_SVN_REV)" \
 		"$(KBUILD_TARGET_ARCH)" \
 		"r$(VBOX_SVN_REV)" \
 		"$(PACKAGE_NAME_LANG)-$(KBUILD_TARGET_ARCH).cab"
@@ -615,7 +615,7 @@ endif # VBOX_WIN_ATTESTATION_SIGNING
 define def_vbox_build_msi
  $(VBOX_WIN_INST_OUT_DIR)/$(lang)/$(PACKAGE_NAME_LANG)_$(lang).msi \
  $(if-expr defined(VBOX_WITH_COMBINED_PACKAGE) && !defined(VBOX_WITH_MSM_INSTALL), + $(VBOX_WIN_INST_OUT_DIR)/common.cab,): \
- 		$(VBOX_WIN_INST_OUT_DIR)/VirtualBox_$(lang).wixlib \
+ 		$(VBOX_WIN_INST_OUT_DIR)/Navebox_$(lang).wixlib \
  		$(VBOX_WIN_INST_OUT_DIR)/NLS/Language_$(lang).wxl \
  		$(VBOX_WIN_INST_OUT_DIR)/NLS/License_$(lang).wxl \
  		$(PATH_STAGE_BIN)/VBoxDrvInst.exe \
@@ -638,7 +638,7 @@ define def_vbox_build_msi
 		-intermediatefolder $$(@D)/wix-temp/ \
 		-loc $(VBOX_WIN_INST_OUT_DIR)/NLS/Language_$(lang).wxl \
 		-loc $(VBOX_WIN_INST_OUT_DIR)/NLS/License_$(lang).wxl \
-		-lib $(VBOX_WIN_INST_OUT_DIR)/VirtualBox_$(lang).wixlib \
+		-lib $(VBOX_WIN_INST_OUT_DIR)/Navebox_$(lang).wixlib \
 		-ext $(VBOX_TOOLS_WIN_WIXEXT_DIR)/WixToolset.Util.wixext.dll \
 		-pdbtype none \
 		-out $$@
@@ -647,15 +647,15 @@ define def_vbox_build_msi
  endif
  ifeq ($(lang),en_US)
 	$(CP) -f -- "$(VBOX_WIN_INST_OUT_DIR)/NLS/Language_$(lang).wxl" "$(VBOX_WIN_INST_OUT_DIR)/NLS/License_$(lang).wxl" \
-       	"$(VBOX_WIN_INST_REPACK_DIR)/files-VirtualBox_$(lang)/"
+       	"$(VBOX_WIN_INST_REPACK_DIR)/files-Navebox_$(lang)/"
   # Create repack script for this step.
 	$(APPEND) -tn "$$(VBOX_WIN_INST_REPACK_DIR)/1-compile-$$(PACKAGE_NAME_LANG).cmd" \
        	'if ".%KBUILD_DEVTOOLS%" == "." (echo KBUILD_DEVTOOLS is not set & exit /b1)' \
 		$(subst $(KBUILD_DEVTOOLS),%KBUILD_DEVTOOLS%,\
 		'$(VBOX_TOOLS_WIN_WIX_BIN) build ^' \
-		'  files-VirtualBox_$(lang)/Language_$(lang).wxl ^' \
-		'  files-VirtualBox_$(lang)/License_$(lang).wxl ^' \
-		'  -lib VirtualBox_en_US.wixlib ^' \
+		'  files-Navebox_$(lang)/Language_$(lang).wxl ^' \
+		'  files-Navebox_$(lang)/License_$(lang).wxl ^' \
+		'  -lib Navebox_en_US.wixlib ^' \
 		'  -ext $(VBOX_TOOLS_WIN_WIXEXT_DIR)/WixToolset.Util.wixext.dll ^' \
 		'  -pdbtype none ^' \
 		'  -out $$(@F) ^' \
@@ -711,8 +711,8 @@ define def_vbox_build_msm
        	'if ".%KBUILD_DEVTOOLS%" == "." (echo KBUILD_DEVTOOLS is not set & exit /b1)' \
 		$(subst $(KBUILD_DEVTOOLS),%KBUILD_DEVTOOLS%,\
 		'$(VBOX_TOOLS_WIN_WIX_BIN) build ^' \
-		'  files-VirtualBox_$(lang)/Language_$(lang).wxl ^' \
-		'  files-VirtualBox_$(lang)/License_$(lang).wxl ^' \
+		'  files-Navebox_$(lang)/Language_$(lang).wxl ^' \
+		'  files-Navebox_$(lang)/License_$(lang).wxl ^' \
 		'  $(VBOX_TOOLS_WIN_WIX_EXT) ^' \
 		'  -out $$(@F) ^' \
                '  || exit /b1' \
@@ -746,11 +746,11 @@ endif
 # Building a WIX library object (.wixlib).
 # We've separated the final building from the WIX library building for repacking reasons.
 #
-## @todo Proper dependencies: unzip -p VirtualBox_en_US.wixlib | sed -e "s/\([,{]\)/\1\n/g" bar.json | sed -n -e "s/,$//" -e "s/]}$//" -e "s/}}$//" -e 's/"file"://p' -e 's/"path"://p' | sort |uniq
-$(call KB_FN_AUTO_CMD_DEPS,$(VBOX_WIN_INST_OUT_DIR)/VirtualBox_en_US.wixlib)
-$(VBOX_WIN_INST_OUT_DIR)/VirtualBox_en_US.wixlib \
-+ $(VBOX_WIN_INST_REPACK_DIR)/VirtualBox_en_US.wixlib \
-+ $(VBOX_WIN_INST_REPACK_DIR)/VirtualBox_en_US.files: \
+## @todo Proper dependencies: unzip -p Navebox_en_US.wixlib | sed -e "s/\([,{]\)/\1\n/g" bar.json | sed -n -e "s/,$//" -e "s/]}$//" -e "s/}}$//" -e 's/"file"://p' -e 's/"path"://p' | sort |uniq
+$(call KB_FN_AUTO_CMD_DEPS,$(VBOX_WIN_INST_OUT_DIR)/Navebox_en_US.wixlib)
+$(VBOX_WIN_INST_OUT_DIR)/Navebox_en_US.wixlib \
++ $(VBOX_WIN_INST_REPACK_DIR)/Navebox_en_US.wixlib \
++ $(VBOX_WIN_INST_REPACK_DIR)/Navebox_en_US.files: \
 		$(PATH_SUB_CURRENT)/VirtualBox.wxs \
 		$(PATH_SUB_CURRENT)/UserInterface.wxi \
 		$(PATH_SUB_CURRENT)/CommonProperties.wxi \
@@ -766,15 +766,15 @@ $(VBOX_WIN_INST_OUT_DIR)/VirtualBox_en_US.wixlib \
 		$(VBOX_WIN_INST_OUT_DIR)/Files_Main.wxi \
 		$(VBOX_WIN_INST_OUT_DIR)/VBoxKey.wxi \
 		$(VBOX_WIN_INST_OUT_DIR)/VBoxGuiNLS.wxi \
-		$(VBOX_WIN_INST_OUT_DIR)/VirtualBox_TypeLib.wxi \
+		$(VBOX_WIN_INST_OUT_DIR)/Navebox_TypeLib.wxi \
 		$(VBOX_WIN_INST_OUT_DIR)/VBoxUnattendedTemplateComponent.wxi \
 		$(if-expr defined(VBOX_WITH_MSM_INSTALL), \
 			$(foreach module,$(VBOX_INSTALLER_MERGE_MODULES), \
 				$(VBOX_WIN_INST_OUT_DIR)/VBoxMerge$(module)_en_US_$(KBUILD_TARGET_ARCH).msm) \
 			, \
 			$(VBOX_WIN_INST_OUT_DIR)/Shortcuts_StartMenu.wxi \
-			$(VBOX_WIN_INST_OUT_DIR)/VirtualBox_TypeLib.wxi \
-			$(if $(VBOX_WITH_32_ON_64_MAIN_API),$(VBOX_WIN_INST_OUT_DIR)/VirtualBox_TypeLib_x86.wxi,) \
+			$(VBOX_WIN_INST_OUT_DIR)/Navebox_TypeLib.wxi \
+			$(if $(VBOX_WITH_32_ON_64_MAIN_API),$(VBOX_WIN_INST_OUT_DIR)/Navebox_TypeLib_x86.wxi,) \
 			$(VBOX_WIN_INST_OUT_DIR)/VBoxKey.wxi \
 			$(if $(VBOX_WITH_CRT_PACKING),$(VBOX_WIN_INST_OUT_DIR)/VBoxCrtDlls.wxi,) \
 			$(if $(VBOX_WITH_CRT_PACKING),$(VBOX_WIN_INST_OUT_DIR)/VBoxCrtDlls32.wxi,) \
@@ -784,9 +784,9 @@ $(VBOX_WIN_INST_OUT_DIR)/VirtualBox_en_US.wixlib \
 		$(VBOX_VERSION_STAMP) \
 		| $$(dir $$@) \
 		$(VBOX_WIN_INST_REPACK_DIR)/ \
-		$(VBOX_WIN_INST_REPACK_DIR)/files-VirtualBox_en_US/
+		$(VBOX_WIN_INST_REPACK_DIR)/files-Navebox_en_US/
 	$(call KB_FN_AUTO_CMD_DEPS_COMMANDS)
-	$(QUIET)$(RM) -f -- "$@"  "$(VBOX_WIN_INST_OUT_DIR)/VirtualBox_en_US.wixlib" "$(VBOX_WIN_INST_REPACK_DIR)/VirtualBox_en_US.wixlib"
+	$(QUIET)$(RM) -f -- "$@"  "$(VBOX_WIN_INST_OUT_DIR)/Navebox_en_US.wixlib" "$(VBOX_WIN_INST_REPACK_DIR)/Navebox_en_US.wixlib"
 	$(REDIRECT) \
 		$(VBOX_WIN_INST_ENV) \
 		$(if-expr defined(VBOX_WITH_MSM_INSTALL), \
@@ -799,10 +799,10 @@ $(VBOX_WIN_INST_OUT_DIR)/VirtualBox_en_US.wixlib \
 			-intermediatefolder $(@D)/wix-temp/ \
 			$(VBOX_TOOLS_WIN_WIX_EXT) \
 			-outputtype library \
-			-out $(VBOX_WIN_INST_OUT_DIR)/VirtualBox_en_US.wixlib
+			-out $(VBOX_WIN_INST_OUT_DIR)/Navebox_en_US.wixlib
 # Copy over the .wixlib into the repack directory, so that it can be used later when
 # doing the repacking via the shell scripts.
-	$(CP) $(VBOX_WIN_INST_OUT_DIR)/VirtualBox_en_US.wixlib $(VBOX_WIN_INST_REPACK_DIR)/
+	$(CP) $(VBOX_WIN_INST_OUT_DIR)/Navebox_en_US.wixlib $(VBOX_WIN_INST_REPACK_DIR)/
 	$(RM) -Rf -- $(@D)/wix-temp/
 
 ## @todo r=bird: what is this supposed to be doing these days? OTHER_CLEAN += $(VBOX_REPACK_FILES_VirtualBox_en_US)
@@ -822,8 +822,8 @@ define def_vbox_build_msm_wixlib
  		$(PATH_SUB_CURRENT)/VBoxMerge$(module)Seq.wxi \
  		$(PATH_SUB_CURRENT)/UserInterface.wxi \
  		$(VBOX_WIN_INST_OUT_DIR)/Shortcuts_StartMenu.wxi \
- 		$(VBOX_WIN_INST_OUT_DIR)/VirtualBox_TypeLib.wxi \
- 		$(if $(VBOX_WITH_32_ON_64_MAIN_API),$(VBOX_WIN_INST_OUT_DIR)/VirtualBox_TypeLib_x86.wxi,) \
+ 		$(VBOX_WIN_INST_OUT_DIR)/Navebox_TypeLib.wxi \
+ 		$(if $(VBOX_WITH_32_ON_64_MAIN_API),$(VBOX_WIN_INST_OUT_DIR)/Navebox_TypeLib_x86.wxi,) \
  		$(VBOX_WIN_INST_OUT_DIR)/VBoxKey.wxi \
  		$(if $(VBOX_WITH_CRT_PACKING),$(VBOX_WIN_INST_OUT_DIR)/VBoxCrtDlls.wxi,) \
  		$(if $(VBOX_WITH_CRT_PACKING),$(VBOX_WIN_INST_OUT_DIR)/VBoxCrtDlls32.wxi,) \
@@ -863,7 +863,7 @@ $(foreach module,$(VBOX_INSTALLER_MERGE_MODULES), \
 #
 # VirtualBox Type Library definition.
 #
-$(VBOX_WIN_INST_OUT_DIR)/VirtualBox_TypeLib.wxi: \
+$(VBOX_WIN_INST_OUT_DIR)/Navebox_TypeLib.wxi: \
 		$(PATH_SUB_CURRENT)/$(if-expr defined(VBOX_WITH_MIDL_PROXY_STUB),VirtualBox_TypeLibWithInterfaces.xsl,VirtualBox_TypeLib.xsl) \
 		$(VBOX_XIDL_FILE) \
 		$(MAKEFILE) \
@@ -873,7 +873,7 @@ $(VBOX_WIN_INST_OUT_DIR)/VirtualBox_TypeLib.wxi: \
 		$(if-expr defined(VBOX_WITH_SDS),--stringparam "a_sWithSDS" "yes",) \
 		-o $@ $< $(VBOX_XIDL_FILE)
 
-$(VBOX_WIN_INST_OUT_DIR)/VirtualBox_TypeLib_x86.wxi: \
+$(VBOX_WIN_INST_OUT_DIR)/Navebox_TypeLib_x86.wxi: \
 		$(PATH_SUB_CURRENT)/$(if-expr defined(VBOX_WITH_MIDL_PROXY_STUB),VirtualBox_TypeLibWithInterfaces.xsl,VirtualBox_TypeLib.xsl) \
 		$(VBOX_XIDL_FILE) \
 		| $$(dir $$@)
@@ -894,7 +894,7 @@ $(VBOX_WIN_INST_OUT_DIR)/VBoxGuiNLS.wxi: $(PATH_ROOT)/src/VBox/Frontends/Virtual
 	$(APPEND) $@ '<Include xmlns="http://wixtoolset.org/schemas/v4/wxs">'
 	$(APPEND) -n $@ $(foreach lang,$(VBOX_APPROVED_GUI_LANGUAGES), \
 	             '  <File Id="file_nlsqt${lang}"  Name="qt_${lang}.qm"         DiskId="$(VBOX_INSTALLER_COMMON_DISKID)" Vital="yes" Source="$$(env.PATH_OUT)\bin\nls\qt_${lang}.qm"         />' \
-	             '  <File Id="file_nlsgui${lang}" Name="VirtualBox_${lang}.qm" DiskId="$(VBOX_INSTALLER_COMMON_DISKID)" Vital="yes" Source="$$(env.PATH_OUT)\bin\nls\VirtualBox_${lang}.qm" />')
+	             '  <File Id="file_nlsgui${lang}" Name="Navebox_${lang}.qm" DiskId="$(VBOX_INSTALLER_COMMON_DISKID)" Vital="yes" Source="$$(env.PATH_OUT)\bin\nls\Navebox_${lang}.qm" />')
 	$(APPEND) $@ '</Include>'
 
 #
@@ -1001,7 +1001,7 @@ define def_vbox_create_mst
 		-intermediatefolder $$(@D)/wix-temp/ \
 		-loc $(VBOX_WIN_INST_OUT_DIR)/NLS/Language_$(lang).wxl \
 		-loc $(VBOX_WIN_INST_OUT_DIR)/NLS/License_$(lang).wxl \
-		-lib $(VBOX_WIN_INST_OUT_DIR)/VirtualBox_en_US.wixlib \
+		-lib $(VBOX_WIN_INST_OUT_DIR)/Navebox_en_US.wixlib \
 		-ext $(VBOX_TOOLS_WIN_WIXEXT_DIR)/WixToolset.Util.wixext.dll \
 		-pdbtype none \
 		-out $$(@D)/$(PACKAGE_NAME_LANG)_$(lang).msi
@@ -1252,8 +1252,8 @@ $$(RePackScripts_0_OUTDIR)/VBoxExtPackPuel.inf: $(PATH_SUB_CURRENT)/Scripts/VBox
 	$(call VBOX_EDIT_INF_FN,$<,$@)
 
 vbox_uninstall:
-	@kmk_builtin_echo "Uninstalling VirtualBox ..."
+	@kmk_builtin_echo "Uninstalling Navebox ..."
 	@kmk_builtin_echo ""
-	@powershell -Command "Start-Process -Wait powershell -Verb RunAs -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File \"$(PATH_SUB_CURRENT)/Scripts/vbox_uninstall.ps1\" \"*VirtualBox*\"'"
+	@powershell -Command "Start-Process -Wait powershell -Verb RunAs -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File \"$(PATH_SUB_CURRENT)/Scripts/vbox_uninstall.ps1\" \"*Navebox*\"'"
 
 include $(FILE_KBUILD_SUB_FOOTER)

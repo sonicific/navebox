@@ -272,7 +272,7 @@ static struct { const char *pszName; SUPHNTVPIMAGEID enmImageId; } const g_aSupN
 static const char *g_apszSupNtVpAllowedVmExes[] =
 {
     "VBoxHeadless.exe",
-    "VirtualBoxVM.exe",
+    "NaveboxVM.exe",
     "VBoxSDL.exe",
     "VBoxNetDHCP.exe",
     "VBoxNetNAT.exe",

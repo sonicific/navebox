@@ -40,7 +40,6 @@
 /* Forward declarations: */
 class QLabel;
 class QPushButton;
-class QTabWidget;
 class QVBoxLayout;
 
 /** QDialog extension
@@ -73,12 +72,18 @@ private:
 
     /** Prepares all. */
     void prepare();
-    /** Prepares main-layout. */
+    /** Refreshes the dialog surfaces and links when the palette changes. */
+    void updateAppearance();
+    /** Prepares the scrollable page and its fixed action row. */
     void prepareMainLayout();
-    /** Prepares the brand story and contact/credits pages. */
-    void preparePages();
-    /** Prepares close-button. */
-    void prepareCloseButton();
+    /** Adds the branding and version header. */
+    void prepareHero(QWidget *pPage, QVBoxLayout *pLayout);
+    /** Adds the four NAVE pillars. */
+    void prepareOverview(QWidget *pPage, QVBoxLayout *pLayout);
+    /** Adds contact, build information and attribution. */
+    void prepareSupport(QWidget *pPage, QVBoxLayout *pLayout);
+    /** Adds the copy and close actions. */
+    void prepareActions(QVBoxLayout *pLayout);
     /** Returns plain-text version and build provenance, without user or VM data. */
     QString buildInformation() const;
 
@@ -91,16 +96,12 @@ private:
     /** Holds the VirtualBox version number. */
     QString  m_strVersion;
 
-    /** Holds About-VirtualBox main-layout instance. */
-    QVBoxLayout *m_pMainLayout;
-    /** Holds the version and upstream attribution label. */
-    QLabel      *m_pLabel;
-    /** Holds the overview and contact tabs. */
-    QTabWidget  *m_pTabs;
-    /** Holds the overview heading. */
-    QLabel      *m_pOverviewHeading;
-    /** Holds the overview introduction. */
-    QLabel      *m_pOverviewIntroduction;
+    /** Holds the product version in the header. */
+    QLabel      *m_pVersion;
+    /** Holds the heading of the upstream credits card. */
+    QLabel      *m_pAttributionHeading;
+    /** Holds the upstream attribution and license link. */
+    QLabel      *m_pAttribution;
     /** Holds the translated pillar titles. */
     QLabel      *m_apPillarTitles[4];
     /** Holds the translated pillar descriptions. */

@@ -66,7 +66,7 @@ enum UIIconGlyph
     UIICONGLYPH_FONT, UIICONGLYPH_TERMINAL, UIICONGLYPH_PACKAGE, UIICONGLYPH_TOOLS,
     UIICONGLYPH_GROUP, UIICONGLYPH_GLOBE, UIICONGLYPH_PORT, UIICONGLYPH_MEMORY,
     UIICONGLYPH_SIZE, UIICONGLYPH_BELL, UIICONGLYPH_TRASH, UIICONGLYPH_SHIELD,
-    UIICONGLYPH_MOVE, UIICONGLYPH_RENAME, UIICONGLYPH_MENU, UIICONGLYPH_EYE
+    UIICONGLYPH_MOVE, UIICONGLYPH_RENAME, UIICONGLYPH_MENU, UIICONGLYPH_EYE, UIICONGLYPH_PHONE
 };
 
 /** Action/state modifiers, kept distinct from the underlying object. */
@@ -117,6 +117,14 @@ static void uiIconDrawGlyph(QPainter &painter, UIIconGlyph enmGlyph)
     QPainterPath path;
     switch (enmGlyph)
     {
+        case UIICONGLYPH_PHONE:
+            painter.drawRoundedRect(QRectF(5, 1.5, 14, 21), 3, 3);
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(QColor("#a2d9fa"));
+            painter.drawRoundedRect(QRectF(7, 4, 10, 13), 1.3, 1.3);
+            painter.setPen(QPen(QColor("#e8f5ff"), 1.3, Qt::SolidLine, Qt::RoundCap));
+            painter.drawLine(QPointF(10.5, 20), QPointF(13.5, 20));
+            break;
         case UIICONGLYPH_MACHINE: case UIICONGLYPH_DISPLAY:
             painter.drawRoundedRect(QRectF(3, 4, 18, 13), 2, 2);
             painter.drawLine(QPointF(12, 17), QPointF(12, 21));

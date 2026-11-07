@@ -647,13 +647,14 @@ void UIDesktopWidgetWatchdog::centerWidget(QWidget *pWidget,
         pRelative = pRelative->window();
         deskGeo = availableGeometry(pRelative);
         parentGeo = pRelative->frameGeometry();
-        // WORKAROUND:
-        // On X11/Gnome, geo/frameGeo.x() and y() are always 0 for top level
-        // widgets with parents, what a shame. Use mapToGlobal() to workaround.
-        QPoint d = pRelative->mapToGlobal(QPoint(0, 0));
-        d.rx() -= pRelative->geometry().x() - pRelative->x();
-        d.ry() -= pRelative->geometry().y() - pRelative->y();
-        parentGeo.moveTopLeft(d);
+#ifdef VBOX_WS_NIX
+        /* Some X11 window managers report a zero origin for owned windows. */
+        if (QGuiApplication::platformName() == QLatin1String("xcb"))
+        {
+            const QPoint frameOffset = pRelative->geometry().topLeft() - parentGeo.topLeft();
+            parentGeo.moveTopLeft(pRelative->mapToGlobal(QPoint(0, 0)) - frameOffset);
+        }
+#endif
         /* Restored owners can exceed the current screen after changing monitors.
          * Center on the visible owner area instead of clamping the dialog to an edge. */
         parentGeo = parentGeo.intersected(deskGeo);
@@ -666,55 +667,52 @@ void UIDesktopWidgetWatchdog::centerWidget(QWidget *pWidget,
         parentGeo = deskGeo;
     }
 
-    // WORKAROUND:
-    // On X11, there is no way to determine frame geometry (including WM
-    // decorations) before the widget is shown for the first time. Stupidly
-    // enumerate other top level widgets to find the thickest frame. The code
-    // is based on the idea taken from QDialog::adjustPositionInternal().
-
-    int iExtraW = 0;
-    int iExtraH = 0;
-
-    QWidgetList list = QApplication::topLevelWidgets();
-    QListIterator<QWidget*> it(list);
-    while ((iExtraW == 0 || iExtraH == 0) && it.hasNext())
+    /* Use the dialog's own frame. Different native window types may have
+     * different title bar heights and border widths, even with one owner. */
+    QSize frameExtra = pWidget->frameSize() - pWidget->size();
+#ifdef VBOX_WS_NIX
+    /* On X11, decorations may not be available at the first show event.
+     * Estimate them from an existing decorated window only in that case. */
+    if (   frameExtra.isNull()
+        && !(pWidget->windowFlags() & Qt::FramelessWindowHint)
+        && QGuiApplication::platformName() == QLatin1String("xcb"))
     {
-        int iFrameW, iFrameH;
-        QWidget *pCurrent = it.next();
-        if (!pCurrent->isVisible())
-            continue;
+        const QWidgetList windows = QApplication::topLevelWidgets();
+        foreach (QWidget *pWindow, windows)
+            if (pWindow->isVisible() && pWindow->frameSize() != pWindow->size())
+            {
+                frameExtra = pWindow->frameSize() - pWindow->size();
+                break;
+            }
+    }
+#endif
 
-        iFrameW = pCurrent->frameGeometry().width() - pCurrent->width();
-        iFrameH = pCurrent->frameGeometry().height() - pCurrent->height();
-
-        iExtraW = qMax(iExtraW, iFrameW);
-        iExtraH = qMax(iExtraH, iFrameH);
+    if (fCanResize)
+    {
+        const QSize availableSize = (deskGeo.size() - frameExtra).expandedTo(QSize(1, 1));
+        const QSize targetSize = pWidget->size().boundedTo(availableSize);
+        if (targetSize != pWidget->size())
+            pWidget->resize(targetSize);
     }
 
-    /* On non-X11 platforms, the following would be enough instead of the above workaround: */
-    // QRect geo = frameGeometry();
-    QRect geo = QRect(0, 0, pWidget->width() + iExtraW,
-                            pWidget->height() + iExtraH);
-
-    geo.moveCenter(QPoint(parentGeo.x() + (parentGeo.width() - 1) / 2,
-                          parentGeo.y() + (parentGeo.height() - 1) / 2));
-
-    /* Ensure the widget is within the available desktop area: */
-    QRect newGeo = normalizeGeometry(geo, deskGeo, fCanResize);
+    /* Clamp the actual size after resizing, which can be constrained by the
+     * dialog's minimum size. Align an oversized axis to the work-area origin. */
+    QRect frame(QPoint(), pWidget->size() + frameExtra);
+    frame.moveCenter(parentGeo.center());
+    const int iMaxX = qMax(deskGeo.left(), deskGeo.right() - frame.width() + 1);
+    const int iMaxY = qMax(deskGeo.top(), deskGeo.bottom() - frame.height() + 1);
+    QPoint position(qBound(deskGeo.left(), frame.left(), iMaxX),
+                    qBound(deskGeo.top(), frame.top(), iMaxY));
 #ifdef VBOX_WS_MAC
     // WORKAROUND:
     // No idea why, but Qt doesn't respect if there is a unified toolbar on the
     // ::move call. So manually add the height of the toolbar before setting
     // the position.
     if (pRelative)
-        newGeo.translate(0, ::darwinWindowToolBarHeight(pWidget));
+        position.ry() += ::darwinWindowToolBarHeight(pWidget);
 #endif /* VBOX_WS_MAC */
 
-    pWidget->move(newGeo.topLeft());
-
-    if (   fCanResize
-        && (geo.width() != newGeo.width() || geo.height() != newGeo.height()))
-        pWidget->resize(newGeo.width() - iExtraW, newGeo.height() - iExtraH);
+    pWidget->move(position);
 }
 
 /* static */

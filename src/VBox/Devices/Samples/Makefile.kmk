@@ -79,7 +79,7 @@ else  # COM
  VBoxPlaygroundDevice_INCS += \
  	$(VBOX_PATH_SDK)/bindings/mscom/include
  VBoxPlaygroundDevice_INTERMEDIATES += \
- 	$(VBOX_PATH_SDK)/bindings/mscom/include/VirtualBox.h
+ 	$(VBOX_PATH_SDK)/bindings/mscom/include/Navebox.h
 endif # COM
 
 

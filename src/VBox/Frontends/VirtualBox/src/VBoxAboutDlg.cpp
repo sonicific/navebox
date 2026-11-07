@@ -33,13 +33,15 @@
 #include <QGridLayout>
 #include <QGuiApplication>
 #include <QLabel>
+#include <QPainter>
+#include <QPainterPath>
 #include <QPushButton>
 #include <QScrollArea>
-#include <QTabWidget>
 #include <QVBoxLayout>
 
 /* GUI includes: */
 #include "QIDialogButtonBox.h"
+#include "UIAppearance.h"
 #include "UIBranding.h"
 #include "UIDesktopWidgetWatchdog.h"
 #include "UITranslationEventListener.h"
@@ -51,22 +53,33 @@
 
 /** @page pg_ui_navebox_about Navebox Product Information
  *
- * Present the product identity and the four NAVE pillars separately from
- * contact details, build information and upstream attribution.  Content can
- * scroll on small screens; font metrics and layouts handle display scaling.
+ * Present the product identity, the four NAVE pillars, contact details, build
+ * information and upstream attribution together. The page scrolls on small
+ * screens while the action buttons stay accessible.
  */
 
 /** Adds a word-wrapped label with the requested type hierarchy. */
 static QLabel *uiAboutLabel(const QString &strText, QWidget *pParent, int iPointDelta = 0, bool fBold = false)
 {
     QLabel *pLabel = new QLabel(strText, pParent);
+    pLabel->setTextFormat(Qt::PlainText);
     pLabel->setWordWrap(true);
-    pLabel->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::LinksAccessibleByMouse | Qt::LinksAccessibleByKeyboard);
     QFont labelFont = pLabel->font();
-    labelFont.setPointSize(qMax(8, labelFont.pointSize() + iPointDelta));
+    if (labelFont.pointSize() > 0)
+        labelFont.setPointSize(qMax(8, labelFont.pointSize() + iPointDelta));
+    else
+        labelFont.setPixelSize(qMax(12, labelFont.pixelSize() + iPointDelta));
     labelFont.setBold(fBold);
     pLabel->setFont(labelFont);
     return pLabel;
+}
+
+/** Makes a rich-text link label accessible by keyboard and mouse. */
+static void uiAboutEnableLinks(QLabel *pLabel)
+{
+    pLabel->setTextFormat(Qt::RichText);
+    pLabel->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::LinksAccessibleByMouse | Qt::LinksAccessibleByKeyboard);
+    pLabel->setOpenExternalLinks(true);
 }
 
 /** Returns a link color with enough visual weight on a dark About surface. */
@@ -76,6 +89,156 @@ static QString uiAboutLinkColor(const QPalette &palette)
     if (palette.color(QPalette::Window).lightness() < 128 && link.lightness() < 160)
         link = link.lighter(180);
     return link.name();
+}
+
+/** Draws the blue product banner and the layered VM illustration behind its labels. */
+class UIAboutHero : public QFrame
+{
+public:
+    explicit UIAboutHero(QWidget *pParent) : QFrame(pParent) {}
+
+protected:
+    void paintEvent(QPaintEvent *) RT_OVERRIDE
+    {
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::Antialiasing);
+        if (isRightToLeft())
+        {
+            painter.translate(width(), 0);
+            painter.scale(-1, 1);
+        }
+        QPainterPath bounds;
+        bounds.addRoundedRect(QRectF(rect()).adjusted(0.5, 0.5, -0.5, -0.5), 15, 15);
+        QLinearGradient fill(0, height(), width(), 0);
+        fill.setColorAt(0, QColor("#102f6d"));
+        fill.setColorAt(0.53, QColor("#174aa0"));
+        fill.setColorAt(1, QColor("#508eef"));
+        painter.fillPath(bounds, fill);
+        painter.setClipPath(bounds);
+
+        if (width() < 720)
+            return;
+        painter.translate(width() - 290, height() - 144);
+        QPainterPath wave;
+        wave.moveTo(-100, 144);
+        wave.cubicTo(15, 140, 75, -3, 290, 1);
+        wave.lineTo(290, 144);
+        wave.closeSubpath();
+        painter.fillPath(wave, QColor(155, 204, 255, 70));
+        painter.translate(23, 58);
+        painter.rotate(-9);
+        for (int i = 0; i < 3; ++i)
+        {
+            const QRectF panel(i * 25, 16 - i * 10, 166, 105);
+            QLinearGradient glass(panel.topLeft(), panel.bottomRight());
+            glass.setColorAt(0, QColor(165, 211, 255, 220));
+            glass.setColorAt(1, QColor(78, 142, 230, 190));
+            painter.setPen(QPen(QColor(226, 244, 255, 150), 2));
+            painter.setBrush(glass);
+            painter.drawRoundedRect(panel, 12, 12);
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(QColor(223, 242, 255, 175));
+            for (int j = 0; j < 3; ++j)
+                painter.drawEllipse(panel.topLeft() + QPointF(12 + j * 8, 13), 2, 2);
+        }
+        painter.translate(136, 51);
+        const QPointF top[] = {{-22, -12}, {0, -24}, {22, -12}, {0, 0}};
+        const QPointF left[] = {{-22, -12}, {0, 0}, {0, 26}, {-22, 14}};
+        const QPointF right[] = {{0, 0}, {22, -12}, {22, 14}, {0, 26}};
+        painter.setBrush(QColor("#d2ecff"));
+        painter.drawPolygon(top, 4);
+        painter.setBrush(QColor("#83bdff"));
+        painter.drawPolygon(left, 4);
+        painter.setBrush(QColor("#3284ec"));
+        painter.drawPolygon(right, 4);
+    }
+};
+
+/** Draws the four pillar glyphs and the two support symbols. */
+static QPixmap uiAboutBadge(int iBadge, qreal fDpr)
+{
+    const int iSize = iBadge < 4 ? 34 : 30;
+    QPixmap pixmap(qRound(iSize * fDpr), qRound(iSize * fDpr));
+    pixmap.setDevicePixelRatio(fDpr);
+    pixmap.fill(Qt::transparent);
+    QPainter painter(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.scale(iSize / 46.0, iSize / 46.0);
+    static const QRgb s_aColors[] = {0xff2165e8, 0xff6347df, 0xff0b9b63, 0xffad5a07, 0xff2165e8, 0xff2165e8};
+    const QColor color = QColor::fromRgb(s_aColors[iBadge]);
+    QLinearGradient fill(0, 0, 46, 46);
+    fill.setColorAt(0, color.lighter(114));
+    fill.setColorAt(1, color);
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(fill);
+    painter.drawRoundedRect(QRectF(0.5, 0.5, 45, 45), 11, 11);
+    painter.setPen(QPen(Qt::white, 1.8, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    painter.setBrush(Qt::NoBrush);
+    switch (iBadge)
+    {
+        case 0:
+            painter.drawEllipse(QRectF(12, 12, 22, 22));
+            painter.drawEllipse(QRectF(18, 12, 10, 22));
+            painter.drawLine(QPointF(12, 23), QPointF(34, 23));
+            break;
+        case 1:
+        {
+            QFont font = painter.font();
+            font.setBold(true);
+            font.setPixelSize(27);
+            painter.setFont(font);
+            painter.drawText(QRectF(0, 0, 46, 46), Qt::AlignCenter, QStringLiteral("A"));
+            break;
+        }
+        case 2:
+            painter.drawRoundedRect(QRectF(12, 13, 22, 15), 2, 2);
+            painter.drawLine(QPointF(23, 28), QPointF(23, 33));
+            painter.drawLine(QPointF(17, 33), QPointF(29, 33));
+            break;
+        case 3:
+        {
+            const QPointF bolt[] = {{25, 10}, {14, 25}, {22, 25}, {20, 36}, {32, 20}, {24, 20}};
+            painter.setBrush(Qt::white);
+            painter.drawPolygon(bolt, 6);
+            break;
+        }
+        case 4:
+        {
+            painter.drawRoundedRect(QRectF(10, 14, 26, 18), 2, 2);
+            const QPointF fold[] = {{11, 16}, {23, 25}, {35, 16}};
+            painter.drawPolyline(fold, 3);
+            break;
+        }
+        case 5:
+        {
+            const QPointF left[] = {{17, 16}, {10, 23}, {17, 30}};
+            const QPointF right[] = {{29, 16}, {36, 23}, {29, 30}};
+            painter.drawPolyline(left, 3);
+            painter.drawPolyline(right, 3);
+            painter.drawLine(QPointF(25, 15), QPointF(21, 31));
+            break;
+        }
+    }
+    painter.end();
+    return pixmap;
+}
+
+/** Adds a support card with a leading icon and returns its text column. */
+static QVBoxLayout *uiAboutSupportCard(QWidget *pParent, QHBoxLayout *pCards, int iBadge, int iStretch, qreal fDpr)
+{
+    QFrame *pCard = new QFrame(pParent);
+    pCard->setObjectName(QStringLiteral("aboutSupport"));
+    QHBoxLayout *pLayout = new QHBoxLayout(pCard);
+    pLayout->setContentsMargins(13, 10, 13, 10);
+    pLayout->setSpacing(10);
+    QLabel *pBadge = new QLabel(pCard);
+    pBadge->setPixmap(uiAboutBadge(iBadge, fDpr));
+    pLayout->addWidget(pBadge, 0, Qt::AlignTop);
+    QVBoxLayout *pText = new QVBoxLayout;
+    pText->setSpacing(3);
+    pLayout->addLayout(pText, 1);
+    pCards->addWidget(pCard, iStretch);
+    return pText;
 }
 
 VBoxAboutDlg::VBoxAboutDlg(QWidget *pParent /* = 0 */, const QString &strVersion /* = QString() */)
@@ -88,11 +251,9 @@ VBoxAboutDlg::VBoxAboutDlg(QWidget *pParent /* = 0 */, const QString &strVersion
 #endif
     , m_fPolished(false)
     , m_strVersion(strVersion.isEmpty() ? QString::fromLatin1(RTBldCfgVersion()) : strVersion)
-    , m_pMainLayout(0)
-    , m_pLabel(0)
-    , m_pTabs(0)
-    , m_pOverviewHeading(0)
-    , m_pOverviewIntroduction(0)
+    , m_pVersion(0)
+    , m_pAttributionHeading(0)
+    , m_pAttribution(0)
     , m_apPillarTitles{0, 0, 0, 0}
     , m_apPillarDescriptions{0, 0, 0, 0}
     , m_pContactHeading(0)
@@ -111,7 +272,7 @@ void VBoxAboutDlg::showEvent(QShowEvent *pEvent)
         m_fPolished = true;
         QWidget *pParent = m_pPseudoParent ? m_pPseudoParent : parentWidget();
         const QRect available = gpDesktop->availableGeometry(pParent);
-        resize(qMin(680, available.width() - 48), qMin(550, available.height() - 72));
+        resize(qMin(880, qMax(1, available.width() - 48)), qMin(520, qMax(1, available.height() - 72)));
         gpDesktop->centerWidget(this, pParent);
     }
 }
@@ -119,24 +280,18 @@ void VBoxAboutDlg::showEvent(QShowEvent *pEvent)
 void VBoxAboutDlg::changeEvent(QEvent *pEvent)
 {
     QDialog::changeEvent(pEvent);
-    if (   pEvent->type() == QEvent::LanguageChange
-        || pEvent->type() == QEvent::PaletteChange
-        || pEvent->type() == QEvent::ApplicationPaletteChange)
+    if (pEvent->type() == QEvent::LanguageChange)
         sltRetranslateUI();
+    else if (pEvent->type() == QEvent::PaletteChange || pEvent->type() == QEvent::ApplicationPaletteChange)
+        QMetaObject::invokeMethod(this, &VBoxAboutDlg::updateAppearance, Qt::QueuedConnection);
 }
 
 void VBoxAboutDlg::sltRetranslateUI()
 {
-    setWindowTitle(tr("About"));
-    if (m_pTabs)
-    {
-        m_pTabs->setTabText(0, tr("Overview"));
-        m_pTabs->setTabText(1, tr("Contact && Credits"));
-    }
-    if (m_pOverviewHeading)
-        m_pOverviewHeading->setText(tr("NAVE - The Virtualization Architecture"));
-    if (m_pOverviewIntroduction)
-        m_pOverviewIntroduction->setText(tr("FOUR PILLARS. ONE VIRTUAL WORLD."));
+    setWindowTitle(QStringLiteral("%1 - %2").arg(tr("About"), UIBranding::name()));
+    if (m_pVersion)
+        m_pVersion->setText(tr("Version %1 | Qt %2 (%3)")
+                            .arg(m_strVersion, QString::fromLatin1(qVersion()), QGuiApplication::platformName()));
     const QStringList titles = QStringList() << tr("Network of Worlds") << tr("Architecture")
                                             << tr("Virtualization") << tr("Efficiency");
     const QStringList descriptions = QStringList()
@@ -167,22 +322,17 @@ void VBoxAboutDlg::sltRetranslateUI()
         strBuildStatus = tr("Development build");
 #endif
         const QString strBuildDetails = tr("Build type: %1; source revision: %2")
-                                        .arg(QString::fromLatin1(RTBldCfgType()))
-                                        .arg(RTBldCfgRevision());
+                                        .arg(QString::fromLatin1(RTBldCfgType())).arg(RTBldCfgRevision());
         m_pBuildInformation->setText(strBuildStatus.isEmpty() ? strBuildDetails
-                                                            : strBuildStatus + QLatin1Char('\n') + strBuildDetails);
+                                                            : strBuildStatus + QStringLiteral("  \u00b7  ") + strBuildDetails);
     }
-    if (m_pLabel)
-        m_pLabel->setText(tr("Version %1 | Qt %2 (%3)").arg(m_strVersion.toHtmlEscaped(),
-                                                         QString::fromLatin1(qVersion()),
-                                                         QGuiApplication::platformName().toHtmlEscaped())
-                         + QStringLiteral("<br/><br/>")
-                         + tr("Built on the VirtualBox open-source platform.")
-                         + QStringLiteral("<br/>")
-                         + QStringLiteral("Copyright &copy; 2004-" VBOX_C_YEAR " " VBOX_VENDOR ".")
-                         + QStringLiteral("<br/>")
-                         + tr("Distributed under the <a style=\"color:%1\" href=\"https://www.gnu.org/licenses/gpl-3.0.html\">"
-                              "GNU General Public License version 3</a>.").arg(uiAboutLinkColor(palette())));
+    if (m_pAttributionHeading)
+        m_pAttributionHeading->setText(tr("Built on the VirtualBox open-source platform."));
+    if (m_pAttribution)
+        m_pAttribution->setText(QStringLiteral("Copyright &copy; 2004-" VBOX_C_YEAR " " VBOX_VENDOR ".<br/>")
+                                + tr("Distributed under the <a style=\"color:%1\" "
+                                     "href=\"https://www.gnu.org/licenses/gpl-3.0.html\">"
+                                     "GNU General Public License version 3</a>.").arg(uiAboutLinkColor(palette())));
 }
 
 QString VBoxAboutDlg::buildInformation() const
@@ -210,7 +360,7 @@ void VBoxAboutDlg::prepare()
     if (m_pPseudoParent)
         connect(m_pPseudoParent, &QObject::destroyed, this, &VBoxAboutDlg::close);
     prepareMainLayout();
-    sltRetranslateUI();
+    updateAppearance();
     if (UITranslationEventListener::instance())
         connect(&translationEventListener(), &UITranslationEventListener::sigRetranslateUI,
                 this, &VBoxAboutDlg::sltRetranslateUI);
@@ -218,106 +368,167 @@ void VBoxAboutDlg::prepare()
 
 void VBoxAboutDlg::prepareMainLayout()
 {
-    m_pMainLayout = new QVBoxLayout(this);
-    m_pMainLayout->setContentsMargins(20, 20, 20, 16);
-    m_pMainLayout->setSpacing(16);
-    QFrame *pHero = new QFrame(this);
-    pHero->setObjectName("naveboxAboutHero");
-    pHero->setStyleSheet(QStringLiteral(
-        "QFrame#naveboxAboutHero { background: qlineargradient(x1:0,y1:0,x2:1,y2:1,"
-        " stop:0 #203b58,stop:1 #0b192a); border-radius: 12px; }"
-        "QFrame#naveboxAboutHero QLabel { color: #edf3fa; background: transparent; }"
-        "QLabel#naveboxSlogan { color: #bdcddd; }"));
-    QHBoxLayout *pHeroLayout = new QHBoxLayout(pHero);
-    pHeroLayout->setContentsMargins(18, 16, 18, 16);
-    pHeroLayout->setSpacing(16);
-    QLabel *pLogo = new QLabel(pHero);
-    const qreal dRatio = gpDesktop->devicePixelRatio(this);
-    pLogo->setPixmap(UIBranding::icon().pixmap(QSize(64, 64), dRatio));
-    pHeroLayout->addWidget(pLogo);
-    QVBoxLayout *pIdentity = new QVBoxLayout;
-    pIdentity->setSpacing(4);
-    pIdentity->addWidget(uiAboutLabel(UIBranding::name(), pHero, 17, true));
-    QLabel *pSlogan = uiAboutLabel(UIBranding::slogan(), pHero, 1);
-    pSlogan->setObjectName("naveboxSlogan");
-    pIdentity->addWidget(pSlogan);
-    pHeroLayout->addLayout(pIdentity, 1);
-    m_pMainLayout->addWidget(pHero);
-    preparePages();
-    prepareCloseButton();
+    setObjectName(QStringLiteral("naveboxAboutDialog"));
+    QVBoxLayout *pMainLayout = new QVBoxLayout(this);
+    pMainLayout->setContentsMargins(16, 12, 16, 12);
+    pMainLayout->setSpacing(10);
+
+    QScrollArea *pScroll = new QScrollArea(this);
+    pScroll->setObjectName("aboutScroll");
+    pScroll->setFrameShape(QFrame::NoFrame);
+    pScroll->setWidgetResizable(true);
+    QWidget *pPage = new QWidget;
+    pPage->setObjectName(QStringLiteral("aboutPage"));
+    pPage->setAttribute(Qt::WA_StyledBackground);
+    QVBoxLayout *pPageLayout = new QVBoxLayout(pPage);
+    pPageLayout->setContentsMargins(0, 0, 0, 0);
+    pPageLayout->setSpacing(12);
+    prepareHero(pPage, pPageLayout);
+    prepareOverview(pPage, pPageLayout);
+    prepareSupport(pPage, pPageLayout);
+    pPageLayout->addStretch();
+    pScroll->setWidget(pPage);
+    pMainLayout->addWidget(pScroll, 1);
+    prepareActions(pMainLayout);
 }
 
-void VBoxAboutDlg::preparePages()
+void VBoxAboutDlg::updateAppearance()
 {
-    m_pTabs = new QTabWidget(this);
-    m_pTabs->setObjectName("aboutTabs");
-    QWidget *pOverview = new QWidget(m_pTabs);
-    QVBoxLayout *pOverviewLayout = new QVBoxLayout(pOverview);
-    pOverviewLayout->setContentsMargins(14, 12, 14, 12);
-    pOverviewLayout->setSpacing(12);
-    m_pOverviewHeading = uiAboutLabel(QString(), pOverview, 2, true);
-    m_pOverviewIntroduction = uiAboutLabel(QString(), pOverview);
-    pOverviewLayout->addWidget(m_pOverviewHeading);
-    pOverviewLayout->addWidget(m_pOverviewIntroduction);
+    const UIAppearance::PaneColors colors(palette());
+    const QString strStyle = QStringLiteral(
+        "QDialog#naveboxAboutDialog, QWidget#aboutPage, QScrollArea#aboutScroll { background: %1; border: none; }"
+        "QDialog#naveboxAboutDialog QLabel { color: %2; }"
+        "QFrame#naveboxAboutHero QLabel { color: #ffffff; }"
+        "QFrame#naveboxAboutHero QLabel#naveboxSlogan { color: #dbe9ff; }"
+        "QFrame#naveboxAboutHero QLabel#naveboxVersion {"
+        " background: rgba(219,235,255,45); border-radius: 11px; }"
+        "QFrame#naveboxAboutHero QFrame#aboutDivider { background: #a9c9ff; }"
+        "QDialog#naveboxAboutDialog QLabel[aboutSecondary=\"true\"] { color: %3; }"
+        "QFrame#aboutPillar { background: %4; border: 1px solid %5; border-radius: 13px; }"
+        "QFrame#aboutSupport { background: %6; border: 1px solid %5; border-radius: 11px; }"
+        "QFrame#aboutDivider { background: %5; border: none; }"
+        "QDialog#naveboxAboutDialog QPushButton { color: %2; background: %4;"
+        " border: 1px solid %5; border-radius: 14px; padding: 7px 15px; font-weight: 600; }"
+        "QDialog#naveboxAboutDialog QPushButton:hover { background: %6; }"
+        "QDialog#naveboxAboutDialog QPushButton:focus { border-color: palette(highlight); }"
+        "QDialog#naveboxAboutDialog QPushButton#aboutClose { background: #2165df; border-color: #2165df; color: white; }"
+        "QDialog#naveboxAboutDialog QPushButton#aboutClose:hover { background: #1c56c0; }"
+        "QDialog#naveboxAboutDialog QPushButton#aboutClose:pressed { background: #1748a2; }"
+        "QDialog#naveboxAboutDialog QPushButton#aboutClose:focus { border-color: #a9ceff; }")
+        .arg(colors.backdrop.name(), colors.text.name(), colors.secondary.name(),
+             colors.surface.name(), colors.border.name(), colors.hover.name());
+    if (styleSheet() != strStyle)
+        setStyleSheet(strStyle);
+    sltRetranslateUI();
+}
+
+void VBoxAboutDlg::prepareHero(QWidget *pPage, QVBoxLayout *pLayout)
+{
+    QFrame *pHero = new UIAboutHero(pPage);
+    pHero->setObjectName("naveboxAboutHero");
+    QHBoxLayout *pHeroLayout = new QHBoxLayout(pHero);
+    pHeroLayout->setContentsMargins(22, 16, 22, 16);
+    pHeroLayout->setSpacing(17);
+    QLabel *pLogo = new QLabel(pHero);
+    pLogo->setObjectName(QStringLiteral("naveboxAboutLogo"));
+    const qreal dRatio = gpDesktop->devicePixelRatio(this);
+    pLogo->setPixmap(UIBranding::icon().pixmap(QSize(76, 76), dRatio));
+    pLogo->setAccessibleName(UIBranding::name());
+    pHeroLayout->addWidget(pLogo, 0, Qt::AlignVCenter);
+    QFrame *pDivider = new QFrame(pHero);
+    pDivider->setObjectName(QStringLiteral("aboutDivider"));
+    pDivider->setFixedSize(1, 64);
+    pHeroLayout->addWidget(pDivider, 0, Qt::AlignVCenter);
+    QVBoxLayout *pIdentity = new QVBoxLayout;
+    pIdentity->setSpacing(4);
+    pIdentity->addWidget(uiAboutLabel(UIBranding::name(), pHero, 23, true));
+    QLabel *pSlogan = uiAboutLabel(UIBranding::slogan(), pHero);
+    pSlogan->setObjectName("naveboxSlogan");
+    pSlogan->setWordWrap(false);
+    pIdentity->addWidget(pSlogan);
+    m_pVersion = uiAboutLabel(QString(), pHero, 0, true);
+    m_pVersion->setObjectName("naveboxVersion");
+    m_pVersion->setWordWrap(false);
+    m_pVersion->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+    m_pVersion->setMargin(5);
+    pIdentity->addWidget(m_pVersion);
+    pHeroLayout->addLayout(pIdentity);
+    pHeroLayout->addStretch(1);
+    pLayout->addWidget(pHero);
+}
+
+void VBoxAboutDlg::prepareOverview(QWidget *pPage, QVBoxLayout *pLayout)
+{
     QGridLayout *pPillars = new QGridLayout;
-    pPillars->setSpacing(14);
-    const QString strLetters = QStringLiteral("NAVE");
+    pPillars->setSpacing(10);
     for (int i = 0; i < 4; ++i)
     {
-        QFrame *pCard = new QFrame(pOverview);
-        QVBoxLayout *pCardLayout = new QVBoxLayout(pCard);
-        pCardLayout->setContentsMargins(0, 0, 8, 0);
-        pCardLayout->setSpacing(5);
-        pCardLayout->addWidget(uiAboutLabel(strLetters.mid(i, 1), pCard, 10, true));
-        m_apPillarTitles[i] = uiAboutLabel(QString(), pCard, 0, true);
+        QFrame *pCard = new QFrame(pPage);
+        pCard->setObjectName("aboutPillar");
+        QHBoxLayout *pCardLayout = new QHBoxLayout(pCard);
+        pCardLayout->setContentsMargins(13, 10, 13, 10);
+        pCardLayout->setSpacing(11);
+        QLabel *pBadge = new QLabel(pCard);
+        pBadge->setPixmap(uiAboutBadge(i, gpDesktop->devicePixelRatio(this)));
+        pCardLayout->addWidget(pBadge, 0, Qt::AlignVCenter);
+        QVBoxLayout *pCardText = new QVBoxLayout;
+        pCardText->setSpacing(3);
+        m_apPillarTitles[i] = uiAboutLabel(QString(), pCard, 2, true);
         m_apPillarDescriptions[i] = uiAboutLabel(QString(), pCard);
-        pCardLayout->addWidget(m_apPillarTitles[i]);
-        pCardLayout->addWidget(m_apPillarDescriptions[i]);
-        pCardLayout->addStretch();
+        m_apPillarDescriptions[i]->setProperty("aboutSecondary", true);
+        pCardText->addStretch();
+        pCardText->addWidget(m_apPillarTitles[i]);
+        pCardText->addWidget(m_apPillarDescriptions[i]);
+        pCardText->addStretch();
+        pCardLayout->addLayout(pCardText, 1);
         pPillars->addWidget(pCard, i / 2, i % 2);
     }
     pPillars->setColumnStretch(0, 1);
     pPillars->setColumnStretch(1, 1);
-    pOverviewLayout->addLayout(pPillars);
-    QScrollArea *pStoryScroll = new QScrollArea(m_pTabs);
-    pStoryScroll->setFrameShape(QFrame::NoFrame);
-    pStoryScroll->setWidgetResizable(true);
-    pStoryScroll->setWidget(pOverview);
-    m_pTabs->addTab(pStoryScroll, QString());
-
-    QWidget *pContact = new QWidget(m_pTabs);
-    QVBoxLayout *pContactLayout = new QVBoxLayout(pContact);
-    pContactLayout->setContentsMargins(18, 18, 18, 18);
-    pContactLayout->setSpacing(12);
-    m_pContactHeading = uiAboutLabel(QString(), pContact, 4, true);
-    pContactLayout->addWidget(m_pContactHeading);
-    pContactLayout->addWidget(uiAboutLabel(UIBranding::author(), pContact, 1, true));
-    m_pEmail = uiAboutLabel(QString(), pContact);
-    m_pEmail->setOpenExternalLinks(true);
-    pContactLayout->addWidget(m_pEmail);
-    pContactLayout->addSpacing(8);
-    m_pLabel = uiAboutLabel(QString(), pContact);
-    m_pLabel->setOpenExternalLinks(true);
-    pContactLayout->addWidget(m_pLabel);
-    m_pBuildInformation = uiAboutLabel(QString(), pContact);
-    m_pBuildInformation->setTextFormat(Qt::PlainText);
-    pContactLayout->addWidget(m_pBuildInformation);
-    pContactLayout->addStretch();
-    QScrollArea *pContactScroll = new QScrollArea(m_pTabs);
-    pContactScroll->setFrameShape(QFrame::NoFrame);
-    pContactScroll->setWidgetResizable(true);
-    pContactScroll->setWidget(pContact);
-    m_pTabs->addTab(pContactScroll, QString());
-    m_pMainLayout->addWidget(m_pTabs, 1);
+    pLayout->addLayout(pPillars);
 }
 
-void VBoxAboutDlg::prepareCloseButton()
+void VBoxAboutDlg::prepareSupport(QWidget *pPage, QVBoxLayout *pLayout)
+{
+    QHBoxLayout *pDetails = new QHBoxLayout;
+    pDetails->setSpacing(10);
+    const qreal fDpr = gpDesktop->devicePixelRatio(this);
+    QVBoxLayout *pContact = uiAboutSupportCard(pPage, pDetails, 4, 2, fDpr);
+    QWidget *pContactCard = pContact->parentWidget();
+    m_pContactHeading = uiAboutLabel(QString(), pContactCard, -1, true);
+    m_pContactHeading->setProperty("aboutSecondary", true);
+    pContact->addWidget(m_pContactHeading);
+    pContact->addWidget(uiAboutLabel(UIBranding::author(), pContactCard, 1, true));
+    m_pEmail = uiAboutLabel(QString(), pContactCard);
+    uiAboutEnableLinks(m_pEmail);
+    pContact->addWidget(m_pEmail);
+    pContact->addStretch();
+
+    QVBoxLayout *pCredits = uiAboutSupportCard(pPage, pDetails, 5, 3, fDpr);
+    QWidget *pCreditsCard = pCredits->parentWidget();
+    m_pAttributionHeading = uiAboutLabel(QString(), pCreditsCard, 1, true);
+    pCredits->addWidget(m_pAttributionHeading);
+    m_pAttribution = uiAboutLabel(QString(), pCreditsCard);
+    m_pAttribution->setProperty("aboutSecondary", true);
+    uiAboutEnableLinks(m_pAttribution);
+    pCredits->addWidget(m_pAttribution);
+    pCredits->addStretch();
+    pLayout->addLayout(pDetails);
+
+    m_pBuildInformation = uiAboutLabel(QString(), pPage, -1);
+    m_pBuildInformation->setProperty("aboutSecondary", true);
+    m_pBuildInformation->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    pLayout->addWidget(m_pBuildInformation);
+}
+
+void VBoxAboutDlg::prepareActions(QVBoxLayout *pLayout)
 {
     QIDialogButtonBox *pButtonBox = new QIDialogButtonBox(QDialogButtonBox::Close, Qt::Horizontal, this);
+    pButtonBox->button(QDialogButtonBox::Close)->setObjectName(QStringLiteral("aboutClose"));
     m_pCopyBuildInformation = pButtonBox->addButton(QString(), QDialogButtonBox::ActionRole);
     m_pCopyBuildInformation->setObjectName("copyBuildInformationButton");
     m_pCopyBuildInformation->setAutoDefault(false);
     connect(m_pCopyBuildInformation, &QPushButton::clicked, this, &VBoxAboutDlg::sltCopyBuildInformation);
     connect(pButtonBox, &QDialogButtonBox::rejected, this, &VBoxAboutDlg::close);
-    m_pMainLayout->addWidget(pButtonBox);
+    pLayout->addWidget(pButtonBox);
 }

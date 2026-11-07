@@ -51,6 +51,7 @@ class UIHomePane;
 class UIMachineToolsWidget;
 class UIMediumManagerWidget;
 class UINetworkManagerWidget;
+class UIPhoneManager;
 class UISnapshotPane;
 class UIVMActivityOverviewWidget;
 class UIVMActivityToolWidget;
@@ -127,8 +128,14 @@ public:
     /** Returns the help keyword of the current tool's widget. */
     QString currentHelpKeyword() const;
 
+    /** Prepares the Android Phones page on demand without switching to it. */
+    UIPhoneManager *phoneManager();
+
     /** @name Global tool stuff.
       * @{ */
+        /** Installs the shared @a pToolBar for the global pages. */
+        void setToolBar(QWidget *pToolBar);
+
         /** Returns the Machine Tools Widget instance. */
         UIMachineToolsWidget *machineToolsWidget() const;
 
@@ -150,6 +157,11 @@ public:
         QUuid currentSnapshotId();
     /** @} */
 
+protected:
+
+    /** Updates the embedded page style on palette changes. */
+    virtual void changeEvent(QEvent *pEvent) RT_OVERRIDE;
+
 private slots:
 
     /** @name Global tool stuff.
@@ -164,6 +176,12 @@ private:
     void prepare();
     /** Prepares stacked-layout. */
     void prepareStackedLayout();
+    /** Adds and activates @a pWidget, applying the Manager card to global tools. */
+    void addToolWidget(QWidget *pWidget);
+    /** Wraps @a pTool in a card with the header for @a enmType. */
+    QWidget *createToolCard(QWidget *pTool, UIToolType enmType);
+    /** Moves the shared toolbar to the active page header or hides it. */
+    void updateToolBarPlacement();
     /** Cleanups all. */
     void cleanup();
 
@@ -183,11 +201,16 @@ private:
 
     /** @name Global tool stuff.
       * @{ */
+        /** Holds the shared toolbar surface. */
+        QWidget *m_pToolBar;
+
         /** Holds the Home pane instance. */
         UIHomePane *m_pPaneHome;
 
         /** Holds the Machine Tools Widget instance. */
         UIMachineToolsWidget         *m_pPaneMachines;
+        /** Holds the Android Phones pane instance. */
+        UIPhoneManager               *m_pPanePhones;
         /** Holds the Extension Pack Manager instance. */
         UIExtensionPackManagerWidget *m_pPaneExtensions;
         /** Holds the Virtual Media Manager instance. */

@@ -171,8 +171,12 @@ int MachineLaunchVMCommonWorker(const Utf8Str &aNameOrId,
             AssertRCReturn(vrc, vrc);
         }
 # else
-        static const char s_szVirtualBox_exe[] = "VirtualBoxVM" HOSTSUFF_EXE;
-        vrc = RTStrCopy(pszNamePart, cbBufLeft, s_szVirtualBox_exe);
+#  ifdef RT_OS_WINDOWS
+        static const char s_szVmExe[] = "NaveboxVM" HOSTSUFF_EXE;
+#  else
+        static const char s_szVmExe[] = "VirtualBoxVM" HOSTSUFF_EXE;
+#  endif
+        vrc = RTStrCopy(pszNamePart, cbBufLeft, s_szVmExe);
         AssertRCReturn(vrc, vrc);
 # endif
 

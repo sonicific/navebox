@@ -944,6 +944,11 @@ void UIMediumManagerWidget::prepareTab(UIMediumDeviceType type)
             /* Configure layout: */
             pLayout->setContentsMargins(10, 10, 10, 10);
 #endif
+            if (m_enmEmbedding == EmbedTo_Stack)
+            {
+                const QMargins margins = pLayout->contentsMargins();
+                pLayout->setContentsMargins(0, margins.top(), 0, margins.bottom());
+            }
 
             /* Prepare tree-widget: */
             prepareTreeWidget(type, type == UIMediumDeviceType_HardDisk ? 3 : 2);

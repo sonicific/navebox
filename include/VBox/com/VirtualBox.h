@@ -6,7 +6,7 @@
  *       that contains the real COM/XPCOM interface declarations.  That other
  *       include file is generated automatically at build time from
  *       /src/VBox/Main/idl/VirtualBox.xidl, which contains all the VirtualBox
- *       interfaces; the include file is called VirtualBox.h on Windows hosts
+ *       interfaces; the generated include file is called Navebox.h on Windows hosts
  *       and VirtualBox_XPCOM.h on Linux hosts.  The build process places it in
  *       out/{platform}/bin/sdk/include, from where it gets
  *       included by the rest of the VirtualBox code.
@@ -55,8 +55,8 @@
 /* Generated VirtualBox COM library definition file. */
 #if !defined(VBOXCOM_NOINCLUDE)
 # if !defined(VBOX_WITH_XPCOM)
-#  include <iprt/win/windows.h> /* Included by VirtualBox.h via rpc.h, so include our wrapper with cleanups. */
-#  include <VirtualBox.h>
+#  include <iprt/win/windows.h> /* Included by Navebox.h via rpc.h, so include our wrapper with cleanups. */
+#  include <Navebox.h>
 # else
 #  define VBOX_WITH_XPCOM_CPP_ENUM_HACK
 #  include <VirtualBox_XPCOM.h>

@@ -164,7 +164,11 @@ def verify_msi(root, output, package, work):
                 raise ValueError('MSI contains stale artwork: ' + identifier)
         files = database.query('SELECT `File`, `FileName`, `FileSize` FROM `File`')
         names = {name.split('|')[-1].lower(): identifier for identifier, name, _ in files}
-        required = ('Navebox.exe', 'VirtualBox.exe', 'VirtualBoxVM.exe', 'VBoxC.dll', 'VBoxSVC.exe',
+        legacy_names = sorted(name for name in names if 'virtualbox' in name)
+        if legacy_names:
+            raise ValueError('MSI contains old filenames: ' + ', '.join(legacy_names))
+        required = ('Navebox.exe', 'NaveboxVM.exe', 'Navebox.VisualElementsManifest.xml',
+                    'navebox-70.png', 'navebox-150.png', 'Navebox_en.qm', 'VBoxC.dll', 'VBoxSVC.exe',
                     'VBoxSDS.exe', 'UICommon.dll', 'VBoxRT.dll', 'VBoxVMM.dll', 'VBoxDD.dll',
                     'VBoxSup.sys', 'VBoxSup.inf', 'Qt6Core.dll', 'Qt6Gui.dll', 'Qt6Widgets.dll', 'qwindows.dll')
         for name in required:
@@ -186,7 +190,9 @@ def verify_msi(root, output, package, work):
         path = (export / identifier).resolve()
         if not path.is_relative_to(export.resolve()) or path.stat().st_size != int(size):
             raise ValueError('Invalid extracted file: ' + identifier)
-    for name in ('Navebox.exe', 'UICommon.dll', 'VBoxRT.dll', 'VBoxVMM.dll', 'VBoxDD.dll'):
+    for name in ('Navebox.exe', 'NaveboxVM.exe', 'NaveboxVM.dll', 'UICommon.dll', 'VBoxRT.dll', 'VBoxVMM.dll', 'VBoxDD.dll'):
+        if name == 'NaveboxVM.dll' and name.lower() not in names:
+            continue
         if (export / names[name.lower()]).read_bytes() != (output / 'bin' / name).read_bytes():
             raise ValueError('MSI payload differs from current output: ' + name)
     logo = (root / 'src/VBox/Artwork/Navebox/navebox-bios.bmp').read_bytes()

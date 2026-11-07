@@ -48,6 +48,7 @@
 #include "UIGraphicsScrollArea.h"
 #include "UIIconPool.h"
 #include "UIImageTools.h"
+#include "UIManagerStyle.h"
 #include "UITranslationEventListener.h"
 #include "UIVirtualBoxManager.h"
 #include "UIVirtualMachineItem.h"
@@ -1520,13 +1521,7 @@ void UIChooserItemGroup::paintBackground(QPainter *pPainter, const QRect &rect)
 
     /* Root-item: */
     if (isRoot())
-    {
-        /* Acquire background color: */
-        const QColor backgroundColor = QApplication::palette().color(QPalette::Active, QPalette::Window);
-
-        /* Keep the navigation background level with its machine rows. */
-        pPainter->fillRect(rect, backgroundColor);
-    }
+        pPainter->fillRect(rect, UIManagerStyle::surfaceColor(QApplication::palette()));
     else
     {
         /* Acquire background color: */
