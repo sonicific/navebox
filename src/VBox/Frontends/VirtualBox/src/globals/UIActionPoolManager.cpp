@@ -4390,7 +4390,6 @@ void UIActionPoolManager::updateMenuHome()
     /* Populate 'Home' menu: */
     pMenu->addAction(action(UIActionIndexMN_M_Home_S_New));
     pMenu->addAction(action(UIActionIndexMN_M_Home_S_Add));
-    pMenu->addAction(action(UIActionIndexMN_M_File_S_AndroidPhones));
 
     /* Mark menu as valid: */
     m_invalidations.remove(UIActionIndexMN_M_Home);

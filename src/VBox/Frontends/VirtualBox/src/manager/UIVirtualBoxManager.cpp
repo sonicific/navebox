@@ -2596,10 +2596,7 @@ void UIVirtualBoxManager::preparePhoneMenu()
         pMenu->clear();
         pMenu->addAction(pOpenPhones);
         if (m_pWidget)
-        {
-            pMenu->addSeparator();
             pMenu->addActions(m_pWidget->phoneMenuActions());
-        }
     });
 }
 

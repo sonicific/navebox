@@ -132,7 +132,8 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
-        <para>Navebox GUI: Added a Phone menu next to Machine, removed the
+        <para>Navebox GUI: Added a Phone menu next to Machine and moved the
+          Android Phones shortcut out of the Machine menu. Removed the
           duplicate Home toolbar, aligned Media and Network tables with
           their page content, and simplified the sidebar and About dialog</para>
       </listitem>
